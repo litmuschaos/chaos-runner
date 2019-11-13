@@ -14,5 +14,5 @@ chaos-executor:
 	@echo "------------------"
 	@echo "--> Build chaos-executor image" 
 	@echo "------------------"
-	sudo docker build . -f build/Dockerfile -t rahulchheda1997/chaos-executor:ci
-	REPONAME="litmuschaos" IMGNAME="ansible-runner" IMGTAG="ci"
+	sudo docker build . -f build/Dockerfile -t litmuschaos/chaos-executor:ci
+	REPONAME="litmuschaos" IMGNAME="chaos-executor" IMGTAG="ci"
