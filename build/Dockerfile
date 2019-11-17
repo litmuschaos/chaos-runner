@@ -2,6 +2,8 @@ FROM ubuntu:18.04
 
 LABEL maintainer="LitmusChaos"
 
-COPY ./exec /usr/local/bin/exec
+ENV EXECUTOR=/usr/local/bin/chaos-executor
 
-ENTRYPOINT ["exec"]
+COPY build/_output/bin/chaos-executor ${EXECUTOR}
+
+ENTRYPOINT ["/usr/local/bin/chaos-executor"]
