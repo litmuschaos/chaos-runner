@@ -8,6 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"time"
 )
 
 // getKubeConfig setup the config for access cluster resource
@@ -59,14 +60,7 @@ func main() {
 	utils.GetOsEnv(&engineDetails)
 	log.Infoln("Experiments List: ", engineDetails.Experiments, " ", "Engine Name: ", engineDetails.Name, " ", "appLabels : ", engineDetails.AppLabel, " ", "appNamespace: ", engineDetails.AppNamespace, " ", "appKind: ", engineDetails.AppKind, " ", "Service Account Name: ", engineDetails.SvcAccount)
 
-<<<<<<< HEAD
 	// Steps for each Experiment
-=======
-	//initial patching of Engine
-	// Steps for each Experiment
-	utils.InitialPatchEngine(engineDetails)
-
->>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 	for i := range engineDetails.Experiments {
 
 		log.Infoln("Going with the experiment Name : " + engineDetails.Experiments[i])
@@ -75,27 +69,15 @@ func main() {
 		// 1 -> found, 0 -> not-found
 		isFound := !utils.CheckExperimentInAppNamespace("default", engineDetails.Experiments[i], config)
 		log.Infoln("Experiment Found Status : ", isFound)
-<<<<<<< HEAD
 
 		// If not found in AppNamespace skip the further steps
 		if !isFound {
 			log.Infoln("Can't Find Experiment Name : "+engineDetails.Experiments[i], "In Namespace : "+engineDetails.AppNamespace)
 			log.Infoln("Not Executing the Experiment : " + engineDetails.Experiments[i])
-=======
-		// If not found in AppNamespace, patch the engine, and skip the further steps
-		if !isFound {
-			log.Infoln("Can't Find Experiment Name : "+engineDetails.Experiments[i], "In Namespace : "+engineDetails.AppNamespace)
-			log.Infoln("Not Executing the Experiment : " + engineDetails.Experiments[i])
-			utils.NotFoundPatchEngine(i, engineDetails)
->>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 			break
 		}
 
 		var perExperiment utils.ExperimentDetails
-<<<<<<< HEAD
-=======
-		perExperiment.ExpName = engineDetails.Experiments[i]
->>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 
 		log.Infoln("Getting the Default ENV Variables")
 
@@ -103,13 +85,41 @@ func main() {
 		perExperiment.Env = utils.GetEnvFromExperiment(engineDetails.AppNamespace, engineDetails.Experiments[i], engineDetails.Config)
 
 		log.Info("Printing the Default Variables", perExperiment.Env)
-		log.Infoln("OverWriting the Default Variables")
 
-<<<<<<< HEAD
+		// Get the ConfigMaps for patching them in the job creation
+		log.Infoln("Find the configMaps in the chaosExperiments")
+
+		configMapExist, configMaps := utils.CheckConfigMaps(engineDetails, config, engineDetails.Experiments[i])
+
+		if configMapExist == true {
+			log.Infoln("Config Map Found")
+			//fetch details and apply those config maps needed
+			// to be used in the job creation
+			// first convert the format of ConfigMap's Data to map[string]string
+			// & then use the kube-builder to build config maps
+			err = utils.CreateConfigMaps(configMaps, engineDetails)
+			if err != nil {
+				log.Infoln("Unable to create the ConfigMaps", err)
+			} else {
+				log.Infoln("Successfully created ConfigMaps")
+			}
+		} else {
+			log.Infoln("Unable to find Config Map's")
+		}
+		//Check for ConfigMaps and create volumes and volumeMounts arrays/slices
+
+		// 1. []corev1.Volume mounts
+		//volumes := utils.CreateVolumes(configMaps)
+		volumeBuilders := utils.CreateVolumeBuilder(configMaps)
+
+		// 2. []corev1.VolumeMounts
+		volumeMounts := utils.CreateVolumeMounts(configMaps)
+
+		//log.Infoln("Printing VolumeMounts : ", volumeMounts)
+
+		//log.Infoln("OverWriting the Default Variables")
+
 		// OverWriting the Deafults Varibles from the ChaosEngine one's
-=======
-		// OverWriting the Defaults Varibles from the ChaosEngine one's
->>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 		utils.OverWriteEnvFromEngine(engineDetails.AppNamespace, engineDetails.Name, engineDetails.Config, perExperiment.Env, engineDetails.Experiments[i])
 
 		log.Infoln("Patching some required ENV's")
@@ -153,7 +163,7 @@ func main() {
 		log.Infoln("JobName for this Experiment : " + perExperiment.JobName)
 
 		// Creation of PodTemplateSpec, and Final Job
-		err = utils.DeployJob(perExperiment, engineDetails, envVar)
+		err = utils.DeployJob(perExperiment, engineDetails, envVar, volumeMounts, volumeBuilders)
 		if err != nil {
 			log.Infoln("Error while building Job : ", err)
 		}
@@ -165,9 +175,10 @@ func main() {
 		clients.KubeClient, clients.LitmusClient, err = utils.GenerateClientSets(engineDetails.Config)
 		if err != nil {
 			log.Info("Unable to generate ClientSet while Creating Job")
-			log.Fatal("Unable to create Client Set : ", err)
+			//log.Fatal("Unable to create Client Set : ", err)
+			return
 		}
-
+		time.Sleep(5 * time.Second)
 		// Getting the Experiment Result Name
 		resultName := utils.GetResultName(engineDetails, i)
 
@@ -182,7 +193,7 @@ func main() {
 		// Delete / retain the Job, using the jobCleanUpPolicy
 		err = utils.UpdateResultWithJobAndDeletingJob(engineDetails, clients, resultName, perExperiment)
 		if err != nil {
-			log.Info("Unable to Update Resource")
+			log.Info("Unable to Update ChaosResult")
 			log.Error(err)
 		}
 	}

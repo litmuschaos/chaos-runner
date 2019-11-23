@@ -150,7 +150,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:71fb5cc20cf33dac3d69b99f00a06186f60134a701e98446aab1ae5163e4d44a"
+  digest = "1:25774f0821b64f92d46a4cf6f8c05f07455ae7c84859074c2bc9d89988b600d4"
   name = "github.com/litmuschaos/chaos-operator"
   packages = [
     "pkg/apis/litmuschaos/v1alpha1",
@@ -159,19 +159,22 @@
     "pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "70dc933a3267b2f07e9fb68a73c6d3cde817cdfc"
+  revision = "1728556a06b892e51a756a5bd7ae96773af6dc86"
 
 [[projects]]
   branch = "master"
-  digest = "1:2258c366a028f236b583372ce9d72bbc57bb0ac77f42a9206deef59e7f7ddbbf"
+  digest = "1:0f20dbbdcc2d8ca47048822945f23cddc9eb49c90a0ef3ae183caca7192c3db5"
   name = "github.com/litmuschaos/kube-helper"
   packages = [
+    "kubernetes/configmap",
     "kubernetes/container",
     "kubernetes/job",
+    "kubernetes/jobspec",
     "kubernetes/podtemplatespec",
+    "kubernetes/volume/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "40d890cc71d83cbbf7467094b3d9d0fb255193e9"
+  revision = "78fac1edfa07536b4236b0bbe3800936f4e792a2"
 
 [[projects]]
   digest = "1:927762c6729b4e72957ba3310e485ed09cf8451c5a637a52fd016a9fe09e7936"
@@ -239,11 +242,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "8986dd9e96cf0a6f74da406c005ba3df38527c04"
+  revision = "ac88ee75c92c889b97e05591e9a39b6480c538b3"
 
 [[projects]]
   branch = "master"
-  digest = "1:5fca9fff89726e12b596091ffb5e0f6d91ad660324633953f0ffab7afe52c365"
+  digest = "1:572817a5e74219a011a0baa07279ae8369c289f850f920db9c2f0f0c35382768"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -254,7 +257,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "0deb6923b6d97481cb43bc1043fe5b72a0143032"
+  revision = "fc4aabc6c91483155dade6fbb627cc953a723260"
 
 [[projects]]
   branch = "master"
@@ -265,18 +268,18 @@
     "internal",
   ]
   pruneopts = "UT"
-  revision = "0f29369cfe4552d0e4bcddc57cc75f4d7e672a33"
+  revision = "5d9234df094ce600ff541158d1491aa10d078a47"
 
 [[projects]]
   branch = "master"
-  digest = "1:2c482fc32bdcfc572ce8b9cc37a409ae8a24c604b0dde73301d8de05d2c1f3e7"
+  digest = "1:adc8dbdd1348594585d83239cf52498fd87e103577dda9b50ccac2122d9ead72"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "f43be2a4598cf3a47be9f94f0c28197ed9eae611"
+  revision = "bd437916bb0eb726b873ee8e9b2dcf212d32e2fd"
 
 [[projects]]
   digest = "1:66a2f252a58b4fbbad0e4e180e1d85a83c222b6bce09c3dcdef3dc87c72eda7c"
@@ -337,12 +340,12 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:59f10c1537d2199d9115d946927fe31165959a95190849c82ff11e05803528b0"
+  digest = "1:b75b3deb2bce8bc079e16bb2aecfe01eb80098f5650f9e93e5643ca8b7b73737"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f221b8435cfb71e54062f6c6e99e9ade30b124d5"
-  version = "v2.2.4"
+  revision = "1f64d6156d11335c3f22d9330b0ad14fc1e789ce"
+  version = "v2.2.7"
 
 [[projects]]
   digest = "1:0d299a04c6472e4458461d7034c76d014cc6f632a3262cbf21d123b19ce13e65"
@@ -507,7 +510,7 @@
   name = "k8s.io/kube-openapi"
   packages = ["pkg/common"]
   pruneopts = "UT"
-  revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
+  revision = "30be4d16710ac61bce31eb28a01054596fe6a9f1"
 
 [[projects]]
   digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
@@ -531,9 +534,11 @@
   input-imports = [
     "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1",
     "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned",
+    "github.com/litmuschaos/kube-helper/kubernetes/configmap",
     "github.com/litmuschaos/kube-helper/kubernetes/container",
     "github.com/litmuschaos/kube-helper/kubernetes/job",
     "github.com/litmuschaos/kube-helper/kubernetes/podtemplatespec",
+    "github.com/litmuschaos/kube-helper/kubernetes/volume/v1alpha1",
     "github.com/sirupsen/logrus",
     "k8s.io/api/batch/v1",
     "k8s.io/api/core/v1",
