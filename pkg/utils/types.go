@@ -24,6 +24,10 @@ type ExperimentDetails struct {
 	ExpImage  string
 	ExpArgs   []string
 	JobName   string
+<<<<<<< HEAD
+=======
+	ExpName   string
+>>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 }
 
 // ClientSets is a collection of clientSets needed

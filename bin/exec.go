@@ -59,7 +59,14 @@ func main() {
 	utils.GetOsEnv(&engineDetails)
 	log.Infoln("Experiments List: ", engineDetails.Experiments, " ", "Engine Name: ", engineDetails.Name, " ", "appLabels : ", engineDetails.AppLabel, " ", "appNamespace: ", engineDetails.AppNamespace, " ", "appKind: ", engineDetails.AppKind, " ", "Service Account Name: ", engineDetails.SvcAccount)
 
+<<<<<<< HEAD
 	// Steps for each Experiment
+=======
+	//initial patching of Engine
+	// Steps for each Experiment
+	utils.InitialPatchEngine(engineDetails)
+
+>>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 	for i := range engineDetails.Experiments {
 
 		log.Infoln("Going with the experiment Name : " + engineDetails.Experiments[i])
@@ -68,15 +75,27 @@ func main() {
 		// 1 -> found, 0 -> not-found
 		isFound := !utils.CheckExperimentInAppNamespace("default", engineDetails.Experiments[i], config)
 		log.Infoln("Experiment Found Status : ", isFound)
+<<<<<<< HEAD
 
 		// If not found in AppNamespace skip the further steps
 		if !isFound {
 			log.Infoln("Can't Find Experiment Name : "+engineDetails.Experiments[i], "In Namespace : "+engineDetails.AppNamespace)
 			log.Infoln("Not Executing the Experiment : " + engineDetails.Experiments[i])
+=======
+		// If not found in AppNamespace, patch the engine, and skip the further steps
+		if !isFound {
+			log.Infoln("Can't Find Experiment Name : "+engineDetails.Experiments[i], "In Namespace : "+engineDetails.AppNamespace)
+			log.Infoln("Not Executing the Experiment : " + engineDetails.Experiments[i])
+			utils.NotFoundPatchEngine(i, engineDetails)
+>>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 			break
 		}
 
 		var perExperiment utils.ExperimentDetails
+<<<<<<< HEAD
+=======
+		perExperiment.ExpName = engineDetails.Experiments[i]
+>>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 
 		log.Infoln("Getting the Default ENV Variables")
 
@@ -86,7 +105,11 @@ func main() {
 		log.Info("Printing the Default Variables", perExperiment.Env)
 		log.Infoln("OverWriting the Default Variables")
 
+<<<<<<< HEAD
 		// OverWriting the Deafults Varibles from the ChaosEngine one's
+=======
+		// OverWriting the Defaults Varibles from the ChaosEngine one's
+>>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 		utils.OverWriteEnvFromEngine(engineDetails.AppNamespace, engineDetails.Name, engineDetails.Config, perExperiment.Env, engineDetails.Experiments[i])
 
 		log.Infoln("Patching some required ENV's")

@@ -44,8 +44,13 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 	jobsClient := clientSet.BatchV1().Jobs(engineDetails.AppNamespace)
 
 	// Creating the Job
+<<<<<<< HEAD
 	jobCreationResult, err := jobsClient.Create(job)
 	log.Info("Jobcreation log : ", jobCreationResult)
+=======
+	_, err = jobsClient.Create(job)
+	//log.Info("Jobcreation log : ", jobCreationResult)
+>>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 	if err != nil {
 		log.Info("Unable to create the Job with the clientSet")
 	}

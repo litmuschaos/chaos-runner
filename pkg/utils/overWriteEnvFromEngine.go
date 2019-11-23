@@ -7,7 +7,11 @@ import (
 )
 
 // OverWriteEnvFromEngine will over-ride the default variables from one provided in the chaosEngine
+<<<<<<< HEAD
 func OverWriteEnvFromEngine(appns string, chaosEngine string, config *rest.Config, m map[string]string, chaosExperiment string) map[string]string {
+=======
+func OverWriteEnvFromEngine(appns string, chaosEngine string, config *rest.Config, m map[string]string, chaosExperiment string) {
+>>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 	_, litmusClientSet, err := GenerateClientSets(config)
 	if err != nil {
 		log.Info(err)
@@ -23,6 +27,9 @@ func OverWriteEnvFromEngine(appns string, chaosEngine string, config *rest.Confi
 		}
 
 	}
+<<<<<<< HEAD
 	return m
+=======
+>>>>>>> 7fc58d356d7f488f50b0af0134e6d881b469225b
 
 }
