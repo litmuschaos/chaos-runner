@@ -51,7 +51,8 @@ func main() {
 	config, err := getKubeConfig()
 	if err != nil {
 		log.Info("Error in fetching the config")
-		panic(err.Error())
+		log.Infoln(err.Error())
+		//panic(err.Error())
 	}
 
 	engineDetails.Config = config
@@ -175,7 +176,6 @@ func main() {
 		clients.KubeClient, clients.LitmusClient, err = utils.GenerateClientSets(engineDetails.Config)
 		if err != nil {
 			log.Info("Unable to generate ClientSet while Creating Job")
-			//log.Fatal("Unable to create Client Set : ", err)
 			return
 		}
 		time.Sleep(5 * time.Second)

@@ -10,7 +10,7 @@ import (
 func InitialPatchEngine(engineDetails EngineDetails) {
 	_, litmusClient, err := GenerateClientSets(engineDetails.Config)
 	if err != nil {
-		log.Fatal("Couldn't Create ClientSet. Exiting ....")
+		log.Infoln("Couldn't Create ClientSet. Exiting ....")
 	}
 	for i := range engineDetails.Experiments {
 		log.Info("Initial Patch for Experiment : ", engineDetails.Experiments[i])
@@ -23,13 +23,13 @@ func InitialPatchEngine(engineDetails EngineDetails) {
 
 		expEngine, err := litmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 		if err != nil {
-			log.Fatal("Could'nt Get the Engine : ", err)
+			log.Infoln("Could'nt Get the Engine : ", err)
 		}
 		expEngine.Status.Experiments = append(expEngine.Status.Experiments, currExpStatus)
 		log.Info("Patching Engine")
 		_, updateErr := litmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
 		if updateErr != nil {
-			log.Fatal("Unable to Patch Engine, Update Error : ", updateErr)
+			log.Infoln("Unable to Patch Engine, Update Error : ", updateErr)
 		}
 	}
 }
