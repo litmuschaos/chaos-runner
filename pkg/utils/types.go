@@ -24,7 +24,6 @@ type ExperimentDetails struct {
 	ExpImage  string
 	ExpArgs   []string
 	JobName   string
-	ExpName   string
 }
 
 // ClientSets is a collection of clientSets needed

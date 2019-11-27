@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package container
+package jobspec
 
 import (
-	corev1 "k8s.io/api/core/v1"
+	batchv1 "k8s.io/api/batch/v1"
 )
 
-// container holds the api's container objects
-type container struct {
-	object corev1.Container
+// JobSpec holds the api's JobSpec objects
+type JobSpec struct {
+	Object *batchv1.JobSpec
 }
