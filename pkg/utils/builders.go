@@ -48,7 +48,19 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 
 	// Will build a PodSpecTemplate
 	// For creating the spec.template of the Job
-	pod := BuildPodTemplateSpec(perExperiment, engineDetails, envVar, volumeMounts, volumeBuilders)
+	pod := BuildPodTemplateSpec(perExperiment, engineDetails, envVar)
+
+	// Add VolumeBuilders, if exists
+	if volumeBuilders != nil {
+		log.Info("Building Pod with VolumeBuilders")
+		log.Info(volumeBuilders)
+		pod.WithVolumeBuilders(volumeBuilders)
+	}
+	//Build Container to add in the Pod
+	containerForPod := BuildContainerSpec(perExperiment, engineDetails, envVar, volumeMounts)
+	pod.WithContainerBuildersNew(containerForPod)
+
+	// Build JobSpec Template
 	jobspec := BuildJobSpec(pod)
 
 	// Generation of ClientSet for creation
