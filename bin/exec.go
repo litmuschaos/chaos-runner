@@ -164,17 +164,12 @@ func main() {
 		log.Infoln("JobName for this Experiment : " + perExperiment.JobName)
 
 		// Creation of PodTemplateSpec, and Final Job
-		err := utils.DeployJob(perExperiment, engineDetails, envVar, volumeMounts, volumeBuilders)
-		/*if configMapExist {
-			err = utils.DeployJobWithConfigMaps(perExperiment, engineDetails, envVar, volumeMounts, volumeBuilders)
-			if err != nil {
-				log.Infoln("Error while building Job : ", err)
-			}
-		} else {
-			err = utils.DeployJob(perExperiment, engineDetails, envVar)
-		}*/
+		err = utils.DeployJob(perExperiment, engineDetails, envVar, volumeMounts, volumeBuilders)
+		if err != nil {
+			log.Infoln("Error while building Job : ", err)
+		}
 
-		// Generating Client Set for more functionality
+		// Genrationg Client Set for more functionality
 		var clients utils.ClientSets
 
 		// ClientSet Generation

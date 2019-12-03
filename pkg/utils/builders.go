@@ -43,23 +43,12 @@ func BuildContainerSpec(perExperiment ExperimentDetails, engineDetails EngineDet
 
 }
 
-// DeployJob creates the Job SPec, and then deploy it
+// DeployJob the Job using all the details gathered
 func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, envVar []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumeBuilders []*volume.Builder) error {
 
-	// Will build a PodSpecTemplate wihtout container
-	pod := BuildPodTemplateSpec(perExperiment, engineDetails, envVar)
-
-	// Add VolumeBuilders, if exists
-	if volumeBuilders != nil {
-		log.Info("Building Pod with VolumeBuilders")
-		log.Info(volumeBuilders)
-		pod.WithVolumeBuilders(volumeBuilders)
-	}
-	//Build Container to add in the Pod
-	containerForPod := BuildContainerSpec(perExperiment, engineDetails, envVar, volumeMounts)
-	pod.WithContainerBuildersNew(containerForPod)
-
-	// Build JobSpec Template
+	// Will build a PodSpecTemplate
+	// For creating the spec.template of the Job
+	pod := BuildPodTemplateSpec(perExperiment, engineDetails, envVar, volumeMounts, volumeBuilders)
 	jobspec := BuildJobSpec(pod)
 
 	// Generation of ClientSet for creation
@@ -88,7 +77,6 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 
 // BuildPodTemplateSpec return a PodTempplateSpec
 func BuildPodTemplateSpec(perExperiment ExperimentDetails, engineDetails EngineDetails, envVar []corev1.EnvVar) *podtemplatespec.Builder {
-
 	podtemplate := podtemplatespec.NewBuilder().
 		WithName(perExperiment.JobName).
 		WithNamespace(engineDetails.AppNamespace).
@@ -102,7 +90,6 @@ func BuildPodTemplateSpec(perExperiment ExperimentDetails, engineDetails EngineD
 func BuildJobSpec(pod *podtemplatespec.Builder) *jobspec.Builder {
 	jobSpecObj := jobspec.NewBuilder().
 		WithPodTemplateSpecBuilder(pod)
-
 	_, err := jobSpecObj.Build()
 	if err != nil {
 		log.Info(err)
