@@ -93,16 +93,17 @@ func main() {
 		configMapExist, configMaps := utils.CheckConfigMaps(engineDetails, config, engineDetails.Experiments[i])
 
 		if configMapExist == true {
-			log.Infoln("Config Map Found")
+			log.Infoln("Config Maps Found")
 			//fetch details and apply those config maps needed
 			// to be used in the job creation
 			// first convert the format of ConfigMap's Data to map[string]string
 			// & then use the kube-builder to build config maps
-			err = utils.CreateConfigMaps(configMaps, engineDetails)
+			err = utils.ValidateConfigMaps(configMaps, engineDetails)
+			//err = utils.CreateConfigMaps(configMaps, engineDetails)
 			if err != nil {
 				log.Infoln("Unable to create the ConfigMaps", err)
 			} else {
-				log.Infoln("Successfully created ConfigMaps")
+				log.Infoln("Successfully Validated ConfigMaps")
 			}
 		} else {
 			log.Infoln("Unable to find Config Map's")

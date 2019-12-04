@@ -44,9 +44,40 @@ func createConfigMapObject(configMap v1alpha1.ConfigMap) *corev1.ConfigMap {
 
 }
 
+func ValidateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDetails) error {
+
+	// Generation of ClientSet for validation
+	clientSet, _, err := GenerateClientSets(engineDetails.Config)
+	if err != nil {
+		log.Info("Unable to generate ClientSet while Creating Job : ", err)
+		return err
+	}
+	for i := range configMaps {
+		_, err := clientSet.CoreV1().ConfigMaps(engineDetails.AppNamespace).Get(configMaps[i].Name, metav1.GetOptions{})
+		if err != nil {
+			log.Errorf("Unable to find the ConfigMap with name : %v", configMaps[i].Name)
+
+			// Will check for configMap Data, if found create configMap
+			if configMaps[i].Data != nil {
+				log.Infof("Will try to build configMap with Name : %v", configMaps[i].Name)
+				configMapObject := createConfigMapObject(configMaps[i])
+				_, err = clientSet.CoreV1().ConfigMaps(engineDetails.AppNamespace).Create(configMapObject)
+				if err != nil {
+					//log.Errorf("Unable to create ConfigMap Error : %v", err)
+					return err
+				}
+
+			}
+		} else {
+			log.Infof("ConfigMap with Name : %v , found", configMaps[i].Name)
+		}
+	}
+	return nil
+}
+
 // CreateConfigMaps builds configMaps
 func CreateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDetails) error {
-	//var dataList []map[string]string
+
 	// Generation of ClientSet for creation
 	clientSet, _, err := GenerateClientSets(engineDetails.Config)
 	if err != nil {
