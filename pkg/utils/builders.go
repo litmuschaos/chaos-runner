@@ -35,7 +35,7 @@ func BuildContainerSpec(perExperiment ExperimentDetails, engineDetails EngineDet
 
 	if volumeMounts != nil {
 		log.Info("Building Container with VolumeMounts")
-		log.Info(volumeMounts)
+		//log.Info(volumeMounts)
 		containerSpec.WithVolumeMountsNew(volumeMounts)
 	}
 
@@ -48,14 +48,8 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 
 	// Will build a PodSpecTemplate
 	// For creating the spec.template of the Job
-	pod := BuildPodTemplateSpec(perExperiment, engineDetails, envVar)
+	pod := BuildPodTemplateSpec(perExperiment, engineDetails, volumeBuilders)
 
-	// Add VolumeBuilders, if exists
-	if volumeBuilders != nil {
-		log.Info("Building Pod with VolumeBuilders")
-		log.Info(volumeBuilders)
-		pod.WithVolumeBuilders(volumeBuilders)
-	}
 	//Build Container to add in the Pod
 	containerForPod := BuildContainerSpec(perExperiment, engineDetails, envVar, volumeMounts)
 	pod.WithContainerBuildersNew(containerForPod)
@@ -88,13 +82,20 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 }
 
 // BuildPodTemplateSpec return a PodTempplateSpec
-func BuildPodTemplateSpec(perExperiment ExperimentDetails, engineDetails EngineDetails, envVar []corev1.EnvVar) *podtemplatespec.Builder {
+func BuildPodTemplateSpec(perExperiment ExperimentDetails, engineDetails EngineDetails, volumeBuilders []*volume.Builder) *podtemplatespec.Builder {
 	podtemplate := podtemplatespec.NewBuilder().
 		WithName(perExperiment.JobName).
 		WithNamespace(engineDetails.AppNamespace).
 		WithLabels(perExperiment.ExpLabels).
 		WithServiceAccountName(engineDetails.SvcAccount).
 		WithRestartPolicy(corev1.RestartPolicyOnFailure)
+
+	// Add VolumeBuilders, if exists
+	if volumeBuilders != nil {
+		log.Info("Building Pod with VolumeBuilders")
+		//log.Info(volumeBuilders)
+		podtemplate.WithVolumeBuilders(volumeBuilders)
+	}
 	return podtemplate
 }
 
@@ -104,7 +105,7 @@ func BuildJobSpec(pod *podtemplatespec.Builder) *jobspec.Builder {
 		WithPodTemplateSpecBuilder(pod)
 	_, err := jobSpecObj.Build()
 	if err != nil {
-		log.Info(err)
+		log.Errorln(err)
 	}
 	return jobSpecObj
 }
@@ -119,7 +120,7 @@ func BuildJob(pod *podtemplatespec.Builder, perExperiment ExperimentDetails, eng
 		WithLabels(perExperiment.ExpLabels).
 		Build()
 	if err != nil {
-		log.Info(err)
+		log.Errorln(err)
 		return jobObj, err
 	}
 	return jobObj, nil
