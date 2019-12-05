@@ -22,12 +22,39 @@ type Builder struct {
 	errs            []error
 }
 
+// BuildContainerSpec builds a Container with following properties
+func BuildContainerSpec(perExperiment ExperimentDetails, engineDetails EngineDetails, envVar []corev1.EnvVar, volumeMounts []corev1.VolumeMount) *container.Builder {
+	containerSpec := container.NewBuilder().
+		WithName(perExperiment.JobName).
+		WithImage(perExperiment.ExpImage).
+		WithCommandNew([]string{"/bin/bash"}).
+		WithArgumentsNew(perExperiment.ExpArgs).
+		WithImagePullPolicy("Always").
+		//WithVolumeMountsNew(volumeMounts).
+		WithEnvsNew(envVar)
+
+	if volumeMounts != nil {
+		log.Info("Building Container with VolumeMounts")
+		//log.Info(volumeMounts)
+		containerSpec.WithVolumeMountsNew(volumeMounts)
+	}
+
+	return containerSpec
+
+}
+
 // DeployJob the Job using all the details gathered
 func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, envVar []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumeBuilders []*volume.Builder) error {
 
 	// Will build a PodSpecTemplate
 	// For creating the spec.template of the Job
-	pod := BuildPodTemplateSpec(perExperiment, engineDetails, envVar, volumeMounts, volumeBuilders)
+	pod := BuildPodTemplateSpec(perExperiment, engineDetails, volumeBuilders)
+
+	//Build Container to add in the Pod
+	containerForPod := BuildContainerSpec(perExperiment, engineDetails, envVar, volumeMounts)
+	pod.WithContainerBuildersNew(containerForPod)
+
+	// Build JobSpec Template
 	jobspec := BuildJobSpec(pod)
 
 	// Generation of ClientSet for creation
@@ -54,33 +81,32 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 	return nil
 }
 
-// BuildPodTemplateSpec will build the PodTemplateSpec for further usage
-func BuildPodTemplateSpec(perExperiment ExperimentDetails, engineDetails EngineDetails, envVar []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumeBuilders []*volume.Builder) *podtemplatespec.Builder {
-
+// BuildPodTemplateSpec return a PodTempplateSpec
+func BuildPodTemplateSpec(perExperiment ExperimentDetails, engineDetails EngineDetails, volumeBuilders []*volume.Builder) *podtemplatespec.Builder {
 	podtemplate := podtemplatespec.NewBuilder().
 		WithName(perExperiment.JobName).
 		WithNamespace(engineDetails.AppNamespace).
 		WithLabels(perExperiment.ExpLabels).
 		WithServiceAccountName(engineDetails.SvcAccount).
-		WithVolumeBuilders(volumeBuilders).
-		WithRestartPolicy(corev1.RestartPolicyOnFailure).
-		WithContainerBuilders(
-			container.NewBuilder().
-				WithName(perExperiment.JobName).
-				WithImage(perExperiment.ExpImage).
-				WithCommandNew([]string{"/bin/bash"}).
-				WithArgumentsNew(perExperiment.ExpArgs).
-				WithImagePullPolicy("Always").
-				WithVolumeMountsNew(volumeMounts).
-				WithEnvsNew(envVar),
-		)
+		WithRestartPolicy(corev1.RestartPolicyOnFailure)
+
+	// Add VolumeBuilders, if exists
+	if volumeBuilders != nil {
+		log.Info("Building Pod with VolumeBuilders")
+		//log.Info(volumeBuilders)
+		podtemplate.WithVolumeBuilders(volumeBuilders)
+	}
 	return podtemplate
 }
 
+// BuildJobSpec returns a JobSpec
 func BuildJobSpec(pod *podtemplatespec.Builder) *jobspec.Builder {
 	jobSpecObj := jobspec.NewBuilder().
 		WithPodTemplateSpecBuilder(pod)
-
+	_, err := jobSpecObj.Build()
+	if err != nil {
+		log.Errorln(err)
+	}
 	return jobSpecObj
 }
 
@@ -94,6 +120,7 @@ func BuildJob(pod *podtemplatespec.Builder, perExperiment ExperimentDetails, eng
 		WithLabels(perExperiment.ExpLabels).
 		Build()
 	if err != nil {
+		log.Errorln(err)
 		return jobObj, err
 	}
 	return jobObj, nil

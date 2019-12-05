@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+// CheckConfigMaps checks for the configMaps embedded inside the chaosExperiments
 func CheckConfigMaps(engineDetails EngineDetails, config *rest.Config, experimentName string) (bool, []v1alpha1.ConfigMap) {
 	_, litmusClientSet, err := GenerateClientSets(config)
 	if err != nil {
@@ -42,6 +43,8 @@ func createConfigMapObject(configMap v1alpha1.ConfigMap) *corev1.ConfigMap {
 	}
 
 }
+
+// CreateConfigMaps builds configMaps
 func CreateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDetails) error {
 	//var dataList []map[string]string
 	// Generation of ClientSet for creation
@@ -85,6 +88,7 @@ func CreateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDetai
 	return volumesList
 }*/
 
+// CreateVolumeBuilder build Volume needed in execution of experiments
 func CreateVolumeBuilder(configMaps []v1alpha1.ConfigMap) []*volume.Builder {
 	volumeBuilderList := []*volume.Builder{}
 	if configMaps == nil {
@@ -100,6 +104,7 @@ func CreateVolumeBuilder(configMaps []v1alpha1.ConfigMap) []*volume.Builder {
 	return volumeBuilderList
 }
 
+// CreateVolumeMounts mounts Volume needed in execution of experiments
 func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap) []corev1.VolumeMount {
 	var volumeMountsList []corev1.VolumeMount
 	for i := range configMaps {
