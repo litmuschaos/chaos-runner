@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package container
+package configmap
 
 import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// container holds the api's container objects
-type container struct {
-	object corev1.Container
+// ConfigMap is a struct with contains th*corev1.ConfigMap
+type ConfigMap struct {
+	object *corev1.ConfigMap
 }
