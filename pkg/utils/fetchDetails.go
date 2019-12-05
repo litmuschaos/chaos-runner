@@ -10,11 +10,7 @@ import (
 func getLabels(appns string, chaosExperiment string, litmusClientSet *clientV1alpha1.Clientset) map[string]string {
 	expirementSpec, err := litmusClientSet.LitmuschaosV1alpha1().ChaosExperiments(appns).Get(chaosExperiment, metav1.GetOptions{})
 	if err != nil {
-<<<<<<< HEAD
-		log.Panic(err)
-=======
 		log.Infoln(err)
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 	}
 	return expirementSpec.Spec.Definition.Labels
 
@@ -22,11 +18,7 @@ func getLabels(appns string, chaosExperiment string, litmusClientSet *clientV1al
 func getImage(appns string, chaosExperiment string, litmusClientSet *clientV1alpha1.Clientset) string {
 	expirementSpec, err := litmusClientSet.LitmuschaosV1alpha1().ChaosExperiments(appns).Get(chaosExperiment, metav1.GetOptions{})
 	if err != nil {
-<<<<<<< HEAD
-		log.Panic(err)
-=======
 		log.Infoln(err)
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 	}
 	image := expirementSpec.Spec.Definition.Image
 	return image
@@ -34,11 +26,7 @@ func getImage(appns string, chaosExperiment string, litmusClientSet *clientV1alp
 func getArgs(appns string, chaosExperiment string, litmusClientSet *clientV1alpha1.Clientset) []string {
 	expirementSpec, err := litmusClientSet.LitmuschaosV1alpha1().ChaosExperiments(appns).Get(chaosExperiment, metav1.GetOptions{})
 	if err != nil {
-<<<<<<< HEAD
-		log.Panic(err)
-=======
 		log.Infoln(err)
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 	}
 	args := expirementSpec.Spec.Definition.Args
 	return args

@@ -42,13 +42,10 @@
   version = "=v0.1.10"
 
 [[override]]
-<<<<<<< HEAD
-=======
   name = "github.com/litmuschaos/chaos-operator"
   branch = "master"
   
 [[override]]
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
   name = "gopkg.in/fsnotify.v1"
   source = "https://github.com/fsnotify/fsnotify.git"
 

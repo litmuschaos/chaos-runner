@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /*
 Copyright 2019 LitmusChaos Authors
 
@@ -16,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 package v1alpha1
 
 import (

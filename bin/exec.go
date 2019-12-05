@@ -8,10 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-<<<<<<< HEAD
-=======
 	"time"
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 )
 
 // getKubeConfig setup the config for access cluster resource
@@ -54,12 +51,8 @@ func main() {
 	config, err := getKubeConfig()
 	if err != nil {
 		log.Info("Error in fetching the config")
-<<<<<<< HEAD
-		panic(err.Error())
-=======
 		log.Infoln(err.Error())
 		//panic(err.Error())
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 	}
 
 	engineDetails.Config = config
@@ -93,9 +86,6 @@ func main() {
 		perExperiment.Env = utils.GetEnvFromExperiment(engineDetails.AppNamespace, engineDetails.Experiments[i], engineDetails.Config)
 
 		log.Info("Printing the Default Variables", perExperiment.Env)
-<<<<<<< HEAD
-		log.Infoln("OverWriting the Default Variables")
-=======
 
 		// Get the ConfigMaps for patching them in the job creation
 		log.Infoln("Find the configMaps in the chaosExperiments")
@@ -129,7 +119,6 @@ func main() {
 		//log.Infoln("Printing VolumeMounts : ", volumeMounts)
 
 		//log.Infoln("OverWriting the Default Variables")
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 
 		// OverWriting the Deafults Varibles from the ChaosEngine one's
 		utils.OverWriteEnvFromEngine(engineDetails.AppNamespace, engineDetails.Name, engineDetails.Config, perExperiment.Env, engineDetails.Experiments[i])
@@ -175,11 +164,7 @@ func main() {
 		log.Infoln("JobName for this Experiment : " + perExperiment.JobName)
 
 		// Creation of PodTemplateSpec, and Final Job
-<<<<<<< HEAD
-		err = utils.DeployJob(perExperiment, engineDetails, envVar)
-=======
 		err = utils.DeployJob(perExperiment, engineDetails, envVar, volumeMounts, volumeBuilders)
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 		if err != nil {
 			log.Infoln("Error while building Job : ", err)
 		}
@@ -191,15 +176,9 @@ func main() {
 		clients.KubeClient, clients.LitmusClient, err = utils.GenerateClientSets(engineDetails.Config)
 		if err != nil {
 			log.Info("Unable to generate ClientSet while Creating Job")
-<<<<<<< HEAD
-			log.Fatal("Unable to create Client Set : ", err)
-		}
-
-=======
 			return
 		}
 		time.Sleep(5 * time.Second)
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 		// Getting the Experiment Result Name
 		resultName := utils.GetResultName(engineDetails, i)
 
@@ -214,11 +193,7 @@ func main() {
 		// Delete / retain the Job, using the jobCleanUpPolicy
 		err = utils.UpdateResultWithJobAndDeletingJob(engineDetails, clients, resultName, perExperiment)
 		if err != nil {
-<<<<<<< HEAD
-			log.Info("Unable to Update Resource")
-=======
 			log.Info("Unable to Update ChaosResult")
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 			log.Error(err)
 		}
 	}

@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /*
 Copyright 2019 LitmusChaos Authors
 
@@ -16,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 package v1alpha1
 
 import (
@@ -40,8 +37,6 @@ type ChaosExperimentStatus struct {
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
 }
 
-<<<<<<< HEAD
-=======
 // ConfigMap is an simpler implementation of corev1.ConfigMaps, needed for experiments
 type ConfigMap struct {
 	Data      map[string]string `json:"data"`
@@ -49,7 +44,6 @@ type ConfigMap struct {
 	MountPath string            `json:"mountpath"`
 }
 
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 // ExperimentDef defines information about nature of chaos & components subjected to it
 type ExperimentDef struct {
 	// Default labels of the executor pod
@@ -63,11 +57,8 @@ type ExperimentDef struct {
 	Command []string `json:"command"`
 	// Defines arguments to executor's entrypoint command
 	Args []string `json:"args"`
-<<<<<<< HEAD
-=======
 	// ConfigMaps contains a list of ConfigMaps
 	ConfigMaps []ConfigMap `json:"configmaps,omitempty"`
->>>>>>> f4d3ecaad25fc7d819dac4b280e97320b7803b28
 }
 
 // ENVPair defines env var list to hold chaos params
