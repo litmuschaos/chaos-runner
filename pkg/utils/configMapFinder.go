@@ -44,6 +44,7 @@ func createConfigMapObject(configMap v1alpha1.ConfigMap) *corev1.ConfigMap {
 
 }
 
+// ValidateConfigMaps validates the configMap, before checking or creating them.
 func ValidateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDetails) error {
 
 	// Generation of ClientSet for validation
@@ -53,6 +54,10 @@ func ValidateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDet
 		return err
 	}
 	for i := range configMaps {
+		if configMaps[i].Name == "" || configMaps[i].MountPath == "" {
+			log.Errorf("Unable to create this configMap with Name: %v , with MoountPath: %v", configMaps[i].Name, configMaps[i].MountPath)
+			continue
+		}
 		_, err := clientSet.CoreV1().ConfigMaps(engineDetails.AppNamespace).Get(configMaps[i].Name, metav1.GetOptions{})
 		if err != nil {
 			log.Errorf("Unable to find the ConfigMap with name : %v", configMaps[i].Name)
