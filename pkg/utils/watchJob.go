@@ -20,13 +20,13 @@ func checkStatusListForExp(status []v1alpha1.ExperimentStatuses, jobName string)
 }
 
 // WatchingJobtillCompletion will watch the JOb, and update it's status
-func WatchingJobtillCompletion(perExperiment ExperimentDetails, engineDetails EngineDetails, clients ClientSets) error {
+func WatchingJobtillCompletion(perExperiment ExperimentDetails, engineDetails EngineDetails) error {
 	var jobStatus int32
 	jobStatus = 1
 	// jobStatus will remain 1, if its running
 	// So, is used to loop over the check for its completion
 	for jobStatus == 1 {
-		expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
+		expEngine, err := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 		if err != nil {
 			log.Print(err)
 			return err
@@ -43,11 +43,11 @@ func WatchingJobtillCompletion(perExperiment ExperimentDetails, engineDetails En
 			expEngine.Status.Experiments[checkForjobName].LastUpdateTime = metav1.Now()
 		}
 		log.Info("Patching Engine")
-		_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
+		_, updateErr := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
 		if updateErr != nil {
 			return err
 		}
-		getJob, err := clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Get(perExperiment.JobName, metav1.GetOptions{})
+		getJob, err := engineDetails.Clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Get(perExperiment.JobName, metav1.GetOptions{})
 		if err != nil {
 			log.Infoln("Unable to get the job : ", err)
 			return err
@@ -70,8 +70,8 @@ func GetResultName(engineDetails EngineDetails, i int) string {
 
 // UpdateResultWithJobAndDeletingJob will update hte resutl in chaosEngine
 // And will delete job if jobCleanUpPolicy is set to "delete"
-func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, clients ClientSets, resultName string, perExperiment ExperimentDetails) error {
-	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.AppNamespace).Get(resultName, metav1.GetOptions{})
+func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, resultName string, perExperiment ExperimentDetails) error {
+	expResult, err := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.AppNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
 		log.Infoln("Unable to get chaosResult Resource")
 		log.Infoln(err)
@@ -79,7 +79,7 @@ func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, clients Clie
 	}
 	verdict := expResult.Spec.ExperimentStatus.Verdict
 	phase := expResult.Spec.ExperimentStatus.Phase
-	expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
+	expEngine, err := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		log.Print(err)
 		return err
@@ -97,14 +97,14 @@ func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, clients Clie
 		expEngine.Status.Experiments[checkForjobName] = currExpStatus
 	}
 	log.Info(expEngine)
-	_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
+	_, updateErr := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
 	if updateErr != nil {
 		log.Info("Updating Resource Error : ", updateErr)
 		return updateErr
 	}
 	if expEngine.Spec.JobCleanUpPolicy == "delete" {
 		log.Infoln("Will delete the job as jobCleanPolicy is set to : " + expEngine.Spec.JobCleanUpPolicy)
-		deleteJob := clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Delete(perExperiment.JobName, &metav1.DeleteOptions{})
+		deleteJob := engineDetails.Clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Delete(perExperiment.JobName, &metav1.DeleteOptions{})
 		if deleteJob != nil {
 			log.Infoln(deleteJob)
 			return deleteJob

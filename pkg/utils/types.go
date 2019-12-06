@@ -6,8 +6,15 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+// ClientSets is a collection of clientSets needed
+type ClientSets struct {
+	KubeClient   *kubernetes.Clientset
+	LitmusClient *clientV1alpha1.Clientset
+}
+
 // EngineDetails struct is for collecting all the engine-related details
 type EngineDetails struct {
+	Clients      ClientSets
 	Name         string
 	Experiments  []string
 	AppLabel     string
@@ -24,10 +31,4 @@ type ExperimentDetails struct {
 	ExpImage  string
 	ExpArgs   []string
 	JobName   string
-}
-
-// ClientSets is a collection of clientSets needed
-type ClientSets struct {
-	KubeClient   *kubernetes.Clientset
-	LitmusClient *clientV1alpha1.Clientset
 }

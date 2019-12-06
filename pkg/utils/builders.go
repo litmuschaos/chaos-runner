@@ -39,6 +39,11 @@ func BuildContainerSpec(perExperiment ExperimentDetails, engineDetails EngineDet
 		containerSpec.WithVolumeMountsNew(volumeMounts)
 	}
 
+	_, err := containerSpec.Build()
+
+	if err != nil {
+		log.Info(err)
+	}
 	return containerSpec
 
 }
@@ -58,13 +63,13 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 	jobspec := BuildJobSpec(pod)
 
 	// Generation of ClientSet for creation
-	clientSet, _, err := GenerateClientSets(engineDetails.Config)
+	/*clientSet, _, err := GenerateClientSets(engineDetails.Config)
 	if err != nil {
 		log.Info("Unable to generate ClientSet while Creating Job")
 		return err
-	}
+	}*/
 
-	jobsClient := clientSet.BatchV1().Jobs(engineDetails.AppNamespace)
+	//jobsClient := clientSet.BatchV1().Jobs(engineDetails.AppNamespace)
 
 	job, err := BuildJob(pod, perExperiment, engineDetails, jobspec)
 	if err != nil {
@@ -74,7 +79,7 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 
 	// Creating the Job
 	//log.Infoln("Printing the Job Object : ", job)
-	_, err = jobsClient.Create(job)
+	_, err = engineDetails.Clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Create(job)
 	if err != nil {
 		log.Info("Unable to create the Job with the clientSet : ", err)
 	}
@@ -95,6 +100,12 @@ func BuildPodTemplateSpec(perExperiment ExperimentDetails, engineDetails EngineD
 		log.Info("Building Pod with VolumeBuilders")
 		//log.Info(volumeBuilders)
 		podtemplate.WithVolumeBuilders(volumeBuilders)
+	}
+
+	_, err := podtemplate.Build()
+
+	if err != nil {
+		log.Info(err)
 	}
 	return podtemplate
 }

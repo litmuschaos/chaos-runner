@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/kube-helper/kubernetes/configmap"
 	volume "github.com/litmuschaos/kube-helper/kubernetes/volume/v1alpha1"
@@ -12,11 +13,14 @@ import (
 
 // CheckConfigMaps checks for the configMaps embedded inside the chaosExperiments
 func CheckConfigMaps(engineDetails EngineDetails, config *rest.Config, experimentName string) (bool, []v1alpha1.ConfigMap) {
-	_, litmusClientSet, err := GenerateClientSets(config)
+	/*_, litmusClientSet, err := GenerateClientSets(config)
+	if err != nil {
+		log.Info(err)
+	}*/
+	chaosExperimentObj, err := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(engineDetails.AppNamespace).Get(experimentName, metav1.GetOptions{})
 	if err != nil {
 		log.Info(err)
 	}
-	chaosExperimentObj, err := litmusClientSet.LitmuschaosV1alpha1().ChaosExperiments(engineDetails.AppNamespace).Get(experimentName, metav1.GetOptions{})
 	check := chaosExperimentObj.Spec.Definition.ConfigMaps
 	if len(check) != 0 {
 		return true, check
@@ -45,10 +49,56 @@ func createConfigMapObject(configMap v1alpha1.ConfigMap) *corev1.ConfigMap {
 }
 
 // ValidateConfigMaps validates the configMap, before checking or creating them.
-func ValidateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDetails) error {
+func ValidateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDetails) ([]v1alpha1.ConfigMap, []error) {
 
+	var errorList []error
+	var validConfigMaps []v1alpha1.ConfigMap
+
+	for _, v := range configMaps {
+		if v.Name == "" || v.MountPath == "" {
+			log.Infof("Unable to validate the configMap, with Name: %v , with mountPath: %v", v.Name, v.MountPath)
+			e := errors.New("Aborting Execution, configMap Name or mountPath is invalid")
+			errorList = append(errorList, e)
+			return nil, errorList
+		}
+
+		_, err := engineDetails.Clients.KubeClient.CoreV1().ConfigMaps(engineDetails.AppNamespace).Get(v.Name, metav1.GetOptions{})
+
+		if err != nil {
+			//errors = append(errors, err)
+			log.Infof("Unable to find ConfigMap with Name: %v", v.Name)
+
+			if v.Data != nil {
+				log.Infof("Will try to build configMap with Name : %v", v.Name)
+				configMapObject := createConfigMapObject(v)
+
+				_, err = engineDetails.Clients.KubeClient.CoreV1().ConfigMaps(engineDetails.AppNamespace).Create(configMapObject)
+
+				if err != nil {
+					log.Errorf("Unable to create ConfigMap Error : %v", err)
+					errorList = append(errorList, err)
+					return nil, errorList
+				}
+				validConfigMaps = append(validConfigMaps, v)
+				log.Infof("Successfully created ConfigMap with Name: %v", v.Name)
+
+			} else {
+				log.Infof("Did'nt find the configMap with Name: %v, and Data is also empty. Aborting Execution", v.Name)
+				e := errors.New("Aborting Execution, configMap not found & doesn't contain Data")
+				errorList = append(errorList, e)
+				return nil, errorList
+			}
+
+		}
+
+		validConfigMaps = append(validConfigMaps, v)
+		log.Infof("Successfully Validated the ConfigMap with Name: %v", v.Name)
+
+	}
+
+	return validConfigMaps, errorList
 	// Generation of ClientSet for validation
-	clientSet, _, err := GenerateClientSets(engineDetails.Config)
+	/*clientSet, _, err := GenerateClientSets(engineDetails.Config)
 	if err != nil {
 		log.Info("Unable to generate ClientSet while Creating Job : ", err)
 		return err
@@ -77,7 +127,8 @@ func ValidateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDet
 			log.Infof("ConfigMap with Name : %v , found", configMaps[i].Name)
 		}
 	}
-	return nil
+	return nil*/
+	//return nil
 }
 
 // CreateConfigMaps builds configMaps
@@ -132,6 +183,9 @@ func CreateVolumeBuilder(configMaps []v1alpha1.ConfigMap) []*volume.Builder {
 		return nil
 	}
 	for _, v := range configMaps {
+		if v.MountPath == "" || v.Name == "" {
+			continue
+		}
 		log.Infoln("Would create VolumeBuilder for : ", v)
 		volumeBuilder := volume.NewBuilder().
 			WithConfigMap(v.Name)
@@ -145,6 +199,9 @@ func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap) []corev1.VolumeMount {
 	var volumeMountsList []corev1.VolumeMount
 	for i := range configMaps {
 		//volumeMount = make(corev1.VolumeMount)
+		if configMaps[i].MountPath == "" || configMaps[i].Name == "" {
+			continue
+		}
 		var volumeMount corev1.VolumeMount
 		volumeMount.Name = configMaps[i].Name
 		volumeMount.MountPath = configMaps[i].MountPath
