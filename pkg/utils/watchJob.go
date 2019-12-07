@@ -78,16 +78,16 @@ func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, resultName s
 		return err
 	}
 	verdict := expResult.Spec.ExperimentStatus.Verdict
-	phase := expResult.Spec.ExperimentStatus.Phase
+	//phase := expResult.Spec.ExperimentStatus.Phase
 	expEngine, err := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		log.Print(err)
 		return err
 	}
-	log.Info(expEngine)
+	//log.Info(expEngine)
 	var currExpStatus v1alpha1.ExperimentStatuses
 	currExpStatus.Name = perExperiment.JobName
-	currExpStatus.Status = phase
+	currExpStatus.Status = "Completed"
 	currExpStatus.LastUpdateTime = metav1.Now()
 	currExpStatus.Verdict = verdict
 	checkForjobName := checkStatusListForExp(expEngine.Status.Experiments, perExperiment.JobName)
@@ -96,7 +96,7 @@ func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, resultName s
 	} else {
 		expEngine.Status.Experiments[checkForjobName] = currExpStatus
 	}
-	log.Info(expEngine)
+	//log.Info(expEngine)
 	_, updateErr := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
 	if updateErr != nil {
 		log.Info("Updating Resource Error : ", updateErr)

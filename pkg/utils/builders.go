@@ -72,6 +72,7 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 	//jobsClient := clientSet.BatchV1().Jobs(engineDetails.AppNamespace)
 
 	job, err := BuildJob(pod, perExperiment, engineDetails, jobspec)
+	//log.Infof("%+v\n", job)
 	if err != nil {
 		log.Info("Unable to build Job")
 		return err

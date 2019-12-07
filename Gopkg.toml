@@ -53,6 +53,9 @@
   name = "github.com/litmuschaos/chaos-operator"
   branch = "master"
 
+[[override]]
+  name = "github.com/litmuschaos/kube-helper"
+  branch = "master"
 [prune]
   go-tests = true
   unused-packages = true

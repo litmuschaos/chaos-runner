@@ -67,8 +67,8 @@ func (b *Builder) WithHostDirectory(path string) *Builder {
 	return b
 }
 
-// WithSecrets build the volume with SecretName as a source
-func (b *Builder) WithSecrets(secretName string) *Builder {
+// WithSecret build the volume with SecretName as a source
+func (b *Builder) WithSecret(secretName string) *Builder {
 	if len(secretName) == 0 {
 		b.errs = append(
 			b.errs,

@@ -93,29 +93,58 @@ func main() {
 		// Get the ConfigMaps for patching them in the job creation
 		log.Infoln("Find the configMaps in the chaosExperiments")
 
-		configMapExist, configMaps := utils.CheckConfigMaps(engineDetails, config, engineDetails.Experiments[i])
+		configMapExist, configMaps := utils.CheckConfigMaps(engineDetails, engineDetails.Experiments[i])
 
 		var validatedConfigMaps []v1alpha1.ConfigMap
-		var errorsList []error
+		var errorsListForConfigMaps []error
 		if configMapExist == true {
 			log.Infoln("Config Maps Found")
 			//fetch details and apply those config maps needed
 			// to be used in the job creation
 			// first convert the format of ConfigMap's Data to map[string]string
 			// & then use the kube-builder to build config maps
-			validatedConfigMaps, errorsList = utils.ValidateConfigMaps(configMaps, engineDetails)
+			validatedConfigMaps, errorsListForConfigMaps = utils.ValidateConfigMaps(configMaps, engineDetails)
 
-			if errorsList != nil {
-				log.Errorf("Printing Errors, found while Validating ConfigMaps : %v, Will abort the Experiment Execution", errorsList)
+			if errorsListForConfigMaps != nil {
+				log.Errorf("Printing Errors, found while Validating ConfigMaps : %v, Will abort the Experiment Execution", errorsListForConfigMaps)
 				continue
 			}
+		} else {
+			log.Infoln("Unable to find ConfigMaps")
 		}
+
+		log.Infoln("Find the secrets in the chaosExperiments")
+
+		secretsExist, secrets := utils.CheckSecrets(engineDetails, engineDetails.Experiments[i])
+
+		var validatedSecrets []v1alpha1.Secret
+		var errorsListForSecrets []error
+		if secretsExist == true {
+			log.Infoln("Secrets Found")
+			//fetch details and apply those config maps needed
+			// to be used in the job creation
+			// first convert the format of ConfigMap's Data to map[string]string
+			// & then use the kube-builder to build config maps
+			validatedSecrets, errorsListForSecrets = utils.ValidateSecrets(secrets, engineDetails)
+
+			if errorsListForSecrets != nil {
+				log.Errorf("Printing Errors, found while Validating Secrets : %v, Will abort the Experiment Execution", errorsListForSecrets)
+				continue
+			}
+		} else {
+			log.Infoln("Unable to find Secrets")
+		}
+
 		// 1. []corev1.Volume mounts
 		//volumes := utils.CreateVolumes(configMaps)
-		volumeBuilders := utils.CreateVolumeBuilder(validatedConfigMaps)
+		log.Infof("Printing Validated ConfigMaps: %v", validatedConfigMaps)
+		log.Infof("Printing Validated Secrets: %v", validatedSecrets)
+		volumeBuilders := utils.CreateVolumeBuilder(validatedConfigMaps, validatedSecrets)
+		//log.Infof("Printing volumeBuilders: %v", volumeBuilders)
 
 		// 2. []corev1.VolumeMounts
-		volumeMounts := utils.CreateVolumeMounts(validatedConfigMaps)
+		volumeMounts := utils.CreateVolumeMounts(validatedConfigMaps, validatedSecrets)
+		//log.Infof("Printing Volumes: %v", volumeMounts)
 
 		//log.Infoln("Printing VolumeMounts : ", volumeMounts)
 
