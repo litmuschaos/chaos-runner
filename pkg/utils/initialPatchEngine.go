@@ -8,10 +8,6 @@ import (
 
 // InitialPatchEngine patches the chaosEngine with the initial ExperimentStatuses
 func InitialPatchEngine(engineDetails EngineDetails) {
-	/*_, litmusClient, err := GenerateClientSets(engineDetails.Config)
-	if err != nil {
-		log.Infoln("Couldn't Create ClientSet. Exiting ....")
-	}*/
 	for i := range engineDetails.Experiments {
 		log.Info("Initial Patch for Experiment : ", engineDetails.Experiments[i])
 		expName := engineDetails.Experiments[i]

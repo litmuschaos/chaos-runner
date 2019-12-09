@@ -98,6 +98,9 @@ func (b *Builder) WithConfigMap(configMapName string) *Builder {
 		)
 		return b
 	}
+
+	// setting the default mode as "420"
+	// for our use-case
 	k := int32(420)
 	volumeSource := corev1.VolumeSource{
 		ConfigMap: &corev1.ConfigMapVolumeSource{

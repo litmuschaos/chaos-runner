@@ -1,13 +1,9 @@
 package utils
 
 import (
+	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
-	//"k8s.io/client-go/tools/clientcmd"
-	log "github.com/sirupsen/logrus"
-	//"os"
-	//"strings"
-	//k8serror "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // GetEnvFromExperiment will return ENVList from the Experiment

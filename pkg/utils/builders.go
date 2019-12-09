@@ -62,15 +62,6 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 	// Build JobSpec Template
 	jobspec := BuildJobSpec(pod)
 
-	// Generation of ClientSet for creation
-	/*clientSet, _, err := GenerateClientSets(engineDetails.Config)
-	if err != nil {
-		log.Info("Unable to generate ClientSet while Creating Job")
-		return err
-	}*/
-
-	//jobsClient := clientSet.BatchV1().Jobs(engineDetails.AppNamespace)
-
 	job, err := BuildJob(pod, perExperiment, engineDetails, jobspec)
 	//log.Infof("%+v\n", job)
 	if err != nil {

@@ -139,7 +139,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f51d0149c915dec21805f9b2c40d999feefba3c4e326b2767fb8070652100996"
+  digest = "1:d749e6135d365e52dcd8f5abba397a71837039f3f64f837a24626ec1efb3beb2"
   name = "github.com/litmuschaos/chaos-operator"
   packages = [
     "pkg/apis/litmuschaos/v1alpha1",
@@ -148,11 +148,11 @@
     "pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "13a36c5cfb8880d1eece4037bbe80d4a60d311a0"
+  revision = "256ec605bf91f6e251cf5301363251f82c60d3c0"
 
 [[projects]]
   branch = "master"
-  digest = "1:0f20dbbdcc2d8ca47048822945f23cddc9eb49c90a0ef3ae183caca7192c3db5"
+  digest = "1:c2f30d639904ea25c252d17285f38be9b10baf2dbcc2bfb083af1f4b01ac2bea"
   name = "github.com/litmuschaos/kube-helper"
   packages = [
     "kubernetes/configmap",
@@ -163,7 +163,7 @@
     "kubernetes/volume/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "301b911234e87707aceb7ebc4f811c3e6fb17efb"
+  revision = "39d98529e8976fcec0edb15f8d9a3b59d587ac36"
 
 [[projects]]
   digest = "1:927762c6729b4e72957ba3310e485ed09cf8451c5a637a52fd016a9fe09e7936"
@@ -215,7 +215,7 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "86a70503ff7e82ffc18c7b0de83db35da4791e6a"
+  revision = "e9b2fee46413994441b28dfca259d911d963dfed"
 
 [[projects]]
   branch = "master"
@@ -230,7 +230,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "5ee1b9f4859acd2e99987ef94ec7a58427c53bef"
+  revision = "e7e4b65ae66375ec1e85afc8e6b9b4933ae4da81"
 
 [[projects]]
   branch = "master"
@@ -245,14 +245,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4dade6126937937ae62a2d345ceef96e1122e49bf3360a567ccd4177c0fb547b"
+  digest = "1:8191c209ac2aaba9e958a061256fab8955ad10cc731aa609660184800f1ef55a"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "ce4227a45e2eb77e5c847278dcc6a626742e2945"
+  revision = "eeba5f6aabab6d6594a9191d6bfeaca5fa6a8248"
 
 [[projects]]
   digest = "1:66a2f252a58b4fbbad0e4e180e1d85a83c222b6bce09c3dcdef3dc87c72eda7c"

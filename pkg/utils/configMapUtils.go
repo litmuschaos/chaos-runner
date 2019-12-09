@@ -13,10 +13,7 @@ import (
 
 // CheckConfigMaps checks for the configMaps embedded inside the chaosExperiments
 func CheckConfigMaps(engineDetails EngineDetails, experimentName string) (bool, []v1alpha1.ConfigMap) {
-	/*_, litmusClientSet, err := GenerateClientSets(config)
-	if err != nil {
-		log.Info(err)
-	}*/
+
 	chaosExperimentObj, err := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(engineDetails.AppNamespace).Get(experimentName, metav1.GetOptions{})
 	if err != nil {
 		log.Info(err)
@@ -31,10 +28,7 @@ func CheckConfigMaps(engineDetails EngineDetails, experimentName string) (bool, 
 
 // CheckSecrets checks for the configMaps embedded inside the chaosExperiments
 func CheckSecrets(engineDetails EngineDetails, experimentName string) (bool, []v1alpha1.Secret) {
-	/*_, litmusClientSet, err := GenerateClientSets(config)
-	if err != nil {
-		log.Info(err)
-	}*/
+
 	chaosExperimentObj, err := engineDetails.Clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(engineDetails.AppNamespace).Get(experimentName, metav1.GetOptions{})
 	if err != nil {
 		log.Info(err)
@@ -68,6 +62,7 @@ func createConfigMapObject(configMap v1alpha1.ConfigMap) *corev1.ConfigMap {
 
 }
 
+// ValidateSecrets validates the secrets, before checking them.
 func ValidateSecrets(secrets []v1alpha1.Secret, engineDetails EngineDetails) ([]v1alpha1.Secret, []error) {
 	var errorList []error
 	var validSecrets []v1alpha1.Secret
@@ -151,38 +146,6 @@ func ValidateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDet
 	}
 
 	return validConfigMaps, errorList
-	// Generation of ClientSet for validation
-	/*clientSet, _, err := GenerateClientSets(engineDetails.Config)
-	if err != nil {
-		log.Info("Unable to generate ClientSet while Creating Job : ", err)
-		return err
-	}
-	for i := range configMaps {
-		if configMaps[i].Name == "" || configMaps[i].MountPath == "" {
-			log.Errorf("Unable to create this configMap with Name: %v , with MoountPath: %v", configMaps[i].Name, configMaps[i].MountPath)
-			continue
-		}
-		_, err := clientSet.CoreV1().ConfigMaps(engineDetails.AppNamespace).Get(configMaps[i].Name, metav1.GetOptions{})
-		if err != nil {
-			log.Errorf("Unable to find the ConfigMap with name : %v", configMaps[i].Name)
-
-			// Will check for configMap Data, if found create configMap
-			if configMaps[i].Data != nil {
-				log.Infof("Will try to build configMap with Name : %v", configMaps[i].Name)
-				configMapObject := createConfigMapObject(configMaps[i])
-				_, err = clientSet.CoreV1().ConfigMaps(engineDetails.AppNamespace).Create(configMapObject)
-				if err != nil {
-					//log.Errorf("Unable to create ConfigMap Error : %v", err)
-					return err
-				}
-
-			}
-		} else {
-			log.Infof("ConfigMap with Name : %v , found", configMaps[i].Name)
-		}
-	}
-	return nil*/
-	//return nil
 }
 
 // CreateConfigMaps builds configMaps
@@ -204,30 +167,6 @@ func CreateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDetai
 	}
 	return err
 }
-
-/*func CreateVolumes(configMaps []v1alpha1.ConfigMap) []corev1.Volume {
-	//volumesList := make([]corev1.Volume, len(configMaps))
-	log.Infoln("-------------------------------------")
-	log.Infoln(configMaps)
-	log.Infoln("--------------------------")
-	volumesList := []corev1.Volume{}
-
-	for _, v := range configMaps {
-		log.Infoln("RETURNING OBJECT")
-		log.Infoln(v)
-		volume := corev1.Volume{}
-		volume.Name = v.Name
-		log.Infoln("!!!!!!!!!!!!!!!!!!!!!!!!!!!! ->")
-		log.Infoln(v.Name)
-		volume.ConfigMap.Name = v.Name
-		var i int = 420
-		var k int32 = int32(i)
-		volume.ConfigMap.DefaultMode = &k
-		volumesList = append(volumesList, volume)
-		//volumesList[i] = volume
-	}
-	return volumesList
-}*/
 
 // CreateVolumeBuilder build Volume needed in execution of experiments
 func CreateVolumeBuilder(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret) []*volume.Builder {

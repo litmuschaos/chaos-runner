@@ -48,7 +48,6 @@ func main() {
 	if err != nil {
 		log.Info("Error in fetching the config")
 		log.Infoln(err.Error())
-		//panic(err.Error())
 	}
 
 	engineDetails.Config = config
@@ -71,7 +70,7 @@ func main() {
 
 		// isFound will return the status of experiment in that namespace
 		// 1 -> found, 0 -> not-found
-		isFound := !utils.CheckExperimentInAppNamespace("default", engineDetails.Experiments[i], config)
+		isFound := !utils.CheckExperimentInAppNamespace(engineDetails.AppNamespace, engineDetails.Experiments[i], config)
 		log.Infoln("Experiment Found Status : ", isFound)
 
 		// If not found in AppNamespace skip the further steps
@@ -135,20 +134,15 @@ func main() {
 			log.Infoln("Unable to find Secrets")
 		}
 
-		// 1. []corev1.Volume mounts
-		//volumes := utils.CreateVolumes(configMaps)
 		log.Infof("Printing Validated ConfigMaps: %v", validatedConfigMaps)
 		log.Infof("Printing Validated Secrets: %v", validatedSecrets)
+
+		// 1. []*volume.Builder
 		volumeBuilders := utils.CreateVolumeBuilder(validatedConfigMaps, validatedSecrets)
 		//log.Infof("Printing volumeBuilders: %v", volumeBuilders)
 
 		// 2. []corev1.VolumeMounts
 		volumeMounts := utils.CreateVolumeMounts(validatedConfigMaps, validatedSecrets)
-		//log.Infof("Printing Volumes: %v", volumeMounts)
-
-		//log.Infoln("Printing VolumeMounts : ", volumeMounts)
-
-		//log.Infoln("OverWriting the Default Variables")
 
 		// OverWriting the Deafults Varibles from the ChaosEngine one's
 		utils.OverWriteEnvFromEngine(engineDetails.AppNamespace, engineDetails.Name, engineDetails.Config, perExperiment.Env, engineDetails.Experiments[i])
