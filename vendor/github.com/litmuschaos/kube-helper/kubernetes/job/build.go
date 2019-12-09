@@ -19,9 +19,10 @@ package job
 import (
 	"errors"
 	"fmt"
-
 	jobspec "github.com/litmuschaos/kube-helper/kubernetes/jobspec"
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Builder is the builder object for Job
@@ -117,4 +118,26 @@ func (b *Builder) Build() (*batchv1.Job, error) {
 		return nil, fmt.Errorf("%+v", b.errs)
 	}
 	return b.job.object, nil
+}
+
+// WithOwnerReferenceNew sets ownerreference if any with
+// ones that are provided here
+func (b *Builder) WithOwnerReferenceNew(ownerRefernce []metav1.OwnerReference) *Builder {
+	if len(ownerRefernce) == 0 {
+		b.errs = append(
+			b.errs,
+			errors.New("failed to build deployment object: no new ownerRefernce"),
+		)
+		return b
+	}
+
+	b.job.object.OwnerReferences = ownerRefernce
+	return b
+}
+
+func GetPodOwnerRef(ownerPod *corev1.Pod) []metav1.OwnerReference {
+	return []metav1.OwnerReference{
+		*metav1.NewControllerRef(ownerPod,
+			corev1.SchemeGroupVersion.WithKind("Pod")),
+	}
 }

@@ -37,6 +37,14 @@
   version = "v2.11.1"
 
 [[projects]]
+  digest = "1:ac425d784b13d49b37a5bbed3ce022677f8f3073b216f05d6adcb9303e27fa0f"
+  name = "github.com/evanphx/json-patch"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "026c730a0dcc5d11f93f1cf1cc65b01247ea7b6f"
+  version = "v4.5.0"
+
+[[projects]]
   digest = "1:ed15647db08b6d63666bf9755d337725960c302bbfa5e23754b4b915a4797e42"
   name = "github.com/go-openapi/jsonpointer"
   packages = ["."]
@@ -194,6 +202,14 @@
   version = "1.0.1"
 
 [[projects]]
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
+
+[[projects]]
   digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -287,6 +303,17 @@
   packages = ["rate"]
   pruneopts = "UT"
   revision = "555d28b269f0569763d25dbe1a237ae74c6bcc82"
+
+[[projects]]
+  branch = "master"
+  digest = "1:918a46e4a2fb83df33f668f5a6bd51b2996775d073fce1800d3ec01b0a5ddd2b"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "UT"
+  revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
 
 [[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"
@@ -409,10 +436,11 @@
   version = "kubernetes-1.15.4"
 
 [[projects]]
-  digest = "1:3d090f853403f5f24fc5ddd14149409476f4759fb59a5a505b328c9040dc6ad2"
+  digest = "1:4c5292cdac6571f09bda33cb867546c3a1d760b39fa1f1913fe0d59d8d2e746c"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
+    "dynamic",
     "kubernetes",
     "kubernetes/scheme",
     "kubernetes/typed/admissionregistration/v1beta1",
@@ -458,6 +486,7 @@
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
+    "restmapper",
     "tools/auth",
     "tools/clientcmd",
     "tools/clientcmd/api",
@@ -501,9 +530,12 @@
   revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
 
 [[projects]]
-  digest = "1:68cd93696d4de06936c94bf0c510802140c2d3c956b557f3d001430d58cf676c"
+  digest = "1:dfd03a5ae9e7d9fc739ba1b34446f83a15ea58eed23c32dfa19793fac94e5f9b"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
+    "pkg/client",
+    "pkg/client/apiutil",
+    "pkg/controller/controllerutil",
     "pkg/runtime/scheme",
     "pkg/scheme",
   ]
@@ -539,6 +571,7 @@
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
+    "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
