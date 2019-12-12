@@ -52,10 +52,19 @@ func main() {
 	if err != nil {
 		log.Info("Error in fetching the config")
 		log.Infoln(err.Error())
-		//panic(err.Error())
 	}
 
 	engineDetails.Config = config
+
+	// Genrationg Client Set for more functionality
+	var clients utils.ClientSets
+
+	// ClientSet Generation
+	clients.KubeClient, clients.LitmusClient, err = utils.GenerateClientSets(engineDetails.Config)
+	if err != nil {
+		log.Info("Unable to generate ClientSet while Creating Job")
+		return
+	}
 
 	// Fetching all the ENV's needed
 	utils.GetOsEnv(&engineDetails)
@@ -68,7 +77,7 @@ func main() {
 
 		// isFound will return the status of experiment in that namespace
 		// 1 -> found, 0 -> not-found
-		isFound := !utils.CheckExperimentInAppNamespace("default", engineDetails.Experiments[i], config)
+		isFound := !utils.CheckExperimentInAppNamespace(engineDetails.AppNamespace, engineDetails.Experiments[i], config)
 		log.Infoln("Experiment Found Status : ", isFound)
 
 		// If not found in AppNamespace skip the further steps
@@ -92,33 +101,32 @@ func main() {
 
 		configMapExist, configMaps := utils.CheckConfigMaps(engineDetails, config, engineDetails.Experiments[i])
 
+		var validatedConfigMaps []v1alpha1.ConfigMap
+		var errorsListForConfigMaps []error
 		if configMapExist == true {
-			log.Infoln("Config Map Found")
+			log.Infoln("Config Maps Found")
 			//fetch details and apply those config maps needed
 			// to be used in the job creation
 			// first convert the format of ConfigMap's Data to map[string]string
 			// & then use the kube-builder to build config maps
-			err = utils.CreateConfigMaps(configMaps, engineDetails)
-			if err != nil {
-				log.Infoln("Unable to create the ConfigMaps", err)
-			} else {
-				log.Infoln("Successfully created ConfigMaps")
+			validatedConfigMaps, errorsListForConfigMaps = utils.ValidateConfigMaps(configMaps, engineDetails, clients)
+
+			if errorsListForConfigMaps != nil {
+				log.Errorf("Printing Errors, found while Validating ConfigMaps : %v, Will abort the Experiment Execution", errorsListForConfigMaps)
+				continue
 			}
 		} else {
-			log.Infoln("Unable to find Config Map's")
+			log.Infoln("Unable to find ConfigMaps")
 		}
-		//Check for ConfigMaps and create volumes and volumeMounts arrays/slices
 
-		// 1. []corev1.Volume mounts
-		//volumes := utils.CreateVolumes(configMaps)
-		volumeBuilders := utils.CreateVolumeBuilder(configMaps)
+		log.Infof("Printing Validated ConfigMaps: %v", validatedConfigMaps)
+
+		// 1. []*volume.Builder
+		volumeBuilders := utils.CreateVolumeBuilder(validatedConfigMaps)
+		//log.Infof("Printing volumeBuilders: %v", volumeBuilders)
 
 		// 2. []corev1.VolumeMounts
-		volumeMounts := utils.CreateVolumeMounts(configMaps)
-
-		//log.Infoln("Printing VolumeMounts : ", volumeMounts)
-
-		//log.Infoln("OverWriting the Default Variables")
+		volumeMounts := utils.CreateVolumeMounts(validatedConfigMaps)
 
 		// OverWriting the Deafults Varibles from the ChaosEngine one's
 		utils.OverWriteEnvFromEngine(engineDetails.AppNamespace, engineDetails.Name, engineDetails.Config, perExperiment.Env, engineDetails.Experiments[i])
@@ -169,15 +177,6 @@ func main() {
 			log.Infoln("Error while building Job : ", err)
 		}
 
-		// Genrationg Client Set for more functionality
-		var clients utils.ClientSets
-
-		// ClientSet Generation
-		clients.KubeClient, clients.LitmusClient, err = utils.GenerateClientSets(engineDetails.Config)
-		if err != nil {
-			log.Info("Unable to generate ClientSet while Creating Job")
-			return
-		}
 		time.Sleep(5 * time.Second)
 		// Getting the Experiment Result Name
 		resultName := utils.GetResultName(engineDetails, i)

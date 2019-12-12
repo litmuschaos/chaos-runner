@@ -39,6 +39,12 @@ func BuildContainerSpec(perExperiment ExperimentDetails, engineDetails EngineDet
 		containerSpec.WithVolumeMountsNew(volumeMounts)
 	}
 
+	_, err := containerSpec.Build()
+
+	if err != nil {
+		log.Info(err)
+	}
+
 	return containerSpec
 
 }
@@ -95,6 +101,12 @@ func BuildPodTemplateSpec(perExperiment ExperimentDetails, engineDetails EngineD
 		log.Info("Building Pod with VolumeBuilders")
 		//log.Info(volumeBuilders)
 		podtemplate.WithVolumeBuilders(volumeBuilders)
+	}
+
+	_, err := podtemplate.Build()
+
+	if err != nil {
+		log.Info(err)
 	}
 	return podtemplate
 }
