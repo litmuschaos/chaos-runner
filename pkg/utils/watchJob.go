@@ -74,7 +74,7 @@ func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, clients Clie
 	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.AppNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
 		log.Infoln("Unable to get chaosResult Resource")
-		log.Panic(err)
+		log.Infoln(err)
 		return err
 	}
 	verdict := expResult.Spec.ExperimentStatus.Verdict
@@ -106,7 +106,7 @@ func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, clients Clie
 		log.Infoln("Will delete the job as jobCleanPolicy is set to : " + expEngine.Spec.JobCleanUpPolicy)
 		deleteJob := clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Delete(perExperiment.JobName, &metav1.DeleteOptions{})
 		if deleteJob != nil {
-			log.Panic(deleteJob)
+			log.Infoln(deleteJob)
 			return deleteJob
 		}
 
