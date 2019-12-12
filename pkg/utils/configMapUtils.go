@@ -46,7 +46,7 @@ func ValidateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDet
 				log.Infof("Successfully created ConfigMap with Name: %v", v.Name)
 
 			} else {
-				log.Infof("Did'nt find the configMap with Name: %v, and Data is also empty. Aborting Execution", v.Name)
+				log.Infof("configMap with name: %v not found. unable to create this configMap as no data is specified. Aborting Execution", v.Name)
 				e := errors.New("Aborting Execution, configMap not found & doesn't contain Data")
 				errorList = append(errorList, e)
 				return nil, errorList
