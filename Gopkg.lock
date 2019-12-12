@@ -53,20 +53,20 @@
   version = "v0.19.3"
 
 [[projects]]
-  digest = "1:55d1c09fc8b3320b6842565249a9e4d0f363bead6f9b8be05c3b47f2c4264eda"
+  digest = "1:a60f47e736cc96075451c3c3502274d86ec6d96588c03d1ab56142ccbb8a5364"
   name = "github.com/go-openapi/spec"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8557d72e4f077c2dbe1e48df09e596b6fb9b7991"
-  version = "v0.19.4"
+  revision = "772572fd19ebcc983369e53bfaed4bde2077fe0c"
+  version = "v0.19.5"
 
 [[projects]]
-  digest = "1:43d0f99f53acce97119181dcd592321084690c2d462c57680ccb4472ae084949"
+  digest = "1:d79ccf65d7721efa48200dc7fc827f8fb29e1fba4db4d55be675fdec84e7cfe1"
   name = "github.com/go-openapi/swag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c3d0f7896d589f3babb99eea24bbc7de98108e72"
-  version = "v0.19.5"
+  revision = "8a84ec635f1b280a7062edeab609f0667a053248"
+  version = "v0.19.6"
 
 [[projects]]
   digest = "1:582e25eccee928dc12416ea4c23b6dae8f3b5687730632aa1473ebebe80a2359"
@@ -139,7 +139,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f51d0149c915dec21805f9b2c40d999feefba3c4e326b2767fb8070652100996"
+  digest = "1:d749e6135d365e52dcd8f5abba397a71837039f3f64f837a24626ec1efb3beb2"
   name = "github.com/litmuschaos/chaos-operator"
   packages = [
     "pkg/apis/litmuschaos/v1alpha1",
@@ -148,11 +148,11 @@
     "pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "13a36c5cfb8880d1eece4037bbe80d4a60d311a0"
+  revision = "256ec605bf91f6e251cf5301363251f82c60d3c0"
 
 [[projects]]
   branch = "master"
-  digest = "1:0f20dbbdcc2d8ca47048822945f23cddc9eb49c90a0ef3ae183caca7192c3db5"
+  digest = "1:c2f30d639904ea25c252d17285f38be9b10baf2dbcc2bfb083af1f4b01ac2bea"
   name = "github.com/litmuschaos/kube-helper"
   packages = [
     "kubernetes/configmap",
@@ -163,7 +163,7 @@
     "kubernetes/volume/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "301b911234e87707aceb7ebc4f811c3e6fb17efb"
+  revision = "ca5e1d6ff7c71f7bc4092bc88b377658844966c7"
 
 [[projects]]
   digest = "1:927762c6729b4e72957ba3310e485ed09cf8451c5a637a52fd016a9fe09e7936"
@@ -215,7 +215,7 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "86a70503ff7e82ffc18c7b0de83db35da4791e6a"
+  revision = "e9b2fee46413994441b28dfca259d911d963dfed"
 
 [[projects]]
   branch = "master"
@@ -230,7 +230,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "5ee1b9f4859acd2e99987ef94ec7a58427c53bef"
+  revision = "c0dbc17a35534bf2e581d7a942408dc936316da4"
 
 [[projects]]
   branch = "master"
@@ -245,14 +245,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4dade6126937937ae62a2d345ceef96e1122e49bf3360a567ccd4177c0fb547b"
+  digest = "1:472d3f5adc36e1c0b9120bc3830d692a090134aa5461335f39caabd0fdb7feac"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "ce4227a45e2eb77e5c847278dcc6a626742e2945"
+  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
 
 [[projects]]
   digest = "1:66a2f252a58b4fbbad0e4e180e1d85a83c222b6bce09c3dcdef3dc87c72eda7c"
