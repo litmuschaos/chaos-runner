@@ -119,14 +119,36 @@ func main() {
 			log.Infoln("Unable to find ConfigMaps")
 		}
 
+		secretsExist, secrets := utils.CheckSecrets(engineDetails, config, engineDetails.Experiments[i])
+
+		var validatedSecrets []v1alpha1.Secret
+		var errorsListForSecrets []error
+		if secretsExist == true {
+			log.Infoln("Secrets Found")
+			//fetch details and apply those config maps needed
+			// to be used in the job creation
+			// first convert the format of ConfigMap's Data to map[string]string
+			// & then use the kube-builder to build config maps
+			validatedSecrets, errorsListForSecrets = utils.ValidateSecrets(secrets, engineDetails, clients)
+
+			//log.Infoln("Printing VolumeMounts : ", volumeMounts)
+			if errorsListForSecrets != nil {
+				log.Errorf("Printing Errors, found while Validating Secrets : %v, Will abort the Experiment Execution", errorsListForSecrets)
+				continue
+			}
+		} else {
+			log.Infoln("Unable to find Secrets")
+		}
+
 		log.Infof("Printing Validated ConfigMaps: %v", validatedConfigMaps)
+		log.Infof("Printing Validated Secrets: %v", validatedSecrets)
 
 		// 1. []*volume.Builder
-		volumeBuilders := utils.CreateVolumeBuilder(validatedConfigMaps)
+		volumeBuilders := utils.CreateVolumeBuilder(validatedConfigMaps, validatedSecrets)
 		//log.Infof("Printing volumeBuilders: %v", volumeBuilders)
 
 		// 2. []corev1.VolumeMounts
-		volumeMounts := utils.CreateVolumeMounts(validatedConfigMaps)
+		volumeMounts := utils.CreateVolumeMounts(validatedConfigMaps, validatedSecrets)
 
 		// OverWriting the Deafults Varibles from the ChaosEngine one's
 		utils.OverWriteEnvFromEngine(engineDetails.AppNamespace, engineDetails.Name, engineDetails.Config, perExperiment.Env, engineDetails.Experiments[i])

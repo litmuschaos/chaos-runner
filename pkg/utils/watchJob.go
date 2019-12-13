@@ -84,7 +84,7 @@ func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, clients Clie
 		log.Print(err)
 		return err
 	}
-	log.Info(expEngine)
+
 	var currExpStatus v1alpha1.ExperimentStatuses
 	currExpStatus.Name = perExperiment.JobName
 	currExpStatus.Status = phase
@@ -96,7 +96,6 @@ func UpdateResultWithJobAndDeletingJob(engineDetails EngineDetails, clients Clie
 	} else {
 		expEngine.Status.Experiments[checkForjobName] = currExpStatus
 	}
-	log.Info(expEngine)
 	_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
 	if updateErr != nil {
 		log.Info("Updating Resource Error : ", updateErr)
