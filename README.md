@@ -3,12 +3,56 @@
 **Why does this repo Exists**
 This repo, is all about converting the current ansible-based executor to a go-based executor.
 It is a experimental repo, for implementing all the functions of ansible-based executor, to go-based executor
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: engine
+  namespace: litmus
+spec:
+  appinfo:
+    appkind: deployment
+    applabel: app=nginx
+    appns: litmus
+  chaosServiceAccount: litmus
+  components:
+    runner:
+      type: "go"
+      image: "rahulchheda1997/chaos-executor:ci"
+  experiments:
+  - name: pod-delete 
+    spec:
+      components: null
+  monitoring: false
 
 **How to use chaos-executor**
 To use these follow these steps:
-    - Clone the chaos-operator
-    - Change it -runner image in the builder function, to litmuschaos/chaos-executor:ci
-    - Check the logs, of the runner
+    - Edit the chaosEngine YAML, and add type: "go", in components.runner, and change the image: "rahulchheda1997/chaos-executor:ci"
+    - Here is a sample ChaosEngine YAML for reference: 
+    ```
+    apiVersion: litmuschaos.io/v1alpha1
+    kind: ChaosEngine
+    metadata:
+      name: engine
+      namespace: litmus
+    spec:
+    appinfo:
+      appkind: deployment
+      applabel: app=nginx
+      appns: litmus
+    chaosServiceAccount: litmus
+    components:
+      runner:
+        type: "go"
+        image: "rahulchheda1997/chaos-executor:ci"
+    experiments:
+    - name: pod-delete 
+      spec:
+        components: null
+      monitoring: false
+
+
+
+**Sample ChaosEngine YAML**
 
 **Functionality Implemented**
     - All Executor functionality implemented
