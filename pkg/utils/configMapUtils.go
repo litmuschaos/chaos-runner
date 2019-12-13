@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/kube-helper/kubernetes/configmap"
-	volume "github.com/litmuschaos/kube-helper/kubernetes/volume/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -77,6 +76,7 @@ func CheckConfigMaps(engineDetails EngineDetails, config *rest.Config, experimen
 	}
 }
 
+// createConfigMapObject creates configMap
 func createConfigMapObject(configMap v1alpha1.ConfigMap) *corev1.ConfigMap {
 	// Create label maps
 	labels := make(map[string]string)
@@ -114,57 +114,4 @@ func CreateConfigMaps(configMaps []v1alpha1.ConfigMap, engineDetails EngineDetai
 		}
 	}
 	return err
-}
-
-/*func CreateVolumes(configMaps []v1alpha1.ConfigMap) []corev1.Volume {
-	//volumesList := make([]corev1.Volume, len(configMaps))
-	log.Infoln("-------------------------------------")
-	log.Infoln(configMaps)
-	log.Infoln("--------------------------")
-	volumesList := []corev1.Volume{}
-
-	for _, v := range configMaps {
-		log.Infoln("RETURNING OBJECT")
-		log.Infoln(v)
-		volume := corev1.Volume{}
-		volume.Name = v.Name
-		log.Infoln("!!!!!!!!!!!!!!!!!!!!!!!!!!!! ->")
-		log.Infoln(v.Name)
-		volume.ConfigMap.Name = v.Name
-		var i int = 420
-		var k int32 = int32(i)
-		volume.ConfigMap.DefaultMode = &k
-		volumesList = append(volumesList, volume)
-		//volumesList[i] = volume
-	}
-	return volumesList
-}*/
-
-// CreateVolumeBuilder build Volume needed in execution of experiments
-func CreateVolumeBuilder(configMaps []v1alpha1.ConfigMap) []*volume.Builder {
-	volumeBuilderList := []*volume.Builder{}
-	if configMaps == nil {
-		log.Infoln("Unable to fetch chaosExperiment ConfigMaps, to create volume")
-		return nil
-	}
-	for _, v := range configMaps {
-		log.Infoln("Would create VolumeBuilder for : ", v)
-		volumeBuilder := volume.NewBuilder().
-			WithConfigMap(v.Name)
-		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
-	}
-	return volumeBuilderList
-}
-
-// CreateVolumeMounts mounts Volume needed in execution of experiments
-func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap) []corev1.VolumeMount {
-	var volumeMountsList []corev1.VolumeMount
-	for _, v := range configMaps {
-		//volumeMount = make(corev1.VolumeMount)
-		var volumeMount corev1.VolumeMount
-		volumeMount.Name = v.Name
-		volumeMount.MountPath = v.MountPath
-		volumeMountsList = append(volumeMountsList, volumeMount)
-	}
-	return volumeMountsList
 }
