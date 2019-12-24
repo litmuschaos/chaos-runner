@@ -1,4 +1,5 @@
-FROM ubuntu:18.04
+# FROM ubuntu:18.04
+FROM registry.access.redhat.com/ubi7-dev-preview/ubi-minimal:7.6
 
 LABEL maintainer="LitmusChaos"
 

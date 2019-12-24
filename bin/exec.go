@@ -2,13 +2,15 @@ package main
 
 import (
 	"flag"
+	"time"
+
 	"github.com/litmuschaos/chaos-executor/pkg/utils"
+	"github.com/litmuschaos/chaos-executor/pkg/utils/analytics"
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"time"
 )
 
 // getKubeConfig setup the config for access cluster resource
@@ -216,6 +218,10 @@ func main() {
 		if err != nil {
 			log.Info("Unable to Update ChaosResult")
 			log.Error(err)
+		} else {
+			log.Infoln("Sending Analytics")
+			analytics.Test(engineDetails.Experiments[i])
+
 		}
 	}
 }

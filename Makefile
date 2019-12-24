@@ -72,4 +72,4 @@ dockerops:
 	@echo "------------------"
 	@echo "--> Build Chaos-executor image..." 
 	@echo "------------------"
-	sudo docker build . -f build/Dockerfile -t litmuschaos/chaos-executor:ci
+	sudo docker build . -f build/Dockerfile -t daitya96/chaos-executor:test7
