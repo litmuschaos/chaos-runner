@@ -1,6 +1,9 @@
 # Makefile for building Litmus and its tools
 # Reference Guide - https://www.gnu.org/software/make/manual/make.html
 
+REGISTRY ?= litmuschaos
+IMG_NAME ?= chaos-executor
+PACKAGE_VERSION ?= ci
 IS_DOCKER_INSTALLED = $(shell which docker >> /dev/null 2>&1; echo $$?)
 HOME = $(shell echo $$HOME)
 # list only our namespaced directories
@@ -72,4 +75,8 @@ dockerops:
 	@echo "------------------"
 	@echo "--> Build Chaos-executor image..." 
 	@echo "------------------"
-	sudo docker build . -f build/Dockerfile -t litmuschaos/chaos-executor:ci
+	sudo docker build . -f build/Dockerfile -t $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION)
+
+.PHONY: push
+push:
+	sudo docker push $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION)

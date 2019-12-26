@@ -2,13 +2,14 @@ package main
 
 import (
 	"flag"
-	"github.com/litmuschaos/chaos-executor/pkg/utils"
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"time"
+
 	log "github.com/sirupsen/logrus"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"time"
+
+	"github.com/litmuschaos/chaos-executor/pkg/utils"
+	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
 // getKubeConfig setup the config for access cluster resource
@@ -39,31 +40,21 @@ func checkStatusListForExp(status []v1alpha1.ExperimentStatuses, jobName string)
 	return -1
 }
 
-var kubeconfig string
-var err error
-var config *rest.Config
-
 func main() {
 
 	engineDetails := utils.EngineDetails{}
-
+	clients := utils.ClientSets{}
 	// Getting the config
 	config, err := getKubeConfig()
 	if err != nil {
-		log.Info("Error in fetching the config")
-		log.Infoln(err.Error())
+		log.Fatalf("Error in fetching the config, error : %v", err)
 	}
 
-	engineDetails.Config = config
+	// clientSet creation for further use.
 
-	// Genrationg Client Set for more functionality
-	var clients utils.ClientSets
-
-	// ClientSet Generation
-	clients.KubeClient, clients.LitmusClient, err = utils.GenerateClientSets(engineDetails.Config)
+	err = clients.GenerateClientSets(config)
 	if err != nil {
-		log.Info("Unable to generate ClientSet while Creating Job")
-		return
+		log.Fatalf("Unable to create ClientSets")
 	}
 
 	// Fetching all the ENV's needed
@@ -73,11 +64,17 @@ func main() {
 	// Steps for each Experiment
 	for i := range engineDetails.Experiments {
 
-		log.Infoln("Going with the experiment Name : " + engineDetails.Experiments[i])
+		experiment := utils.NewExperimentDetails()
+		experiment.Name = engineDetails.Experiments[i]
+		experiment.Namespace = engineDetails.AppNamespace
+		experiment.SvcAccount = engineDetails.SvcAccount
+		log.Infof("Printing experiment.Name: %v, experiment.Namespace : %v", experiment.Name, experiment.Namespace)
+
+		log.Infoln("Going with the experiment Name: " + engineDetails.Experiments[i])
 
 		// isFound will return the status of experiment in that namespace
 		// 1 -> found, 0 -> not-found
-		isFound := !utils.CheckExperimentInAppNamespace(engineDetails.AppNamespace, engineDetails.Experiments[i], config)
+		isFound := experiment.CheckExistence(clients)
 		log.Infoln("Experiment Found Status : ", isFound)
 
 		// If not found in AppNamespace skip the further steps
@@ -87,116 +84,73 @@ func main() {
 			break
 		}
 
-		var perExperiment utils.ExperimentDetails
-
 		log.Infoln("Getting the Default ENV Variables")
 
-		// Get thee Deafult ENV's from ChaosExperiment
-		perExperiment.Env = utils.GetEnvFromExperiment(engineDetails.AppNamespace, engineDetails.Experiments[i], engineDetails.Config)
+		// Get the Default ENV's from ChaosExperiment
+		experiment.SetDefaultEnv(clients)
 
-		log.Info("Printing the Default Variables", perExperiment.Env)
+		log.Info("Printing the Default Variables", experiment.Env)
 
 		// Get the ConfigMaps for patching them in the job creation
 		log.Infoln("Find the configMaps in the chaosExperiments")
 
-		configMapExist, configMaps := utils.CheckConfigMaps(engineDetails, config, engineDetails.Experiments[i])
+		experiment.SetConfigMaps(clients)
 
-		var validatedConfigMaps []v1alpha1.ConfigMap
-		var errorsListForConfigMaps []error
-		if configMapExist == true {
-			log.Infoln("Config Maps Found")
-			//fetch details and apply those config maps needed
-			// to be used in the job creation
-			// first convert the format of ConfigMap's Data to map[string]string
-			// & then use the kube-builder to build config maps
-			validatedConfigMaps, errorsListForConfigMaps = utils.ValidateConfigMaps(configMaps, engineDetails, clients)
-
-			if errorsListForConfigMaps != nil {
-				log.Errorf("Printing Errors, found while Validating ConfigMaps : %v, Will abort the Experiment Execution", errorsListForConfigMaps)
-				continue
-			}
-		} else {
-			log.Infoln("Unable to find ConfigMaps")
+		err := experiment.ValidateConfigMaps(clients)
+		if err != nil {
+			log.Infof("Aborting Execution")
+			return
 		}
 
-		secretsExist, secrets := utils.CheckSecrets(engineDetails, config, engineDetails.Experiments[i])
-
-		var validatedSecrets []v1alpha1.Secret
-		var errorsListForSecrets []error
-		if secretsExist == true {
-			log.Infoln("Secrets Found")
-			//fetch details and apply those config maps needed
-			// to be used in the job creation
-			// first convert the format of ConfigMap's Data to map[string]string
-			// & then use the kube-builder to build config maps
-			validatedSecrets, errorsListForSecrets = utils.ValidateSecrets(secrets, engineDetails, clients)
-
-			//log.Infoln("Printing VolumeMounts : ", volumeMounts)
-			if errorsListForSecrets != nil {
-				log.Errorf("Printing Errors, found while Validating Secrets : %v, Will abort the Experiment Execution", errorsListForSecrets)
-				continue
-			}
-		} else {
-			log.Infoln("Unable to find Secrets")
+		experiment.SetSecrets(clients)
+		err = experiment.ValidateSecrets(clients)
+		if err != nil {
+			log.Infof("Aborting Execution")
+			return
 		}
 
-		log.Infof("Printing Validated ConfigMaps: %v", validatedConfigMaps)
-		log.Infof("Printing Validated Secrets: %v", validatedSecrets)
+		log.Infof("Validated ConfigMaps: %v", experiment.ConfigMaps)
+		log.Infof("Validated Secrets: %v", experiment.Secrets)
 
-		// 1. []*volume.Builder
-		volumeBuilders := utils.CreateVolumeBuilder(validatedConfigMaps, validatedSecrets)
-		//log.Infof("Printing volumeBuilders: %v", volumeBuilders)
+		// Adding VolumeBuilders, according to the ConfigMaps, and Secrets from ChaosEXperiment
+		experiment.VolumeOpts.VolumeBuilders = utils.CreateVolumeBuilder(experiment.ConfigMaps, experiment.Secrets)
 
-		// 2. []corev1.VolumeMounts
-		volumeMounts := utils.CreateVolumeMounts(validatedConfigMaps, validatedSecrets)
+		// Adding VoulmeMounts, according to the configMaps, and Secrets from ChaosEXperiment
+		experiment.VolumeOpts.VolumeMounts = utils.CreateVolumeMounts(experiment.ConfigMaps, experiment.Secrets)
 
-		// OverWriting the Deafults Varibles from the ChaosEngine one's
-		utils.OverWriteEnvFromEngine(engineDetails.AppNamespace, engineDetails.Name, engineDetails.Config, perExperiment.Env, engineDetails.Experiments[i])
-
+		// OverWriting the Defaults Varibles from the ChaosEngine ENV
 		log.Infoln("Patching some required ENV's")
+		experiment.SetEnvFromEngine(engineDetails.Name, clients)
 
 		// Adding some addition necessary ENV's
-		perExperiment.Env["CHAOSENGINE"] = engineDetails.Name
-		perExperiment.Env["APP_LABEL"] = engineDetails.AppLabel
-		perExperiment.Env["APP_NAMESPACE"] = engineDetails.AppNamespace
-		perExperiment.Env["APP_KIND"] = engineDetails.AppKind
+		experiment.Env["CHAOSENGINE"] = engineDetails.Name
+		experiment.Env["APP_LABEL"] = engineDetails.AppLabel
+		experiment.Env["APP_NAMESPACE"] = engineDetails.AppNamespace
+		experiment.Env["APP_KIND"] = engineDetails.AppKind
 
 		log.Info("Printing the Over-ridden Variables")
-		log.Infoln(perExperiment.Env)
+		log.Infoln(experiment.Env)
 
-		log.Infoln("Converting the Variables using A Range loop to convert the map of ENV to corev1.EnvVar to directly send to the Builder Func")
+		log.Infoln("Getting all the details of the experiment Name : " + engineDetails.Experiments[i])
 
-		// Converting the ENV's (map[string]string)  --> ([]corev1.EnvVar)
-		var envVar []corev1.EnvVar
-		for k, v := range perExperiment.Env {
-			var perEnv corev1.EnvVar
-			perEnv.Name = k
-			perEnv.Value = v
-			envVar = append(envVar, perEnv)
-		}
-
-		log.Info("Printing the corev1.EnvVar : ")
-		log.Infoln(envVar)
-
-		log.Infoln("getting all the details of the experiment Name : " + engineDetails.Experiments[i])
-
-		// Fetching more details from the CHoasExpeirment needed for execution
-		perExperiment.ExpLabels, perExperiment.ExpImage, perExperiment.ExpArgs = utils.GetDetails(engineDetails.AppNamespace, engineDetails.Experiments[i], engineDetails.Config)
-
-		log.Infoln("Variables for ChaosJob : ", "Experiment Labels : ", perExperiment.ExpLabels, " Experiment Image : ", perExperiment.ExpImage, " Experiment Args : ", perExperiment.ExpArgs)
+		// Fetching more details from the ChaosExperiment needed for execution
+		experiment.SetImage(clients)
+		experiment.SetArgs(clients)
+		experiment.SetLabels(clients)
+		log.Infof("Variables for ChaosJob: Experiment Labels: %v, Experiment Image: %v, experiment.Args: %v", experiment.ExpLabels, experiment.ExpImage, experiment.ExpArgs)
 
 		// Generation of Random String for appending it into Job
 		randomString := utils.RandomString()
 
 		// Setting the JobName in Experiment Realted struct
-		perExperiment.JobName = engineDetails.Experiments[i] + "-" + randomString
+		experiment.JobName = engineDetails.Experiments[i] + "-" + randomString
 
-		log.Infoln("JobName for this Experiment : " + perExperiment.JobName)
+		log.Infof("JobName for this Experiment : %v", experiment.JobName)
 
 		// Creation of PodTemplateSpec, and Final Job
-		err = utils.DeployJob(perExperiment, engineDetails, envVar, volumeMounts, volumeBuilders)
+		err = utils.DeployJob(experiment, clients)
 		if err != nil {
-			log.Infoln("Error while building Job : ", err)
+			log.Infof("Error while building Job : %v", err)
 		}
 
 		time.Sleep(5 * time.Second)
@@ -204,18 +158,16 @@ func main() {
 		resultName := utils.GetResultName(engineDetails, i)
 
 		// Watching the Job till Completion
-		err = utils.WatchingJobtillCompletion(perExperiment, engineDetails, clients)
+		err = utils.WatchingJobtillCompletion(experiment, engineDetails, clients)
 		if err != nil {
-			log.Info("Unable to Watch the Job")
-			log.Error(err)
+			log.Infof("Unable to Watch the Job, error: %v", err)
 		}
 
 		// Will Update the result,
 		// Delete / retain the Job, using the jobCleanUpPolicy
-		err = utils.UpdateResultWithJobAndDeletingJob(engineDetails, clients, resultName, perExperiment)
+		err = utils.UpdateResultWithJobAndDeletingJob(engineDetails, resultName, experiment, clients)
 		if err != nil {
-			log.Info("Unable to Update ChaosResult")
-			log.Error(err)
+			log.Infof("Unable to Update ChaosResult, error: %v", err)
 		}
 	}
 }
