@@ -1,14 +1,10 @@
 package utils
 
 import (
-	//"errors"
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	//"github.com/litmuschaos/kube-helper/kubernetes/configmap"
 	volume "github.com/litmuschaos/kube-helper/kubernetes/volume/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
-	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	//"k8s.io/client-go/rest"
 )
 
 // CreateVolumeBuilder build Volume needed in execution of experiments
@@ -41,7 +37,6 @@ func CreateVolumeBuilder(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Sec
 func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret) []corev1.VolumeMount {
 	var volumeMountsList []corev1.VolumeMount
 	for _, v := range configMaps {
-		//volumeMount = make(corev1.VolumeMount)
 		var volumeMount corev1.VolumeMount
 		volumeMount.Name = v.Name
 		volumeMount.MountPath = v.MountPath
@@ -49,7 +44,6 @@ func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secr
 	}
 
 	for _, v := range secrets {
-		//volumeMount = make(corev1.VolumeMount)
 		var volumeMount corev1.VolumeMount
 		volumeMount.Name = v.Name
 		volumeMount.MountPath = v.MountPath
