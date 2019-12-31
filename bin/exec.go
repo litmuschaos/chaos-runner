@@ -219,9 +219,7 @@ func main() {
 			log.Info("Unable to Update ChaosResult")
 			log.Error(err)
 		} else {
-			log.Infoln("Sending Analytics")
-			analytics.Test(engineDetails.Experiments[i])
-
+			analytics.TriggerAnalytics(engineDetails.Experiments[i])
 		}
 	}
 }

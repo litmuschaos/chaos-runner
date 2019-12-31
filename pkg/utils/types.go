@@ -14,6 +14,7 @@ type EngineDetails struct {
 	SvcAccount   string
 	AppKind      string
 	AppNamespace string
+	ClientUUID   string
 	Config       *rest.Config
 }
 

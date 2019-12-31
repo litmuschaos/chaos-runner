@@ -1,28 +1,37 @@
 package analytics
 
 import (
-	// "github.com/go-logr/logr"
 	ga "github.com/jpillora/go-ogle-analytics"
+	"github.com/litmuschaos/chaos-executor/pkg/utils"
+	log "github.com/sirupsen/logrus"
 )
 
-// Test ashdihadihai
-func Test(experimentName string) {
+const (
+	// clientID contains TrackingID of the application
+	clientID string = "UA-92076314-21"
 
-	client, err := ga.NewClient("UA-127388617-2")
-	if err != nil {
-		println("client")
-		panic(err)
-	}
-	client.ClientID("dba81026-a68e-4f67-9f4c-10bfafd97ed4")
-	err = client.Send(ga.NewEvent("ExperimentRun", "Total").Label("AppName"))
-	if err != nil {
-		panic(err)
-	}
-	err = client.Send(ga.NewEvent("ExperimentRun", experimentName).Label("AppName"))
-	if err != nil {
-		println("expoervvv")
-		panic(err)
-	}
-	println("Event fired!")
+	// supported event categories
 
+	// category category notifies installation of a Litmus Experiment
+	category string = "Chaos-Experiment"
+
+	// supported event actions
+
+	// action is sent when the installation is triggered
+	action string = "Installation"
+)
+// TriggerAnalytics is reponsible for sending out events
+func TriggerAnalytics(experimentName string) {
+	engineDetails := utils.EngineDetails{}
+	utils.GetOsEnv(&engineDetails)
+	client, err := ga.NewClient(clientID)
+	if err != nil {
+		log.Error(err, "GA Client ID Error")
+	}
+	uuid := engineDetails.ClientUUID
+	client.ClientID(uuid)
+	err = client.Send(ga.NewEvent(category, action).Label(experimentName))
+	if err != nil {
+		log.Info("Unable to send GA event")
+	}
 }
