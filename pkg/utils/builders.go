@@ -1,14 +1,15 @@
 package utils
 
 import (
+	log "github.com/sirupsen/logrus"
+
+	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/litmuschaos/kube-helper/kubernetes/container"
 	"github.com/litmuschaos/kube-helper/kubernetes/job"
 	jobspec "github.com/litmuschaos/kube-helper/kubernetes/jobspec"
 	"github.com/litmuschaos/kube-helper/kubernetes/podtemplatespec"
-	volume "github.com/litmuschaos/kube-helper/kubernetes/volume/v1alpha1"
-	log "github.com/sirupsen/logrus"
-	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // PodTemplateSpec is struct for creating the *core1.PodTemplateSpec
@@ -23,20 +24,20 @@ type Builder struct {
 }
 
 // BuildContainerSpec builds a Container with following properties
-func BuildContainerSpec(perExperiment ExperimentDetails, engineDetails EngineDetails, envVar []corev1.EnvVar, volumeMounts []corev1.VolumeMount) *container.Builder {
+func BuildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) *container.Builder {
 	containerSpec := container.NewBuilder().
-		WithName(perExperiment.JobName).
-		WithImage(perExperiment.ExpImage).
+		WithName(experiment.JobName).
+		WithImage(experiment.ExpImage).
 		WithCommandNew([]string{"/bin/bash"}).
-		WithArgumentsNew(perExperiment.ExpArgs).
+		WithArgumentsNew(experiment.ExpArgs).
 		WithImagePullPolicy("Always").
 		//WithVolumeMountsNew(volumeMounts).
 		WithEnvsNew(envVar)
 
-	if volumeMounts != nil {
+	if experiment.VolumeOpts.VolumeMounts != nil {
 		log.Info("Building Container with VolumeMounts")
 		//log.Info(volumeMounts)
-		containerSpec.WithVolumeMountsNew(volumeMounts)
+		containerSpec.WithVolumeMountsNew(experiment.VolumeOpts.VolumeMounts)
 	}
 
 	_, err := containerSpec.Build()
@@ -49,38 +50,40 @@ func BuildContainerSpec(perExperiment ExperimentDetails, engineDetails EngineDet
 
 }
 
-// DeployJob the Job using all the details gathered
-func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, envVar []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumeBuilders []*volume.Builder) error {
+func getEnvFromMap(env map[string]string) []corev1.EnvVar {
+	var envVar []corev1.EnvVar
+	for k, v := range env {
+		var perEnv corev1.EnvVar
+		perEnv.Name = k
+		perEnv.Value = v
+		envVar = append(envVar, perEnv)
+	}
+	return envVar
+}
 
+// DeployJob the Job using all the details gathered
+func DeployJob(experiment *ExperimentDetails, clients ClientSets) error {
+
+	envVar := getEnvFromMap(experiment.Env)
 	// Will build a PodSpecTemplate
 	// For creating the spec.template of the Job
-	pod := BuildPodTemplateSpec(perExperiment, engineDetails, volumeBuilders)
+	pod := BuildPodTemplateSpec(experiment)
 
 	//Build Container to add in the Pod
-	containerForPod := BuildContainerSpec(perExperiment, engineDetails, envVar, volumeMounts)
+	containerForPod := BuildContainerSpec(experiment, envVar)
 	pod.WithContainerBuildersNew(containerForPod)
 
 	// Build JobSpec Template
 	jobspec := BuildJobSpec(pod)
 
-	// Generation of ClientSet for creation
-	clientSet, _, err := GenerateClientSets(engineDetails.Config)
-	if err != nil {
-		log.Info("Unable to generate ClientSet while Creating Job")
-		return err
-	}
-
-	jobsClient := clientSet.BatchV1().Jobs(engineDetails.AppNamespace)
-
-	job, err := BuildJob(pod, perExperiment, engineDetails, jobspec)
+	job, err := experiment.BuildJob(pod, jobspec)
 	if err != nil {
 		log.Info("Unable to build Job")
 		return err
 	}
 
 	// Creating the Job
-	//log.Infoln("Printing the Job Object : ", job)
-	_, err = jobsClient.Create(job)
+	_, err = clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Create(job)
 	if err != nil {
 		log.Info("Unable to create the Job with the clientSet : ", err)
 	}
@@ -88,19 +91,19 @@ func DeployJob(perExperiment ExperimentDetails, engineDetails EngineDetails, env
 }
 
 // BuildPodTemplateSpec return a PodTempplateSpec
-func BuildPodTemplateSpec(perExperiment ExperimentDetails, engineDetails EngineDetails, volumeBuilders []*volume.Builder) *podtemplatespec.Builder {
+func BuildPodTemplateSpec(experiment *ExperimentDetails) *podtemplatespec.Builder {
 	podtemplate := podtemplatespec.NewBuilder().
-		WithName(perExperiment.JobName).
-		WithNamespace(engineDetails.AppNamespace).
-		WithLabels(perExperiment.ExpLabels).
-		WithServiceAccountName(engineDetails.SvcAccount).
+		WithName(experiment.JobName).
+		WithNamespace(experiment.Namespace).
+		WithLabels(experiment.ExpLabels).
+		WithServiceAccountName(experiment.SvcAccount).
 		WithRestartPolicy(corev1.RestartPolicyOnFailure)
 
 	// Add VolumeBuilders, if exists
-	if volumeBuilders != nil {
+	if experiment.VolumeOpts.VolumeBuilders != nil {
 		log.Info("Building Pod with VolumeBuilders")
 		//log.Info(volumeBuilders)
-		podtemplate.WithVolumeBuilders(volumeBuilders)
+		podtemplate.WithVolumeBuilders(experiment.VolumeOpts.VolumeBuilders)
 	}
 
 	_, err := podtemplate.Build()
@@ -122,14 +125,14 @@ func BuildJobSpec(pod *podtemplatespec.Builder) *jobspec.Builder {
 	return jobSpecObj
 }
 
-// BuildJob will build the JobObject (*batchv1.Job) for creation
-func BuildJob(pod *podtemplatespec.Builder, perExperiment ExperimentDetails, engineDetails EngineDetails, jobspec *jobspec.Builder) (*batchv1.Job, error) {
+// BuildJob will build the JobObject for creation
+func (experiment ExperimentDetails) BuildJob(pod *podtemplatespec.Builder, jobspec *jobspec.Builder) (*batchv1.Job, error) {
 	//restartPolicy := corev1.RestartPolicyOnFailure
 	jobObj, err := job.NewBuilder().
 		WithJobSpecBuilder(jobspec).
-		WithName(perExperiment.JobName).
-		WithNamespace(engineDetails.AppNamespace).
-		WithLabels(perExperiment.ExpLabels).
+		WithName(experiment.JobName).
+		WithNamespace(experiment.Namespace).
+		WithLabels(experiment.ExpLabels).
 		Build()
 	if err != nil {
 		log.Errorln(err)

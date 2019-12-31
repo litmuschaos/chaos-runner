@@ -15,6 +15,4 @@ func GetOsEnv(engineDetails *EngineDetails) {
 	engineDetails.SvcAccount = os.Getenv("CHAOS_SVC_ACC")
 	engineDetails.ClientUUID = os.Getenv("CLIENT_UUID")
 	engineDetails.Experiments = strings.Split(experimentList, ",")
-	//rand := os.Getenv("RANDOM")
-	//max := os.Getenv("MAX_DURATION")
 }

@@ -2,7 +2,6 @@ package analytics
 
 import (
 	ga "github.com/jpillora/go-ogle-analytics"
-	"github.com/litmuschaos/chaos-executor/pkg/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,17 +17,15 @@ const (
 	// supported event actions
 
 	// action is sent when the installation is triggered
-	action string = "Installation"
+	action string = "Execution"
 )
+
 // TriggerAnalytics is reponsible for sending out events
-func TriggerAnalytics(experimentName string) {
-	engineDetails := utils.EngineDetails{}
-	utils.GetOsEnv(&engineDetails)
+func TriggerAnalytics(experimentName string, uuid string) {
 	client, err := ga.NewClient(clientID)
 	if err != nil {
 		log.Error(err, "GA Client ID Error")
 	}
-	uuid := engineDetails.ClientUUID
 	client.ClientID(uuid)
 	err = client.Send(ga.NewEvent(category, action).Label(experimentName))
 	if err != nil {
