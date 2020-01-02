@@ -50,7 +50,7 @@ type ClientSets struct {
 }
 
 // GenerateClientSets will generation both ClientSets (k8s, and Litmus)
-func (clientSets ClientSets) GenerateClientSets(config *rest.Config) error {
+func (clientSets *ClientSets) GenerateClientSets(config *rest.Config) error {
 	k8sClientSet, err := k8s.GenerateK8sClientSet(config)
 	if err != nil {
 		return err
