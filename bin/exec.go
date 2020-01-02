@@ -9,6 +9,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/litmuschaos/chaos-executor/pkg/utils"
+	"github.com/litmuschaos/chaos-executor/pkg/utils/analytics"
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
@@ -145,6 +146,11 @@ func main() {
 		// Setting the JobName in Experiment Realted struct
 		experiment.JobName = engineDetails.Experiments[i] + "-" + randomString
 
+		// Sending event to GA instance
+		if engineDetails.ClientUUID != "" {
+			analytics.TriggerAnalytics(experiment.JobName, engineDetails.ClientUUID)
+		}
+		
 		log.Infof("JobName for this Experiment : %v", experiment.JobName)
 
 		// Creation of PodTemplateSpec, and Final Job
