@@ -20,6 +20,7 @@ type EngineDetails struct {
 	SvcAccount   string
 	AppKind      string
 	AppNamespace string
+	ClientUUID   string
 }
 
 // ExperimentDetails is for collecting all the experiment-related details
