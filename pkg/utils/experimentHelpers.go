@@ -7,6 +7,34 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientSets) {
+	expDetails.SetImage(clients)
+	expDetails.SetArgs(clients)
+	expDetails.SetLabels(clients)
+	// Generation of Random String for appending it into Job
+	randomString := RandomString()
+	// Setting the JobName in Experiment Realted struct
+	expDetails.JobName = expDetails.Name + "-" + randomString
+}
+func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) {
+	// Get the Default ENV's from ChaosExperiment
+	log.Infoln("Getting the Default ENV Variables")
+	expDetails.SetDefaultEnv(clients)
+	// OverWriting the Defaults Varibles from the ChaosEngine ENV
+	log.Infoln("Patching some required ENV's")
+	expDetails.SetEnvFromEngine(engineDetails.Name, clients)
+	// Adding some addition necessary ENV's
+	expDetails.Env["CHAOSENGINE"] = engineDetails.Name
+	expDetails.Env["APP_LABEL"] = engineDetails.AppLabel
+	expDetails.Env["APP_NAMESPACE"] = engineDetails.AppNamespace
+	expDetails.Env["APP_KIND"] = engineDetails.AppKind
+}
+func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engineDetails EngineDetails, i int) {
+	expDetails.Name = engineDetails.Experiments[i]
+	expDetails.Namespace = engineDetails.AppNamespace
+	expDetails.SvcAccount = engineDetails.SvcAccount
+}
+
 // NewExperimentDetails initilizes the structure
 func NewExperimentDetails() *ExperimentDetails {
 	var experimentDetails ExperimentDetails
@@ -19,7 +47,7 @@ func NewExperimentDetails() *ExperimentDetails {
 func (expDetails *ExperimentDetails) CheckExistence(clients ClientSets) bool {
 
 	_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
-	log.Infof("error while getting exp: %v", err)
+	//log.Infof("error while getting exp: %v", err)
 	if err != nil {
 		return false
 	}
@@ -84,11 +112,11 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 			log.Infof("Incomplete Information in Secret, will abort execution")
 			return errors.New("Abort Execution")
 		}
-		err := clients.ValidateConfigMap(v.Name, expDetails)
+		err := clients.ValidateSecrets(v.Name, expDetails)
 		if err != nil {
-			log.Infof("Unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
+			log.Infof("Unable to get Secrets with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		} else {
-			log.Infof("Succesfully Validate ConfigMap with Name: %v", v.Name)
+			log.Infof("Succesfully Validate Secret with Name: %v", v.Name)
 		}
 	}
 	return nil

@@ -126,7 +126,7 @@ func BuildJobSpec(pod *podtemplatespec.Builder) *jobspec.Builder {
 }
 
 // BuildJob will build the JobObject for creation
-func (experiment ExperimentDetails) BuildJob(pod *podtemplatespec.Builder, jobspec *jobspec.Builder) (*batchv1.Job, error) {
+func (experiment *ExperimentDetails) BuildJob(pod *podtemplatespec.Builder, jobspec *jobspec.Builder) (*batchv1.Job, error) {
 	//restartPolicy := corev1.RestartPolicyOnFailure
 	jobObj, err := job.NewBuilder().
 		WithJobSpecBuilder(jobspec).
