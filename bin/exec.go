@@ -65,6 +65,11 @@ func main() {
 	// Steps for each Experiment
 	for i := range engineDetails.Experiments {
 
+		// Sending event to GA instance
+		if engineDetails.ClientUUID != "" {
+			analytics.TriggerAnalytics(engineDetails.Experiments[i], engineDetails.ClientUUID)
+		}
+
 		experiment := utils.NewExperimentDetails()
 		experiment.Name = engineDetails.Experiments[i]
 		experiment.Namespace = engineDetails.AppNamespace
@@ -146,11 +151,6 @@ func main() {
 		// Setting the JobName in Experiment Realted struct
 		experiment.JobName = engineDetails.Experiments[i] + "-" + randomString
 
-		// Sending event to GA instance
-		if engineDetails.ClientUUID != "" {
-			analytics.TriggerAnalytics(experiment.JobName, engineDetails.ClientUUID)
-		}
-		
 		log.Infof("JobName for this Experiment : %v", experiment.JobName)
 
 		// Creation of PodTemplateSpec, and Final Job
