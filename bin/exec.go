@@ -40,8 +40,7 @@ func main() {
 		log.Fatalf("Error in fetching the config, error : %v", err)
 	}
 	// clientSet creation for further use.
-	err = clients.GenerateClientSets(config)
-	if err != nil {
+	if err = clients.GenerateClientSets(config); err != nil {
 		log.Fatalf("Unable to create ClientSets")
 	}
 
@@ -61,67 +60,61 @@ func main() {
 		experiment.SetValueFromChaosEngine(engineDetails, i)
 		experiment.SetValueFromChaosExperiment(clients)
 		experiment.SetENV(engineDetails, clients)
-		log.Infof("Printing Experiment Structure: %v", experiment)
 
 		experimentStatus := utils.ExperimentStatus{}
 		experimentStatus.IntialExperimentStatus(experiment)
 		experimentStatus.InitialPatchEngine(engineDetails, clients)
 
-		log.Infof("Printing experiment.Name: %v, experiment.Namespace : %v", experiment.Name, experiment.Namespace)
-		log.Infoln("Going with the experiment Name: " + engineDetails.Experiments[i])
+		log.Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
 
 		// isFound will return the status of experiment in that namespace
 		// 1 -> found, 0 -> not-found
-		isFound := experiment.CheckExistence(clients)
+		isFound, err := experiment.CheckExistence(clients)
 		log.Infoln("Experiment Found Status : ", isFound)
 
 		// If not found in AppNamespace skip the further steps
 		if !isFound {
-			//TODO Patch Engine if chaosExperiment is not found.
 			engineDetails.ExperimentNotFoundPatchEngine(experiment, clients)
-
-			log.Infoln("Can't Find Experiment Name : "+engineDetails.Experiments[i], "In Namespace : "+engineDetails.AppNamespace)
-			log.Infoln("Not Executing the Experiment : " + engineDetails.Experiments[i])
+			log.Infof("Unable to list Chaos Experiment: %v, in Namespace: %v, skipping execution, error: %v", experiment.Name, experiment.Namespace, err)
 			break
 		}
-		log.Info("Printing the ENV Variables", experiment.Env)
 
 		// Patch ConfigMaps to ChaosExperiment Job
-		err := experiment.PatchConfigMaps(clients)
-		if err != nil {
+		if err := experiment.PatchConfigMaps(clients); err != nil {
+			log.Infof("Unable to patch ConfigMaps, due to: %v", err)
 			break
 		}
-		// Patch Secrets to ChaosExperiment Job
-		err = experiment.PatchSecrets(clients)
-		if err != nil {
-			break
-		}
-		// Adding VolumeBuilders, according to the ConfigMaps, and Secrets from ChaosEXperiment
-		experiment.VolumeOpts.VolumeBuilders = utils.CreateVolumeBuilder(experiment.ConfigMaps, experiment.Secrets)
 
-		// Adding VoulmeMounts, according to the configMaps, and Secrets from ChaosEXperiment
-		experiment.VolumeOpts.VolumeMounts = utils.CreateVolumeMounts(experiment.ConfigMaps, experiment.Secrets)
+		// Patch Secrets to ChaosExperiment Job
+		if err = experiment.PatchSecrets(clients); err != nil {
+			log.Infof("Unable to patch Secrets, due to: %v", err)
+			break
+		}
+
+		experiment.VolumeOpts.VolumeOperations(experiment.ConfigMaps, experiment.Secrets)
 
 		// Creation of PodTemplateSpec, and Final Job
-		err = utils.DeployJob(experiment, clients)
-		if err != nil {
-			log.Infof("Error while building Job : %v", err)
+		if err = utils.BuildingAndLaunchJob(experiment, clients); err != nil {
+			log.Infof("Unable to construct chaos experiment job due to: %v", err)
 			break
 		}
 
 		time.Sleep(5 * time.Second)
 
-		err = engineDetails.WatchingJobtillCompletion(experiment, clients)
 		// Watching the Job till Completion
-		if err != nil {
+		if err = engineDetails.WatchJobForCompletion(experiment, clients); err != nil {
 			log.Infof("Unable to Watch the Job, error: %v", err)
+			break
 		}
 
-		// Will Update the result,
+		// Will Update the chaosEngine Status
+		if err = engineDetails.UpdateEngineWithResultAndDeletingJob(experiment, clients); err != nil {
+			log.Infof("Unable to Update ChaosEngine Status due to: %v", err)
+		}
+
 		// Delete / retain the Job, using the jobCleanUpPolicy
-		err = engineDetails.UpdateResultWithJobAndDeletingJob(experiment, clients)
-		if err != nil {
-			log.Infof("Unable to Update ChaosResult, error: %v", err)
+		if err = engineDetails.DeleteJobAccordingToJobCleanUpPolicy(experiment, clients); err != nil {
+			log.Infof("Unable to Delete chaosExperiment Job due to: %v", err)
 		}
 	}
 }

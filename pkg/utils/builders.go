@@ -35,8 +35,7 @@ func BuildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) *
 		WithEnvsNew(envVar)
 
 	if experiment.VolumeOpts.VolumeMounts != nil {
-		log.Info("Building Container with VolumeMounts")
-		//log.Info(volumeMounts)
+		log.Infof("Building ChaosExperiment Job with VolumeMounts from ConfigMaps, and Secrets provided.")
 		containerSpec.WithVolumeMountsNew(experiment.VolumeOpts.VolumeMounts)
 	}
 
@@ -61,29 +60,29 @@ func getEnvFromMap(env map[string]string) []corev1.EnvVar {
 	return envVar
 }
 
-// DeployJob the Job using all the details gathered
-func DeployJob(experiment *ExperimentDetails, clients ClientSets) error {
-
+// BuildingAndLaunchJob builds Job, and then launch it.
+func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) error {
 	envVar := getEnvFromMap(experiment.Env)
-	// Will build a PodSpecTemplate
-	// For creating the spec.template of the Job
-	pod := BuildPodTemplateSpec(experiment)
-
 	//Build Container to add in the Pod
 	containerForPod := BuildContainerSpec(experiment, envVar)
-	pod.WithContainerBuildersNew(containerForPod)
-
+	// Will build a PodSpecTemplate
+	pod := BuildPodTemplateSpec(experiment, containerForPod)
 	// Build JobSpec Template
 	jobspec := BuildJobSpec(pod)
-
 	job, err := experiment.BuildJob(pod, jobspec)
 	if err != nil {
-		log.Info("Unable to build Job")
+		log.Infof("Unable to build ChaosExperiment Job, due to: %v", err)
 		return err
 	}
-
 	// Creating the Job
-	_, err = clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Create(job)
+	if err = experiment.launchJob(job, clients); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (experiment *ExperimentDetails) launchJob(job *batchv1.Job, clients ClientSets) error {
+	_, err := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Create(job)
 	if err != nil {
 		log.Info("Unable to create the Job with the clientSet : ", err)
 	}
@@ -91,25 +90,19 @@ func DeployJob(experiment *ExperimentDetails, clients ClientSets) error {
 }
 
 // BuildPodTemplateSpec return a PodTempplateSpec
-func BuildPodTemplateSpec(experiment *ExperimentDetails) *podtemplatespec.Builder {
+func BuildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *container.Builder) *podtemplatespec.Builder {
 	podtemplate := podtemplatespec.NewBuilder().
 		WithName(experiment.JobName).
 		WithNamespace(experiment.Namespace).
 		WithLabels(experiment.ExpLabels).
 		WithServiceAccountName(experiment.SvcAccount).
-		WithRestartPolicy(corev1.RestartPolicyOnFailure)
+		WithRestartPolicy(corev1.RestartPolicyOnFailure).
+		WithVolumeBuilders(experiment.VolumeOpts.VolumeBuilders).
+		WithContainerBuildersNew(containerForPod)
 
-	// Add VolumeBuilders, if exists
-	if experiment.VolumeOpts.VolumeBuilders != nil {
-		log.Info("Building Pod with VolumeBuilders")
-		//log.Info(volumeBuilders)
-		podtemplate.WithVolumeBuilders(experiment.VolumeOpts.VolumeBuilders)
-	}
-
-	_, err := podtemplate.Build()
-
-	if err != nil {
-		log.Info(err)
+	if _, err := podtemplate.Build(); err != nil {
+		log.Infof("Unable to build ChaosExperiment Job, due to: %v", err)
+		return nil
 	}
 	return podtemplate
 }
