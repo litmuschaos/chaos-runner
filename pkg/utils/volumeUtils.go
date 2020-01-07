@@ -25,11 +25,9 @@ func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secr
 	var volumeMountsList []corev1.VolumeMount
 
 	volumeMountsListForConfigMaps := BuildVolumeMountsForConfigMaps(configMaps)
-
 	volumeMountsList = append(volumeMountsList, volumeMountsListForConfigMaps...)
 
 	volumeMountsListForSecrets := BuildVolumeMountsForSecrets(secrets)
-
 	volumeMountsList = append(volumeMountsList, volumeMountsListForSecrets...)
 
 	return volumeMountsList

@@ -13,8 +13,8 @@ func (expStatus *ExperimentStatus) IntialExperimentStatus(experimentDetails *Exp
 	expStatus.LastUpdateTime = metav1.Now()
 }
 
-// AwaitingExperimentStatus fills up ExperimentStatus Structure with Running Status
-func (expStatus *ExperimentStatus) AwaitingExperimentStatus(experimentDetails *ExperimentDetails) {
+// AwaitedExperimentStatus fills up ExperimentStatus Structure with Running Status
+func (expStatus *ExperimentStatus) AwaitedExperimentStatus(experimentDetails *ExperimentDetails) {
 	expStatus.Name = experimentDetails.JobName
 	expStatus.Status = "Running"
 	expStatus.Verdict = "Awaited"

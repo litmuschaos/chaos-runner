@@ -8,12 +8,11 @@ import (
 
 // PatchSecrets patches secrets in experimentDetails.
 func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets) error {
-	log.Infof("Find the Secrets in the chaosExperiments")
+	log.Infof("Validating secrets specified in the ChaosExperiment")
 	expDetails.SetSecrets(clients)
-	log.Infof("Validating Secrets")
 	err := expDetails.ValidateSecrets(clients)
 	if err != nil {
-		log.Infof("Aborting Execution")
+		log.Infof("Error Validating secrets, skipping Execution")
 		return err
 	}
 	return nil
@@ -45,14 +44,14 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 
 	for _, v := range expDetails.Secrets {
 		if v.Name == "" || v.MountPath == "" {
-			log.Infof("Incomplete Information in Secret, skipping execution of this ChaosExperiment")
-			return errors.New("Moving to next ChaosExperiment")
+			//log.Infof("Incomplete Information in Secret, skipping execution of this ChaosExperiment")
+			return errors.New("Incomplete Information in Secret, will skip execution")
 		}
 		err := clients.ValidateSecrets(v.Name, expDetails)
 		if err != nil {
 			log.Infof("Unable to list Secret: %v, in namespace: %v, skipping execution", v.Name, expDetails.Namespace)
 		} else {
-			log.Infof("Succesfully Validate Secret with Name: %v", v.Name)
+			log.Infof("Succesfully Validated Secret: %v", v.Name)
 		}
 	}
 	return nil

@@ -45,14 +45,14 @@ func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) erro
 
 	for _, v := range expDetails.ConfigMaps {
 		if v.Name == "" || v.MountPath == "" {
-			log.Infof("Incomplete Information in ConfigMap, will abort execution")
-			return errors.New("Abort Execution")
+			//log.Infof("Incomplete Information in ConfigMap, will skip execution")
+			return errors.New("Incomplete Information in ConfigMap, will skip execution")
 		}
 		err := clients.ValidateConfigMap(v.Name, expDetails)
 		if err != nil {
 			log.Infof("Unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		} else {
-			log.Infof("Succesfully Validate ConfigMap with Name: %v", v.Name)
+			log.Infof("Succesfully Validated ConfigMap: %v", v.Name)
 		}
 	}
 	return nil

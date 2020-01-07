@@ -12,6 +12,7 @@ type ExperimentStatus v1alpha1.ExperimentStatuses
 // InitialPatchEngine patches the chaosEngine with the initial ExperimentStatuses
 func (expStatus *ExperimentStatus) InitialPatchEngine(engineDetails EngineDetails, clients ClientSets) {
 
+	// TODO: check for the status before patching
 	for range engineDetails.Experiments {
 		expEngine, err := engineDetails.GetChaosEngine(clients)
 		if err != nil {

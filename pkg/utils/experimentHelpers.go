@@ -23,7 +23,7 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 	expDetails.SetDefaultEnv(clients)
 	// OverWriting the Defaults Varibles from the ChaosEngine ENV
 	expDetails.SetEnvFromEngine(engineDetails.Name, clients)
-	// Adding some addition necessary ENV's
+	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
 	expDetails.Env["CHAOSENGINE"] = engineDetails.Name
 	expDetails.Env["APP_LABEL"] = engineDetails.AppLabel
 	expDetails.Env["APP_NAMESPACE"] = engineDetails.AppNamespace

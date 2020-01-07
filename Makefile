@@ -1,7 +1,7 @@
 # Makefile for building Litmus and its tools
 # Reference Guide - https://www.gnu.org/software/make/manual/make.html
 
-REGISTRY ?= rahulchheda1997
+REGISTRY ?= litmuschaos
 IMG_NAME ?= chaos-executor
 PACKAGE_VERSION ?= ci
 IS_DOCKER_INSTALLED = $(shell which docker >> /dev/null 2>&1; echo $$?)

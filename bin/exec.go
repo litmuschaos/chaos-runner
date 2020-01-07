@@ -75,7 +75,7 @@ func main() {
 		// If not found in AppNamespace skip the further steps
 		if !isFound {
 			engineDetails.ExperimentNotFoundPatchEngine(experiment, clients)
-			log.Infof("Unable to list Chaos Experiment: %v, in Namespace: %v, skipping execution, error: %v", experiment.Name, experiment.Namespace, err)
+			log.Infof("Unable to list Chaos Experiment: %v, in Namespace: %v, skipping execution, with error: %v", experiment.Name, experiment.Namespace, err)
 			break
 		}
 
@@ -108,7 +108,7 @@ func main() {
 		}
 
 		// Will Update the chaosEngine Status
-		if err = engineDetails.UpdateEngineWithResultAndDeletingJob(experiment, clients); err != nil {
+		if err = engineDetails.UpdateEngineWithResult(experiment, clients); err != nil {
 			log.Infof("Unable to Update ChaosEngine Status due to: %v", err)
 		}
 

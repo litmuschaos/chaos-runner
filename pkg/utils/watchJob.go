@@ -75,14 +75,16 @@ func (engineDetails EngineDetails) WatchJobForCompletion(experiment *ExperimentD
 	for jobStatus == 1 {
 		//checkForjobName := checkStatusListForExp(expEngine.Status.Experiments, experiment.JobName)
 		var expStatus ExperimentStatus
-		expStatus.AwaitingExperimentStatus(experiment)
-		expStatus.PatchChaosEngineStatus(engineDetails, clients)
+		expStatus.AwaitedExperimentStatus(experiment)
+		if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
+			log.Infof("Unable to patch ChaosEngine")
+			return err
+		}
 		time.Sleep(5 * time.Second)
 		jobStatus = GetJobStatus(experiment, clients)
 
 	}
 	return nil
-
 }
 
 // GetResultName returns the resultName using the experimentName and engine Name
@@ -105,9 +107,9 @@ func (experimentDetails *ExperimentDetails) GetChaosResult(engineDetails EngineD
 	return expResult, nil
 }
 
-// UpdateEngineWithResultAndDeletingJob will update hte resutl in chaosEngine
+// UpdateEngineWithResult will update hte resutl in chaosEngine
 // And will delete job if jobCleanUpPolicy is set to "delete"
-func (engineDetails EngineDetails) UpdateEngineWithResultAndDeletingJob(experiment *ExperimentDetails, clients ClientSets) error {
+func (engineDetails EngineDetails) UpdateEngineWithResult(experiment *ExperimentDetails, clients ClientSets) error {
 	// Getting the Experiment Result Name
 	chaosResult, err := experiment.GetChaosResult(engineDetails, clients)
 	if err != nil {
@@ -116,7 +118,9 @@ func (engineDetails EngineDetails) UpdateEngineWithResultAndDeletingJob(experime
 
 	var currExpStatus ExperimentStatus
 	currExpStatus.CompletedExperimentStatus(chaosResult, experiment)
-	currExpStatus.PatchChaosEngineStatus(engineDetails, clients)
+	if err = currExpStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -132,7 +136,10 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 	if expEngine.Spec.JobCleanUpPolicy == "delete" {
 		log.Infoln("Will delete the job as jobCleanPolicy is set to : " + expEngine.Spec.JobCleanUpPolicy)
 
-		deleteJob := clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Delete(experiment.JobName, &metav1.DeleteOptions{})
+		deletePolicy := metav1.DeletePropagationForeground
+		deleteJob := clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Delete(experiment.JobName, &metav1.DeleteOptions{
+			PropagationPolicy: &deletePolicy,
+		})
 		if deleteJob != nil {
 			log.Infoln(deleteJob)
 			return deleteJob
