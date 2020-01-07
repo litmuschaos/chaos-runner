@@ -3,38 +3,44 @@ package utils
 import (
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	volume "github.com/litmuschaos/kube-helper/kubernetes/volume/v1alpha1"
-	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 )
 
 // CreateVolumeBuilder build Volume needed in execution of experiments
 func CreateVolumeBuilder(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret) []*volume.Builder {
 	volumeBuilderList := []*volume.Builder{}
-	if configMaps == nil {
-		log.Infoln("Unable to fetch chaosExperiment ConfigMaps, to create volume")
-		return nil
-	}
-	for _, v := range configMaps {
-		log.Infoln("Would create VolumeBuilder for : ", v)
-		volumeBuilder := volume.NewBuilder().
-			WithConfigMap(v.Name)
-		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
-	}
 
-	if secrets == nil {
-		log.Infoln("Unable to getch Valid chaosExperiment Secrets, to create Volumes")
-	}
+	volumeBuilderForConfigMaps := BuildVolumeBuilderForConfigMaps(configMaps)
+	volumeBuilderList = append(volumeBuilderList, volumeBuilderForConfigMaps...)
 
-	for _, v := range secrets {
-		log.Infof("Would create VolumeBuilder for Secret Name: %v", v)
-		volumeBuilder := volume.NewBuilder().WithSecret(v.Name)
-		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
-	}
+	volumeBuilderForSecrets := BuildVolumeBuilderForSecrets(secrets)
+	volumeBuilderList = append(volumeBuilderList, volumeBuilderForSecrets...)
+
 	return volumeBuilderList
 }
 
 // CreateVolumeMounts mounts Volume needed in execution of experiments
 func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret) []corev1.VolumeMount {
+
+	var volumeMountsList []corev1.VolumeMount
+
+	volumeMountsListForConfigMaps := BuildVolumeMountsForConfigMaps(configMaps)
+	volumeMountsList = append(volumeMountsList, volumeMountsListForConfigMaps...)
+
+	volumeMountsListForSecrets := BuildVolumeMountsForSecrets(secrets)
+	volumeMountsList = append(volumeMountsList, volumeMountsListForSecrets...)
+
+	return volumeMountsList
+}
+
+// VolumeOperations filles up VolumeOpts strucuture
+func (volumeOpts *VolumeOpts) VolumeOperations(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret) {
+	volumeOpts.VolumeBuilders = CreateVolumeBuilder(configMaps, secrets)
+	volumeOpts.VolumeMounts = CreateVolumeMounts(configMaps, secrets)
+}
+
+// BuildVolumeMountsForConfigMaps builds VolumeMounts for ConfigMaps
+func BuildVolumeMountsForConfigMaps(configMaps []v1alpha1.ConfigMap) []corev1.VolumeMount {
 	var volumeMountsList []corev1.VolumeMount
 	for _, v := range configMaps {
 		var volumeMount corev1.VolumeMount
@@ -42,13 +48,45 @@ func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secr
 		volumeMount.MountPath = v.MountPath
 		volumeMountsList = append(volumeMountsList, volumeMount)
 	}
+	return volumeMountsList
+}
 
+// BuildVolumeMountsForSecrets builds VolumeMounts for Secrets
+func BuildVolumeMountsForSecrets(secrets []v1alpha1.Secret) []corev1.VolumeMount {
+	var volumeMountsList []corev1.VolumeMount
 	for _, v := range secrets {
 		var volumeMount corev1.VolumeMount
 		volumeMount.Name = v.Name
 		volumeMount.MountPath = v.MountPath
 		volumeMountsList = append(volumeMountsList, volumeMount)
 	}
-
 	return volumeMountsList
+}
+
+// BuildVolumeBuilderForConfigMaps builds VolumeBuilders for ConfigMaps
+func BuildVolumeBuilderForConfigMaps(configMaps []v1alpha1.ConfigMap) []*volume.Builder {
+	volumeBuilderList := []*volume.Builder{}
+	if configMaps == nil {
+		return nil
+	}
+	for _, v := range configMaps {
+		volumeBuilder := volume.NewBuilder().
+			WithConfigMap(v.Name)
+		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
+	}
+	return volumeBuilderList
+}
+
+// BuildVolumeBuilderForSecrets builds VolumeBuilders for Secrets
+func BuildVolumeBuilderForSecrets(secrets []v1alpha1.Secret) []*volume.Builder {
+	volumeBuilderList := []*volume.Builder{}
+	if secrets == nil {
+		return nil
+	}
+	for _, v := range secrets {
+		volumeBuilder := volume.NewBuilder().
+			WithSecret(v.Name)
+		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
+	}
+	return volumeBuilderList
 }

@@ -3,32 +3,26 @@ package utils
 import (
 	log "github.com/sirupsen/logrus"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
+// ExperimentStatus is wrapper for v1alpha1.ExperimentStatuses
+type ExperimentStatus v1alpha1.ExperimentStatuses
+
 // InitialPatchEngine patches the chaosEngine with the initial ExperimentStatuses
-func InitialPatchEngine(engineDetails EngineDetails, clients ClientSets) {
+func (expStatus *ExperimentStatus) InitialPatchEngine(engineDetails EngineDetails, clients ClientSets) {
 
-	for i := range engineDetails.Experiments {
-		log.Info("Initial Patch for Experiment : ", engineDetails.Experiments[i])
-		expName := engineDetails.Experiments[i]
-		var currExpStatus v1alpha1.ExperimentStatuses
-		currExpStatus.Name = expName
-		currExpStatus.Status = "Waiting"
-		currExpStatus.Verdict = "Wait for Completion"
-		currExpStatus.LastUpdateTime = metav1.Now()
-
-		expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
+	// TODO: check for the status before patching
+	for range engineDetails.Experiments {
+		expEngine, err := engineDetails.GetChaosEngine(clients)
 		if err != nil {
-			log.Infoln("Could'nt Get the Engine : ", err)
+			log.Infof("Couldn't Get ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine", err)
 		}
-		expEngine.Status.Experiments = append(expEngine.Status.Experiments, currExpStatus)
-		log.Info("Patching Engine")
+		expEngine.Status.Experiments = append(expEngine.Status.Experiments, v1alpha1.ExperimentStatuses(*expStatus))
+		//log.Info("Patching Engine")
 		_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
 		if updateErr != nil {
-			log.Infoln("Unable to Patch Engine, Update Error : ", updateErr)
+			log.Infof("Couldn't Update ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine", updateErr)
 		}
 	}
 }

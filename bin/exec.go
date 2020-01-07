@@ -10,7 +10,6 @@ import (
 
 	"github.com/litmuschaos/chaos-executor/pkg/utils"
 	"github.com/litmuschaos/chaos-executor/pkg/utils/analytics"
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
 // getKubeConfig setup the config for access cluster resource
@@ -31,30 +30,17 @@ func getKubeConfig() (*rest.Config, error) {
 	return config, err
 }
 
-// checkStatusListForExp will loook for the Experiment in AppNamespace
-func checkStatusListForExp(status []v1alpha1.ExperimentStatuses, jobName string) int {
-	for i := range status {
-		if status[i].Name == jobName {
-			return i
-		}
-	}
-	return -1
-}
-
 func main() {
 
 	engineDetails := utils.EngineDetails{}
 	clients := utils.ClientSets{}
-	// Getting the config
+	// Getting the kubeconfig
 	config, err := getKubeConfig()
 	if err != nil {
 		log.Fatalf("Error in fetching the config, error : %v", err)
 	}
-
 	// clientSet creation for further use.
-
-	err = clients.GenerateClientSets(config)
-	if err != nil {
+	if err = clients.GenerateClientSets(config); err != nil {
 		log.Fatalf("Unable to create ClientSets")
 	}
 
@@ -71,109 +57,64 @@ func main() {
 		}
 
 		experiment := utils.NewExperimentDetails()
-		experiment.Name = engineDetails.Experiments[i]
-		experiment.Namespace = engineDetails.AppNamespace
-		experiment.SvcAccount = engineDetails.SvcAccount
-		log.Infof("Printing experiment.Name: %v, experiment.Namespace : %v", experiment.Name, experiment.Namespace)
+		experiment.SetValueFromChaosEngine(engineDetails, i)
+		experiment.SetValueFromChaosExperiment(clients)
+		experiment.SetENV(engineDetails, clients)
 
-		log.Infoln("Going with the experiment Name: " + engineDetails.Experiments[i])
+		experimentStatus := utils.ExperimentStatus{}
+		experimentStatus.IntialExperimentStatus(experiment)
+		experimentStatus.InitialPatchEngine(engineDetails, clients)
+
+		log.Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
 
 		// isFound will return the status of experiment in that namespace
 		// 1 -> found, 0 -> not-found
-		isFound := experiment.CheckExistence(clients)
+		isFound, err := experiment.CheckExistence(clients)
 		log.Infoln("Experiment Found Status : ", isFound)
 
 		// If not found in AppNamespace skip the further steps
 		if !isFound {
-			log.Infoln("Can't Find Experiment Name : "+engineDetails.Experiments[i], "In Namespace : "+engineDetails.AppNamespace)
-			log.Infoln("Not Executing the Experiment : " + engineDetails.Experiments[i])
+			engineDetails.ExperimentNotFoundPatchEngine(experiment, clients)
+			log.Infof("Unable to list Chaos Experiment: %v, in Namespace: %v, skipping execution, with error: %v", experiment.Name, experiment.Namespace, err)
 			break
 		}
 
-		log.Infoln("Getting the Default ENV Variables")
-
-		// Get the Default ENV's from ChaosExperiment
-		experiment.SetDefaultEnv(clients)
-
-		log.Info("Printing the Default Variables", experiment.Env)
-
-		// Get the ConfigMaps for patching them in the job creation
-		log.Infoln("Find the configMaps in the chaosExperiments")
-
-		experiment.SetConfigMaps(clients)
-
-		err := experiment.ValidateConfigMaps(clients)
-		if err != nil {
-			log.Infof("Aborting Execution")
-			return
+		// Patch ConfigMaps to ChaosExperiment Job
+		if err := experiment.PatchConfigMaps(clients); err != nil {
+			log.Infof("Unable to patch ConfigMaps, due to: %v", err)
+			break
 		}
 
-		experiment.SetSecrets(clients)
-		err = experiment.ValidateSecrets(clients)
-		if err != nil {
-			log.Infof("Aborting Execution")
-			return
+		// Patch Secrets to ChaosExperiment Job
+		if err = experiment.PatchSecrets(clients); err != nil {
+			log.Infof("Unable to patch Secrets, due to: %v", err)
+			break
 		}
 
-		log.Infof("Validated ConfigMaps: %v", experiment.ConfigMaps)
-		log.Infof("Validated Secrets: %v", experiment.Secrets)
-
-		// Adding VolumeBuilders, according to the ConfigMaps, and Secrets from ChaosEXperiment
-		experiment.VolumeOpts.VolumeBuilders = utils.CreateVolumeBuilder(experiment.ConfigMaps, experiment.Secrets)
-
-		// Adding VoulmeMounts, according to the configMaps, and Secrets from ChaosEXperiment
-		experiment.VolumeOpts.VolumeMounts = utils.CreateVolumeMounts(experiment.ConfigMaps, experiment.Secrets)
-
-		// OverWriting the Defaults Varibles from the ChaosEngine ENV
-		log.Infoln("Patching some required ENV's")
-		experiment.SetEnvFromEngine(engineDetails.Name, clients)
-
-		// Adding some addition necessary ENV's
-		experiment.Env["CHAOSENGINE"] = engineDetails.Name
-		experiment.Env["APP_LABEL"] = engineDetails.AppLabel
-		experiment.Env["APP_NAMESPACE"] = engineDetails.AppNamespace
-		experiment.Env["APP_KIND"] = engineDetails.AppKind
-
-		log.Info("Printing the Over-ridden Variables")
-		log.Infoln(experiment.Env)
-
-		log.Infoln("Getting all the details of the experiment Name : " + engineDetails.Experiments[i])
-
-		// Fetching more details from the ChaosExperiment needed for execution
-		experiment.SetImage(clients)
-		experiment.SetArgs(clients)
-		experiment.SetLabels(clients)
-		log.Infof("Variables for ChaosJob: Experiment Labels: %v, Experiment Image: %v, experiment.Args: %v", experiment.ExpLabels, experiment.ExpImage, experiment.ExpArgs)
-
-		// Generation of Random String for appending it into Job
-		randomString := utils.RandomString()
-
-		// Setting the JobName in Experiment Realted struct
-		experiment.JobName = engineDetails.Experiments[i] + "-" + randomString
-
-		log.Infof("JobName for this Experiment : %v", experiment.JobName)
+		experiment.VolumeOpts.VolumeOperations(experiment.ConfigMaps, experiment.Secrets)
 
 		// Creation of PodTemplateSpec, and Final Job
-		err = utils.DeployJob(experiment, clients)
-		if err != nil {
-			log.Infof("Error while building Job : %v", err)
+		if err = utils.BuildingAndLaunchJob(experiment, clients); err != nil {
+			log.Infof("Unable to construct chaos experiment job due to: %v", err)
+			break
 		}
 
 		time.Sleep(5 * time.Second)
-		// Getting the Experiment Result Name
-		resultName := utils.GetResultName(engineDetails, i)
 
 		// Watching the Job till Completion
-		err = utils.WatchingJobtillCompletion(experiment, engineDetails, clients)
-		if err != nil {
+		if err = engineDetails.WatchJobForCompletion(experiment, clients); err != nil {
 			log.Infof("Unable to Watch the Job, error: %v", err)
+			break
 		}
 
-		// Will Update the result,
+		// Will Update the chaosEngine Status
+		if err = engineDetails.UpdateEngineWithResult(experiment, clients); err != nil {
+			log.Infof("Unable to Update ChaosEngine Status due to: %v", err)
+		}
+
 		// Delete / retain the Job, using the jobCleanUpPolicy
-		err = utils.UpdateResultWithJobAndDeletingJob(engineDetails, resultName, experiment, clients)
-		if err != nil {
-			log.Infof("Unable to Update ChaosResult, error: %v", err)
+		if err = engineDetails.DeleteJobAccordingToJobCleanUpPolicy(experiment, clients); err != nil {
+			log.Infof("Unable to Delete chaosExperiment Job due to: %v", err)
 		}
 	}
 }
