@@ -83,7 +83,7 @@ jobs:
       - checkout 
       - run: | 
           docker load -i /tmp/workspace/image.tar
-          ~/go/src/github.com/litmuschaos/chaos-executor/builds/push --type=release
+          ~/go/src/github.com/litmuschaos/chaos-executor/build/push --type=release
 
 workflows:
   version: 2
