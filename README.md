@@ -60,4 +60,4 @@ spec:
 
 ## Further Improvements 
 
-- The Go Chaos Runner is in alpha stage with further improvements coming soon!! 
+- The Go Chaos Runner is in beta stage with further improvements coming soon!! 
