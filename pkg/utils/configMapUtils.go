@@ -2,17 +2,17 @@ package utils
 
 import (
 	"errors"
-	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 //PatchConfigMaps patches configmaps in experimentDetails struct.
 func (expDetails *ExperimentDetails) PatchConfigMaps(clients ClientSets) error {
 	expDetails.SetConfigMaps(clients)
-	log.Infof("Validating configmaps specified in the ChaosExperiment")
+	klog.V(1).Infof("Validating configmaps specified in the ChaosExperiment")
 	err := expDetails.ValidateConfigMaps(clients)
 	if err != nil {
-		log.Infof("Error Validating configMaps, skipping Execution")
+		klog.V(1).Infof("Error Validating configMaps, skipping Execution")
 		return err
 	}
 	return nil
@@ -34,7 +34,7 @@ func (expDetails *ExperimentDetails) SetConfigMaps(clients ClientSets) {
 
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infof("Unable to get ChaosEXperiment Resource, wouldn't not be able to patch ConfigMaps")
+		klog.V(1).Infof("Unable to get ChaosEXperiment Resource, wouldn't not be able to patch ConfigMaps")
 	}
 	configMaps := chaosExperimentObj.Spec.Definition.ConfigMaps
 	expDetails.ConfigMaps = configMaps
@@ -50,9 +50,9 @@ func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) erro
 		}
 		err := clients.ValidateConfigMap(v.Name, expDetails)
 		if err != nil {
-			log.Infof("Unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
+			klog.V(1).Infof("Unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		} else {
-			log.Infof("Succesfully Validated ConfigMap: %v", v.Name)
+			klog.V(1).Infof("Succesfully Validated ConfigMap: %v", v.Name)
 		}
 	}
 	return nil

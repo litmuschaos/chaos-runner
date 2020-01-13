@@ -1,12 +1,15 @@
 package utils
 
 import (
+	"k8s.io/klog"
 	"os"
 	"strings"
 )
 
 // GetOsEnv adds the ENV's to EngineDetails
 func GetOsEnv(engineDetails *EngineDetails) {
+
+	klog.V(2).Infof("Geting OS ENV's")
 	experimentList := os.Getenv("EXPERIMENT_LIST")
 	engineDetails.Name = os.Getenv("CHAOSENGINE")
 	engineDetails.AppLabel = os.Getenv("APP_LABEL")

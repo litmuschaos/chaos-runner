@@ -1,7 +1,7 @@
 package utils
 
 import (
-	log "github.com/sirupsen/logrus"
+	"k8s.io/klog"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -35,14 +35,15 @@ func BuildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) *
 		WithEnvsNew(envVar)
 
 	if experiment.VolumeOpts.VolumeMounts != nil {
-		log.Infof("Building ChaosExperiment Job with VolumeMounts from ConfigMaps, and Secrets provided.")
+		klog.V(2).Infof("Building ChaosExperiment Job with VolumeMounts from ConfigMaps, and Secrets provided.")
 		containerSpec.WithVolumeMountsNew(experiment.VolumeOpts.VolumeMounts)
 	}
 
 	_, err := containerSpec.Build()
 
 	if err != nil {
-		log.Info(err)
+		klog.V(1).Infof("Unable to build containerSpec for chaosJob creation")
+		klog.V(2).Infof("Unable to build container Spec, due to error: %v", err)
 	}
 
 	return containerSpec
@@ -71,7 +72,8 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 	jobspec := BuildJobSpec(pod)
 	job, err := experiment.BuildJob(pod, jobspec)
 	if err != nil {
-		log.Infof("Unable to build ChaosExperiment Job, due to: %v", err)
+		klog.V(1).Infof("Unable to build ChaosExperiment Job")
+		klog.V(2).Infof("Unable to build ChaosExperiment Job, due to error: %v", err)
 		return err
 	}
 	// Creating the Job
@@ -85,7 +87,8 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 func (experiment *ExperimentDetails) launchJob(job *batchv1.Job, clients ClientSets) error {
 	_, err := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Create(job)
 	if err != nil {
-		log.Info("Unable to create the Job with the clientSet : ", err)
+		klog.V(1).Infof("Unable to create Job with provided clientSet")
+		klog.V(2).Infof("Unable to create the Job with the clientSet: %v", err)
 	}
 	return nil
 }
@@ -102,7 +105,8 @@ func BuildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		WithContainerBuildersNew(containerForPod)
 
 	if _, err := podtemplate.Build(); err != nil {
-		log.Infof("Unable to build ChaosExperiment Job, due to: %v", err)
+		klog.V(1).Infof("Unable to create pod Template Spec for chaosJob")
+		klog.V(2).Infof("Unable to create the pod Template Spec, due to error: %v", err)
 		return nil
 	}
 	return podtemplate
@@ -114,7 +118,8 @@ func BuildJobSpec(pod *podtemplatespec.Builder) *jobspec.Builder {
 		WithPodTemplateSpecBuilder(pod)
 	_, err := jobSpecObj.Build()
 	if err != nil {
-		log.Errorln(err)
+		klog.V(1).Infof("Unable to create Job Spec for chaosJob")
+		klog.V(2).Infof("Unable to create Job Spec, due to error: %v", err)
 	}
 	return jobSpecObj
 }
@@ -129,7 +134,8 @@ func (experiment *ExperimentDetails) BuildJob(pod *podtemplatespec.Builder, jobs
 		WithLabels(experiment.ExpLabels).
 		Build()
 	if err != nil {
-		log.Errorln(err)
+		klog.V(1).Infof("Unable to build Job for chaosJob")
+		klog.V(2).Infof("Unable to build Job, due to error: %v", err)
 		return jobObj, err
 	}
 	return jobObj, nil
