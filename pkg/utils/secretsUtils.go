@@ -8,11 +8,11 @@ import (
 
 // PatchSecrets patches secrets in experimentDetails.
 func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets) error {
-	klog.V(1).Infof("Validating secrets specified in the ChaosExperiment")
+	klog.V(0).Infof("Validating secrets specified in the ChaosExperiment")
 	expDetails.SetSecrets(clients)
 	err := expDetails.ValidateSecrets(clients)
 	if err != nil {
-		klog.V(1).Infof("Error Validating secrets, skipping Execution")
+		klog.V(0).Infof("Error Validating secrets, skipping Execution")
 		return err
 	}
 	return nil
@@ -33,7 +33,7 @@ func (expDetails *ExperimentDetails) SetSecrets(clients ClientSets) {
 
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		klog.V(1).Infof("Unable to get ChaosEXperiment Resource, wouldn't not be able to patch ConfigMaps")
+		klog.V(0).Infof("Unable to get ChaosEXperiment Resource, wouldn't not be able to patch ConfigMaps")
 	}
 	secrets := chaosExperimentObj.Spec.Definition.Secrets
 	expDetails.Secrets = secrets
@@ -49,9 +49,9 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 		}
 		err := clients.ValidateSecrets(v.Name, expDetails)
 		if err != nil {
-			klog.V(1).Infof("Unable to list Secret: %v, in namespace: %v, skipping execution", v.Name, expDetails.Namespace)
+			klog.V(0).Infof("Unable to list Secret: %v, in namespace: %v, skipping execution", v.Name, expDetails.Namespace)
 		} else {
-			klog.V(1).Infof("Succesfully Validated Secret: %v", v.Name)
+			klog.V(0).Infof("Succesfully Validated Secret: %v", v.Name)
 		}
 	}
 	return nil

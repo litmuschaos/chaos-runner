@@ -9,11 +9,11 @@ func (engineDetails EngineDetails) ExperimentNotFoundPatchEngine(experiment *Exp
 
 	var expStatus ExperimentStatus
 
-	klog.V(2).Infof("Creating Not Found Experiment Status")
+	klog.V(1).Infof("Creating Not Found Experiment Status")
 	expStatus.NotFoundExperimentStatus(experiment)
 
 	if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
-		klog.V(1).Infof("Unable to Patch ChaosEngine Status")
-		klog.V(2).Infof("Unable to Patch ChaosEngine Status, error: %v", err)
+		klog.V(0).Infof("Unable to Patch ChaosEngine Status")
+		klog.V(1).Infof("Unable to Patch ChaosEngine Status, error: %v", err)
 	}
 }

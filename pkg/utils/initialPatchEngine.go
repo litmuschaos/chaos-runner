@@ -15,18 +15,18 @@ func (expStatus *ExperimentStatus) InitialPatchEngine(engineDetails EngineDetail
 	// TODO: check for the status before patching
 	for range engineDetails.Experiments {
 
-		klog.V(2).Infof("getting ChaosEngine for Patching")
+		klog.V(1).Infof("getting ChaosEngine for Patching")
 		expEngine, err := engineDetails.GetChaosEngine(clients)
 		if err != nil {
-			klog.V(1).Infof("Unable to get ChaosEngine for Intial Patching")
-			klog.V(2).Infof("Couldn't Get ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine, due to error: &v", engineDetails.Name, err)
+			klog.V(0).Infof("Unable to get ChaosEngine for Intial Patching")
+			klog.V(1).Infof("Couldn't Get ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine, due to error: &v", engineDetails.Name, err)
 		}
 		expEngine.Status.Experiments = append(expEngine.Status.Experiments, v1alpha1.ExperimentStatuses(*expStatus))
 		//log.Info("Patching Engine")
 		_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
 		if updateErr != nil {
-			klog.V(1).Infof("Unable to update ChaosEngine for Intial Patching")
-			klog.V(2).Infof("Couldn't Update ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine", updateErr)
+			klog.V(0).Infof("Unable to update ChaosEngine for Intial Patching")
+			klog.V(1).Infof("Couldn't Update ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine", updateErr)
 		}
 	}
 }

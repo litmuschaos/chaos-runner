@@ -26,14 +26,14 @@ func GetJobStatus(experimentDetails *ExperimentDetails, clients ClientSets) int3
 
 	getJob, err := clients.KubeClient.BatchV1().Jobs(experimentDetails.Namespace).Get(experimentDetails.JobName, metav1.GetOptions{})
 	if err != nil {
-		klog.V(1).Infof("Unable to get chaosJob for watching status")
-		klog.V(2).Infof("Unable to get chaosJob, due to error: %v", err)
+		klog.V(0).Infof("Unable to get chaosJob for watching status")
+		klog.V(1).Infof("Unable to get chaosJob, due to error: %v", err)
 		//TODO: check for jobStatus should not return -1 directly, look for best practices.
 		return -1
 	}
 	//TODO:check the container of the Job, rather than going with the JobStatus.
 	jobStatus := getJob.Status.Active
-	klog.V(2).Infof("Watching Job: %v", experimentDetails.JobName)
+	klog.V(1).Infof("Watching Job: %v", experimentDetails.JobName)
 	return jobStatus
 }
 
@@ -41,8 +41,8 @@ func GetJobStatus(experimentDetails *ExperimentDetails, clients ClientSets) int3
 func (engineDetails EngineDetails) GetChaosEngine(clients ClientSets) (*v1alpha1.ChaosEngine, error) {
 	expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		klog.V(1).Infof("Unable to get ChaosEngine for chaosJob status patching")
-		klog.V(2).Infof("Couldn't Get ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine, due to error: %v", engineDetails.Name, err)
+		klog.V(0).Infof("Unable to get ChaosEngine for chaosJob status patching")
+		klog.V(1).Infof("Couldn't Get ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine, due to error: %v", engineDetails.Name, err)
 		return nil, err
 	}
 	return expEngine, nil
@@ -79,8 +79,8 @@ func (engineDetails EngineDetails) WatchJobForCompletion(experiment *ExperimentD
 		var expStatus ExperimentStatus
 		expStatus.AwaitedExperimentStatus(experiment)
 		if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
-			klog.V(1).Infof("Unable to patch ChaosEngine for chaosJob status patching")
-			klog.V(2).Infof("Couldn't Get ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine, due to error: %v", engineDetails.Name, err)
+			klog.V(0).Infof("Unable to patch ChaosEngine for chaosJob status patching")
+			klog.V(1).Infof("Couldn't Get ChaosEngine: %v, wouldn't be able to update Status in ChaosEngine, due to error: %v", engineDetails.Name, err)
 			return err
 		}
 		time.Sleep(5 * time.Second)
@@ -93,7 +93,7 @@ func (engineDetails EngineDetails) WatchJobForCompletion(experiment *ExperimentD
 // GetResultName returns the resultName using the experimentName and engine Name
 func GetResultName(engineName string, experimentName string) string {
 	resultName := engineName + "-" + experimentName
-	klog.V(2).Infof("Chaos Result for getting the verdict is: %v", resultName)
+	klog.V(1).Infof("Chaos Result for getting the verdict is: %v", resultName)
 	return resultName
 }
 
@@ -103,8 +103,8 @@ func (experimentDetails *ExperimentDetails) GetChaosResult(engineDetails EngineD
 	resultName := GetResultName(engineDetails.Name, experimentDetails.Name)
 	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.AppNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
-		klog.V(1).Infof("Unable to get ChaosResult for getting chaosJob verdict")
-		klog.V(2).Infof("Couldn't Get ChaosResult: %v, wouldn't be able to update Status in ChaosEngine, due to error: %v", resultName, err)
+		klog.V(0).Infof("Unable to get ChaosResult for getting chaosJob verdict")
+		klog.V(1).Infof("Couldn't Get ChaosResult: %v, wouldn't be able to update Status in ChaosEngine, due to error: %v", resultName, err)
 		return nil, err
 	}
 	return expResult, nil
@@ -137,14 +137,14 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 	}
 
 	if expEngine.Spec.JobCleanUpPolicy == "delete" {
-		klog.V(1).Infof("Will delete the job as jobCleanPolicy is set to: %v", expEngine.Spec.JobCleanUpPolicy)
+		klog.V(0).Infof("Will delete the job as jobCleanPolicy is set to: %v", expEngine.Spec.JobCleanUpPolicy)
 
 		deletePolicy := metav1.DeletePropagationForeground
 		deleteJob := clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Delete(experiment.JobName, &metav1.DeleteOptions{
 			PropagationPolicy: &deletePolicy,
 		})
 		if deleteJob != nil {
-			klog.V(1).Infof("Unable to delete chaosJob: %v", experiment.JobName)
+			klog.V(0).Infof("Unable to delete chaosJob: %v", experiment.JobName)
 			return deleteJob
 		}
 	}
