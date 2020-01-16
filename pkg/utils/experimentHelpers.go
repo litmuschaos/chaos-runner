@@ -81,7 +81,7 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 	envList := engineSpec.Spec.Experiments
 	for i := range envList {
 		if envList[i].Name == expDetails.Name {
-			keyValue := envList[i].Spec.Components
+			keyValue := envList[i].Spec.Components.ENV
 			for j := range keyValue {
 				expDetails.Env[keyValue[j].Name] = keyValue[j].Value
 			}

@@ -130,12 +130,12 @@
   revision = "14b04e0594ef6a9fd943363b135656f0ec8c9d0e"
 
 [[projects]]
-  digest = "1:beb5b4f42a25056f0aa291b5eadd21e2f2903a05d15dfe7caf7eaee7e12fa972"
+  digest = "1:7cd2924a44ecf80a319cfa2378529fabd348d011b739fb4eccc565f65e3296c4"
   name = "github.com/json-iterator/go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "03217c3e97663914aec3faafde50d081f197a0a2"
-  version = "v1.1.8"
+  revision = "acfec88f7a0d5140ace3dcdbee10184e3684a9e1"
+  version = "v1.1.9"
 
 [[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
@@ -147,7 +147,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d749e6135d365e52dcd8f5abba397a71837039f3f64f837a24626ec1efb3beb2"
+  digest = "1:8167cd911eb8ee5676ff7cc266c153c4a38d23608d385bb10a2c7b085c659c4c"
   name = "github.com/litmuschaos/chaos-operator"
   packages = [
     "pkg/apis/litmuschaos/v1alpha1",
@@ -156,11 +156,11 @@
     "pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1"
   ]
   pruneopts = "UT"
-  revision = "256ec605bf91f6e251cf5301363251f82c60d3c0"
+  revision = "804c3b4d5c6a55ac10690d9aeae749388836ce7a"
 
 [[projects]]
   branch = "master"
-  digest = "1:ce2d3165cb048c71ecbaa2688cd2cc8b4743b2286820f96a3c847910acf7e6cc"
+  digest = "1:adf7ba4405dfb66cd289c0c4bddb7a9bc9ea93890d4486ba0715fce0d03e7dd1"
   name = "github.com/litmuschaos/kube-helper"
   packages = [
     "kubernetes/container",
@@ -170,7 +170,7 @@
     "kubernetes/volume/v1alpha1"
   ]
   pruneopts = "UT"
-  revision = "ca5e1d6ff7c71f7bc4092bc88b377658844966c7"
+  revision = "102614ee4ecd3d08023980d32127c4ff5d7df415"
 
 [[projects]]
   digest = "1:927762c6729b4e72957ba3310e485ed09cf8451c5a637a52fd016a9fe09e7936"
@@ -218,15 +218,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bbe51412d9915d64ffaa96b51d409e070665efc5194fcf145c4a27d4133107a4"
+  digest = "1:c8b0363634b7f813bd07d829fa98af420d99c68d9e88077a7c86fad8e6e31e27"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "e9b2fee46413994441b28dfca259d911d963dfed"
+  revision = "6d4e4cb37c7d6416dfea8472e751c7b6615267a6"
 
 [[projects]]
   branch = "master"
-  digest = "1:e4a92f168e339bc2e697401a883588748fa58e0dd3ae14160f9bd890ca37382d"
+  digest = "1:96c0696233ec0e7c9f472c53c8fa3d2c50f476341d24f101236367d80ef0ca19"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -237,29 +237,29 @@
     "idna"
   ]
   pruneopts = "UT"
-  revision = "c0dbc17a35534bf2e581d7a942408dc936316da4"
+  revision = "6afb5195e5aab057fda82e27171243402346b0ad"
 
 [[projects]]
   branch = "master"
-  digest = "1:55d36eb35766a3f105fa36cfb2faf053cc33c019108a6adee799c4e7d59d62b2"
+  digest = "1:911b45b658f5fab1a26259e2fd1085ab296f9d3e46117311d25f8dae51efe720"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal"
   ]
   pruneopts = "UT"
-  revision = "858c2ad4c8b6c5d10852cb89079f6ca1c7309787"
+  revision = "bf48bf16ab8d622ce64ec6ce98d2c98f916b6303"
 
 [[projects]]
   branch = "master"
-  digest = "1:472d3f5adc36e1c0b9120bc3830d692a090134aa5461335f39caabd0fdb7feac"
+  digest = "1:f7b9c8ac6e14581494d8f20a044878b1d23aac99e49bc4f1ac831a973fb9ccfd"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows"
   ]
   pruneopts = "UT"
-  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
+  revision = "b77594299b429d05028403d72b68172959c7dad5"
 
 [[projects]]
   digest = "1:66a2f252a58b4fbbad0e4e180e1d85a83c222b6bce09c3dcdef3dc87c72eda7c"
@@ -505,7 +505,7 @@
   name = "k8s.io/utils"
   packages = ["integer"]
   pruneopts = "UT"
-  revision = "6ca3b61696b65b0e81f1a39b4937fc2d2994ed6a"
+  revision = "94aeca20bf0991bf33922a5938174b9147ab8ca7"
 
 [[projects]]
   digest = "1:68cd93696d4de06936c94bf0c510802140c2d3c956b557f3d001430d58cf676c"

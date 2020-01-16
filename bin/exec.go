@@ -80,13 +80,13 @@ func main() {
 		}
 
 		// Patch ConfigMaps to ChaosExperiment Job
-		if err := experiment.PatchConfigMaps(clients); err != nil {
+		if err := experiment.PatchConfigMaps(clients, engineDetails.Name); err != nil {
 			log.Infof("Unable to patch ConfigMaps, due to: %v", err)
 			break
 		}
 
 		// Patch Secrets to ChaosExperiment Job
-		if err = experiment.PatchSecrets(clients); err != nil {
+		if err = experiment.PatchSecrets(clients, engineDetails.Name); err != nil {
 			log.Infof("Unable to patch Secrets, due to: %v", err)
 			break
 		}
