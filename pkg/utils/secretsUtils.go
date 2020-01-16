@@ -2,14 +2,15 @@ package utils
 
 import (
 	"errors"
+
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // PatchSecrets patches secrets in experimentDetails.
-func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets) error {
-	log.Infof("Validating secrets specified in the ChaosExperiment")
-	expDetails.SetSecrets(clients)
+func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets, engineName string) error {
+	expDetails.SetSecrets(clients, engineName)
+	log.Infof("Validating secrets specified in the ChaosExperiment & chaosEngine")
 	err := expDetails.ValidateSecrets(clients)
 	if err != nil {
 		log.Infof("Error Validating secrets, skipping Execution")
@@ -29,14 +30,40 @@ func (clientSets ClientSets) ValidateSecrets(secretName string, experiment *Expe
 }
 
 // SetSecrets sets the value of secrets in Experiment Structure
-func (expDetails *ExperimentDetails) SetSecrets(clients ClientSets) {
+func (expDetails *ExperimentDetails) SetSecrets(clients ClientSets, engineName string) {
 
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infof("Unable to get ChaosEXperiment Resource, wouldn't not be able to patch ConfigMaps")
+		log.Infof("Unable to get ChaosEXperiment Resource, wouldn't not be able to patch Secrets")
 	}
-	secrets := chaosExperimentObj.Spec.Definition.Secrets
-	expDetails.Secrets = secrets
+	secretsExperiment := chaosExperimentObj.Spec.Definition.Secrets
+
+	chaosEngineObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
+	if err != nil {
+		log.Infof("Unable to get ChaosEngine Resource, wouldn't not be able to patch Secrets")
+	}
+	expList := chaosEngineObj.Spec.Experiments
+	for i := range expList {
+		if expList[i].Name == expDetails.Name {
+			secretsEngine := expList[i].Spec.Components.Secrets
+			for j := range secretsEngine {
+				flag := false
+				for k := range secretsExperiment {
+					if secretsEngine[j].Name == secretsExperiment[k].Name {
+						flag = true
+						if secretsEngine[j].MountPath != secretsExperiment[k].MountPath {
+							secretsExperiment[k].MountPath = secretsEngine[j].MountPath
+						}
+					}
+				}
+				if !flag {
+					secretsExperiment = append(secretsExperiment, secretsEngine[j])
+				}
+			}
+		}
+	}
+
+	expDetails.Secrets = secretsExperiment
 }
 
 // ValidateSecrets checks for secrets in the Applicaation Namespace
