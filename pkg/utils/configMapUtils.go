@@ -35,13 +35,13 @@ func (expDetails *ExperimentDetails) SetConfigMaps(clients ClientSets, engineNam
 
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infof("Unable to get ChaosExperiment Resource, wouldn't not be able to patch ConfigMaps")
+		log.Infof("Unable to get ChaosExperiment Resource, would not be able to patch ConfigMaps")
 	}
 	configMapsExperiment := chaosExperimentObj.Spec.Definition.ConfigMaps
 
 	chaosEngineObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
 	if err != nil {
-		log.Infof("Unable to get ChaosEngine Resource, wouldn't not be able to patch ConfigMaps")
+		log.Infof("Unable to patch ConfigMaps, error: %v", err)
 	}
 	expList := chaosEngineObj.Spec.Experiments
 	for i := range expList {
