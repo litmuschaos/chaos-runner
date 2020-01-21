@@ -13,14 +13,12 @@ import (
 func (expDetails *ExperimentDetails) PatchConfigMaps(clients ClientSets, engineDetails EngineDetails) error {
 	err := expDetails.SetConfigMaps(clients, engineDetails)
 	if err != nil {
-		log.Infof("Unable to set configmaps, skipping Execution")
 		return err
 	}
 
 	log.Infof("Validating configmaps specified in the ChaosExperiment & ChaosEngine")
 	err = expDetails.ValidateConfigMaps(clients)
 	if err != nil {
-		log.Infof("Error Validating configMaps, skipping Execution")
 		return err
 	}
 	return nil
@@ -48,22 +46,8 @@ func (expDetails *ExperimentDetails) SetConfigMaps(clients ClientSets, engineDet
 	if err != nil {
 		return err
 	}
-
-	for i := range engineConfigMaps {
-		flag := false
-		for j := range experimentConfigMaps {
-			if engineConfigMaps[i].Name == experimentConfigMaps[j].Name {
-				flag = true
-				if engineConfigMaps[i].MountPath != experimentConfigMaps[j].MountPath {
-					experimentConfigMaps[j].MountPath = engineConfigMaps[i].MountPath
-				}
-			}
-		}
-		if !flag {
-			experimentConfigMaps = append(experimentConfigMaps, engineConfigMaps[i])
-		}
-	}
-	expDetails.ConfigMaps = experimentConfigMaps
+	// Overriding the ConfigMaps from the ChaosEngine
+	OverridingConfigMaps(experimentConfigMaps, engineConfigMaps, expDetails)
 
 	return nil
 }
@@ -96,7 +80,8 @@ func getExperimentConfigmaps(clients ClientSets, expDetails *ExperimentDetails) 
 }
 
 func getEngineConfigmaps(clients ClientSets, engineDetails EngineDetails, expDetails *ExperimentDetails) ([]v1alpha1.ConfigMap, error) {
-	chaosEngineObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
+
+	chaosEngineObj, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to get ChaosEngine Resource,  error: %v", err)
 	}
@@ -107,5 +92,25 @@ func getEngineConfigmaps(clients ClientSets, engineDetails EngineDetails, expDet
 			return engineConfigMaps, nil
 		}
 	}
-	return nil, fmt.Errorf("No experiment found with %v name", expDetails.Name)
+	return nil, fmt.Errorf("No experiment found with %v name in ChaosEngine", expDetails.Name)
+}
+
+// OverridingConfigMaps will override configmaps from ChaosEngine
+func OverridingConfigMaps(experimentConfigMaps []v1alpha1.ConfigMap, engineConfigMaps []v1alpha1.ConfigMap, expDetails *ExperimentDetails) {
+
+	for i := range engineConfigMaps {
+		flag := false
+		for j := range experimentConfigMaps {
+			if engineConfigMaps[i].Name == experimentConfigMaps[j].Name {
+				flag = true
+				if engineConfigMaps[i].MountPath != experimentConfigMaps[j].MountPath {
+					experimentConfigMaps[j].MountPath = engineConfigMaps[i].MountPath
+				}
+			}
+		}
+		if !flag {
+			experimentConfigMaps = append(experimentConfigMaps, engineConfigMaps[i])
+		}
+	}
+	expDetails.ConfigMaps = experimentConfigMaps
 }

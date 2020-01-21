@@ -13,14 +13,12 @@ import (
 func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets, engineDetails EngineDetails) error {
 	err := expDetails.SetSecrets(clients, engineDetails)
 	if err != nil {
-		log.Infof("Unable to set secrets, skipping Execution")
 		return err
 	}
 
 	log.Infof("Validating secrets specified in the ChaosExperiment & ChaosEngine")
 	err = expDetails.ValidateSecrets(clients)
 	if err != nil {
-		log.Infof("Error Validating secrets, skipping Execution")
 		return err
 	}
 	return nil
@@ -47,21 +45,8 @@ func (expDetails *ExperimentDetails) SetSecrets(clients ClientSets, engineDetail
 		return err
 	}
 
-	for i := range engineSecrets {
-		flag := false
-		for j := range experimentSecrets {
-			if engineSecrets[i].Name == experimentSecrets[j].Name {
-				flag = true
-				if engineSecrets[i].MountPath != experimentSecrets[j].MountPath {
-					experimentSecrets[j].MountPath = engineSecrets[i].MountPath
-				}
-			}
-		}
-		if !flag {
-			experimentSecrets = append(experimentSecrets, engineSecrets[i])
-		}
-	}
-	expDetails.Secrets = experimentSecrets
+	// Overriding the Secrets from the ChaosEngine
+	OverridingSecrets(experimentSecrets, engineSecrets, expDetails)
 
 	return nil
 }
@@ -94,7 +79,7 @@ func getExperimentSecrets(clients ClientSets, expDetails *ExperimentDetails) ([]
 }
 
 func getEngineSecrets(clients ClientSets, engineDetails EngineDetails, expDetails *ExperimentDetails) ([]v1alpha1.Secret, error) {
-	chaosEngineObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
+	chaosEngineObj, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to get ChaosEngine Resource,  error: %v", err)
 	}
@@ -105,5 +90,25 @@ func getEngineSecrets(clients ClientSets, engineDetails EngineDetails, expDetail
 			return engineSecrets, nil
 		}
 	}
-	return nil, fmt.Errorf("No experiment found with %v name", expDetails.Name)
+	return nil, fmt.Errorf("No experiment found with %v name in ChaosEngine", expDetails.Name)
+}
+
+// OverridingSecrets will override secrets from ChaosEngine
+func OverridingSecrets(experimentSecrets []v1alpha1.Secret, engineSecrets []v1alpha1.Secret, expDetails *ExperimentDetails) {
+
+	for i := range engineSecrets {
+		flag := false
+		for j := range experimentSecrets {
+			if engineSecrets[i].Name == experimentSecrets[j].Name {
+				flag = true
+				if engineSecrets[i].MountPath != experimentSecrets[j].MountPath {
+					experimentSecrets[j].MountPath = engineSecrets[i].MountPath
+				}
+			}
+		}
+		if !flag {
+			experimentSecrets = append(experimentSecrets, engineSecrets[i])
+		}
+	}
+	expDetails.Secrets = experimentSecrets
 }
