@@ -50,6 +50,10 @@
   source = "https://github.com/fsnotify/fsnotify.git"
 
 [[override]]
+  name = "github.com/litmuschaos/kube-helper"
+  branch = "master"
+
+[[override]]
   name = "github.com/litmuschaos/chaos-operator"
   branch = "master"
 

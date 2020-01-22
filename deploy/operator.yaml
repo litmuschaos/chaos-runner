@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litmus
+  namespace: litmus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: chaos-operator
+  template:
+    metadata:
+      labels:
+        name: chaos-operator
+    spec:
+      serviceAccountName: litmus
+      containers:
+        - name: chaos-operator
+          image: litmuschaos/chaos-operator:ci
+          command:
+          - chaos-operator
+          imagePullPolicy: IfNotPresent
+          env:
+            #- name: CHAOS_RUNNER_IMAGE
+            #  value: "litmuschaos/ansible-runner:ci"
+            #- name: CHAOS_MONITOR_IMAGE
+            #  value: "litmuschaos/chaos-exporter:ci"
+            - name: WATCH_NAMESPACE
+              value: 
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "chaos-operator"
