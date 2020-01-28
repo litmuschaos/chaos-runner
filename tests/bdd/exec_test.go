@@ -18,6 +18,8 @@ limitations under the License.
 
 import (
 	"flag"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
@@ -30,7 +32,6 @@ import (
 	. "github.com/onsi/gomega"
 	appv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
-	rbacV1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	scheme "k8s.io/client-go/kubernetes/scheme"
@@ -95,6 +96,26 @@ var _ = BeforeSuite(func() {
 		klog.Infof("Unable to create RBAC Permissions, due to error: %v", err)
 	}
 
+	resp, err := http.Get("https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml")
+	if err != nil {
+		klog.Infof("Unable to fetch webpage URL: https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml, due to error: %v ", err)
+	}
+
+	html, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		klog.Infof("Unable to convert Webpage into bytes, due to error: %v", err)
+	}
+
+	err = ioutil.WriteFile("../../pod-delete.yaml", html, 0644)
+	if err != nil {
+		klog.Infof("Unable to write file, due to error: %v", err)
+	}
+
+	err = exec.Command("kubectl", "create", "-f", "../../pod-delete.yaml", "-n", "litmus").Run()
+
+	if err != nil {
+		klog.Infof("Unable to create Pod-Delete Experiment, due to error: %v", err)
+	}
 	//Creating Chaos-Operator
 	By("Installing Chaos-Operator")
 	err = exec.Command("kubectl", "create", "-f", "../../deploy/operator.yaml").Run()
@@ -174,62 +195,6 @@ var _ = Describe("BDD on chaos-executor", func() {
 			)
 		})
 	})
-
-	When("Create Pod-delete chaosExperiment in litmus Namespace", func() {
-		It("should create a CustomResource ChaosExperiment Pod-delete", func() {
-
-			By("Creating ChaosExperiments")
-			ChaosExperiment := &v1alpha1.ChaosExperiment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "pod-delete",
-					Namespace: "litmus",
-					Labels: map[string]string{
-						"litmuschaos.io/name": "kubernetes",
-					},
-				},
-				Spec: v1alpha1.ChaosExperimentSpec{
-					Definition: v1alpha1.ExperimentDef{
-
-						Permissions: []rbacV1.PolicyRule{},
-						Scope:       "Namespaced",
-
-						Args:    []string{"-c", "ansible-playbook ./experiments/chaos/pod_delete/test.yml -i /etc/ansible/hosts -vv; exit 0"},
-						Command: []string{"/bin/bash"},
-
-						ENVList: []v1alpha1.ENVPair{
-							{
-								Name:  "ANSIBLE_STDOUT_CALLBACK",
-								Value: "default",
-							},
-							{
-								Name:  "TOTAL_CHAOS_DURATION",
-								Value: "15",
-							},
-							{
-								Name:  "CHAOS_INTERVAL",
-								Value: "5",
-							},
-							{
-								Name:  "LIB",
-								Value: "",
-							},
-						},
-						Image: "",
-						Labels: map[string]string{
-							"name": "pod-delete",
-						},
-					},
-				},
-			}
-
-			By("Creating above chaosExperiment")
-			_, err := litmusClientSet.ChaosExperiments("litmus").Create(ChaosExperiment)
-			Expect(err).To(
-				BeNil(),
-				"While creating chaosExerpiment Pod-delete in namespace litmus",
-			)
-		})
-	})
 	When("Creating ChaosEngine to trigger chaos-executor", func() {
 		It("Should create a runnerPod and Service ", func() {
 
@@ -257,6 +222,9 @@ var _ = Describe("BDD on chaos-executor", func() {
 					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: "pod-delete",
+							Spec: v1alpha1.ExperimentAttributes{
+								Rank: uint32(1),
+							},
 						},
 					},
 				},
@@ -302,7 +270,7 @@ var _ = Describe("BDD on chaos-executor", func() {
 })
 
 //Deleting all unused resources
-/*var _ = AfterSuite(func() {
+var _ = AfterSuite(func() {
 
 	By("Deleting Litmus NameSpace")
 	deleteErr := k8sClientSet.CoreV1().Namespaces().Delete("litmus", &metav1.DeleteOptions{})
@@ -314,4 +282,4 @@ var _ = Describe("BDD on chaos-executor", func() {
 	By("Deleting all CRDs")
 	crdDeletion := exec.Command("kubectl", "delete", "-f", "../../deploy/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
-})*/
+})
