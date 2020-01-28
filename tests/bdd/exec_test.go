@@ -24,20 +24,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	chaosClient "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
+	rbacV1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	scheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
-
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	chaosClient "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1"
-	restclient "k8s.io/client-go/rest"
 )
 
 var (
@@ -86,20 +86,20 @@ var _ = BeforeSuite(func() {
 	By("Installing Litmus CRDs")
 	err = exec.Command("kubectl", "create", "-f", "../../deploy/chaos_crds.yaml").Run()
 	if err != nil {
-		klog.Infof("Unable to execute command, due to error: %v", err)
+		klog.Infof("Unable to create Litmus CRD's, due to error: %v", err)
 	}
 
 	//Creating rbacs
 	err = exec.Command("kubectl", "create", "-f", "../../deploy/rbac.yaml").Run()
 	if err != nil {
-		klog.Infof("Unable to execute command, due to error: %v", err)
+		klog.Infof("Unable to create RBAC Permissions, due to error: %v", err)
 	}
 
 	//Creating Chaos-Operator
 	By("Installing Chaos-Operator")
 	err = exec.Command("kubectl", "create", "-f", "../../deploy/operator.yaml").Run()
 	if err != nil {
-		klog.Infof("Unable to execute command, due to error: %v", err)
+		klog.Infof("Unable to create Chaos-operator, due to error: %v", err)
 	}
 
 	klog.Infof("Chaos-Operator installed Successfully")
@@ -119,11 +119,10 @@ var _ = BeforeSuite(func() {
 //BDD Tests to check secondary resources
 var _ = Describe("BDD on chaos-executor", func() {
 
-	var err error
 	// BDD TEST CASE 1
 	When("Create a test Deployment with nginx image", func() {
 		It("Should create Nginx deployment ", func() {
-			By("building a deployment")
+			By("Building a nginx deployment")
 			//creating nginx deployment
 			deployment := &appv1.Deployment{
 				ObjectMeta: metav1.ObjectMeta{
@@ -167,16 +166,11 @@ var _ = Describe("BDD on chaos-executor", func() {
 					},
 				},
 			}
-			Expect(err).ShouldNot(
-				HaveOccurred(),
-				"while building deployment nginx in namespace litmus",
-			)
-
-			By("creating above deployment")
+			By("Creating nginx deployment")
 			_, err := k8sClientSet.AppsV1().Deployments("litmus").Create(deployment)
 			Expect(err).To(
 				BeNil(),
-				"while creating deployment nginx in namespace litmus",
+				"while creating nginx deployment in namespace litmus",
 			)
 		})
 	})
@@ -184,7 +178,7 @@ var _ = Describe("BDD on chaos-executor", func() {
 	When("Create Pod-delete chaosExperiment in litmus Namespace", func() {
 		It("should create a CustomResource ChaosExperiment Pod-delete", func() {
 
-			By("building a chaosExperiment")
+			By("Creating ChaosExperiments")
 			ChaosExperiment := &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "pod-delete",
@@ -196,9 +190,12 @@ var _ = Describe("BDD on chaos-executor", func() {
 				Spec: v1alpha1.ChaosExperimentSpec{
 					Definition: v1alpha1.ExperimentDef{
 
-						Args:    []string{"-c", "ansible-playbook ./experiments/generic/pod_delete/pod_delete_ansible_logic.yml -i /etc/ansible/hosts -vv; exit 0"},
+						Permissions: []rbacV1.PolicyRule{},
+						Scope:       "Namespaced",
+
+						Args:    []string{"-c", "ansible-playbook ./experiments/chaos/pod_delete/test.yml -i /etc/ansible/hosts -vv; exit 0"},
 						Command: []string{"/bin/bash"},
-						Image:   "litmuschaos/ansible-runner:ci",
+
 						ENVList: []v1alpha1.ENVPair{
 							{
 								Name:  "ANSIBLE_STDOUT_CALLBACK",
@@ -217,48 +214,46 @@ var _ = Describe("BDD on chaos-executor", func() {
 								Value: "",
 							},
 						},
+						Image: "",
 						Labels: map[string]string{
 							"name": "pod-delete",
 						},
 					},
 				},
 			}
-			Expect(err).ShouldNot(
-				HaveOccurred(),
-				"while building pod-delete chaosExperiment",
-			)
 
-			By("creating above chaosExperiment")
-			_, err = litmusClientSet.ChaosExperiments("litmus").Create(ChaosExperiment)
+			By("Creating above chaosExperiment")
+			_, err := litmusClientSet.ChaosExperiments("litmus").Create(ChaosExperiment)
 			Expect(err).To(
 				BeNil(),
-				"while creating chaosExerpiment Pod-delete in namespace litmus",
+				"While creating chaosExerpiment Pod-delete in namespace litmus",
 			)
 		})
 	})
 	When("Creating ChaosEngine to trigger chaos-executor", func() {
-		It("should create a runnerPod and Service ", func() {
+		It("Should create a runnerPod and Service ", func() {
 
-			By("Building a ChaosEngine")
+			//Creating chaosEngine
+			By("Creating ChaosEngine")
 			chaosEngine := &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "engine-nginx",
 					Namespace: "litmus",
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
-					Components: v1alpha1.ComponentParams{
-						Runner: v1alpha1.RunnerInfo{
-							Type:  "go",
-							Image: "litmuschaos/chaos-executor:ci",
-						},
-					},
 					Appinfo: v1alpha1.ApplicationParams{
 						Appns:    "litmus",
 						Applabel: "app=nginx",
 						AppKind:  "deployment",
 					},
 					ChaosServiceAccount: "litmus",
-					Monitoring:          true,
+					Components: v1alpha1.ComponentParams{
+						Runner: v1alpha1.RunnerInfo{
+							Image: "litmuschaos/chaos-executor:ci",
+							Type:  "go",
+						},
+					},
+					Monitoring: true,
 					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: "pod-delete",
@@ -266,13 +261,9 @@ var _ = Describe("BDD on chaos-executor", func() {
 					},
 				},
 			}
-			Expect(err).ShouldNot(
-				HaveOccurred(),
-				"while building ChaosEngine engine-nginx in namespace litmus",
-			)
 
 			By("Creating ChaosEngine Resource")
-			_, err = litmusClientSet.ChaosEngines("litmus").Create(chaosEngine)
+			_, err := litmusClientSet.ChaosEngines("litmus").Create(chaosEngine)
 			Expect(err).To(
 				BeNil(),
 				"while building ChaosEngine engine-nginx in namespace litmus",
@@ -311,7 +302,7 @@ var _ = Describe("BDD on chaos-executor", func() {
 })
 
 //Deleting all unused resources
-var _ = AfterSuite(func() {
+/*var _ = AfterSuite(func() {
 
 	By("Deleting Litmus NameSpace")
 	deleteErr := k8sClientSet.CoreV1().Namespaces().Delete("litmus", &metav1.DeleteOptions{})
@@ -323,4 +314,4 @@ var _ = AfterSuite(func() {
 	By("Deleting all CRDs")
 	crdDeletion := exec.Command("kubectl", "delete", "-f", "../../deploy/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
-})
+})*/
