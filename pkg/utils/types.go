@@ -22,6 +22,7 @@ type EngineDetails struct {
 	AppNamespace     string
 	ClientUUID       string
 	AuxiliaryAppInfo string
+	UID              string
 }
 
 // ExperimentDetails is for collecting all the experiment-related details

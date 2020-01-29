@@ -59,7 +59,7 @@ func main() {
 		experiment := utils.NewExperimentDetails()
 		experiment.SetValueFromChaosEngine(engineDetails, i)
 		experiment.SetValueFromChaosExperiment(clients)
-		experiment.SetENV(engineDetails, clients)
+		experiment.SetENV(&engineDetails, clients)
 
 		experimentStatus := utils.ExperimentStatus{}
 		experimentStatus.IntialExperimentStatus(experiment)

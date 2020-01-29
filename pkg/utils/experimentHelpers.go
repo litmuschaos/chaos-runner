@@ -17,18 +17,21 @@ func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientS
 }
 
 //SetENV sets ENV values in experimentDetails struct.
-func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) {
+func (expDetails *ExperimentDetails) SetENV(engineDetails *EngineDetails, clients ClientSets) {
 	// Get the Default ENV's from ChaosExperiment
 	log.Infoln("Getting the ENV Variables")
 	expDetails.SetDefaultEnv(clients)
 	// OverWriting the Defaults Varibles from the ChaosEngine ENV
 	expDetails.SetEnvFromEngine(engineDetails.Name, clients)
+	// Get engineUID from the chaos-runner's label
+	SetEngineUID(engineDetails, clients)
 	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
 	expDetails.Env["CHAOSENGINE"] = engineDetails.Name
 	expDetails.Env["APP_LABEL"] = engineDetails.AppLabel
 	expDetails.Env["APP_NAMESPACE"] = engineDetails.AppNamespace
 	expDetails.Env["APP_KIND"] = engineDetails.AppKind
 	expDetails.Env["AUXILIARY_APPINFO"] = engineDetails.AuxiliaryAppInfo
+	expDetails.Env["ENGINE_UID"] = engineDetails.UID
 }
 
 //SetValueFromChaosEngine sets value in experimentDetails struct from chaosEngine
@@ -117,4 +120,19 @@ func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) {
 		log.Infoln(err)
 	}
 	expDetails.ExpArgs = expirementSpec.Spec.Definition.Args
+}
+
+// SetEngineUID fetch the engineUID from chaos-runner
+func SetEngineUID(engine *EngineDetails, clients ClientSets) {
+	runnerName := engine.Name + "-runner"
+	runnerSpec, err := clients.KubeClient.CoreV1().Pods(engine.AppNamespace).Get(runnerName, metav1.GetOptions{})
+	if err != nil {
+		log.Infof("Unable to get the chaosRunner, error : %v", err)
+	}
+	engineUID := runnerSpec.Labels["engineUID"]
+	if engineUID != "" {
+		engine.UID = engineUID
+	} else {
+		log.Infof("Can't find the engineUID")
+	}
 }
