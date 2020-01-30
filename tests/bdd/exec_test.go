@@ -20,7 +20,6 @@ import (
 	"flag"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"os/exec"
 	"regexp"
 	"testing"
@@ -50,6 +49,7 @@ var (
 
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "path to kubeconfig to invoke kubernetes API calls")
+	flag.Parse()
 }
 func TestChaos(t *testing.T) {
 
@@ -58,9 +58,7 @@ func TestChaos(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-
 	var err error
-	kubeconfig = os.Getenv("HOME") + "/.kube/config"
 	config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		Expect(err).To(BeNil(), "failed to get config")
@@ -85,13 +83,13 @@ var _ = BeforeSuite(func() {
 
 	//Creating crds
 	By("Installing Litmus CRDs")
-	err = exec.Command("kubectl", "create", "-f", "../../deploy/chaos_crds.yaml").Run()
+	err = exec.Command("kubectl", "create", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create Litmus CRD's, due to error: %v", err)
 	}
 
 	//Creating rbacs
-	err = exec.Command("kubectl", "create", "-f", "../../deploy/rbac.yaml").Run()
+	err = exec.Command("kubectl", "create", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/rbac.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create RBAC Permissions, due to error: %v", err)
 	}
@@ -100,25 +98,24 @@ var _ = BeforeSuite(func() {
 	if err != nil {
 		klog.Infof("Unable to fetch webpage URL: https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml, due to error: %v ", err)
 	}
-
 	html, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		klog.Infof("Unable to convert Webpage into bytes, due to error: %v", err)
 	}
 
-	err = ioutil.WriteFile("../../pod-delete.yaml", html, 0644)
+	err = ioutil.WriteFile("/tmp/pod-delete.yaml", html, 0644)
 	if err != nil {
 		klog.Infof("Unable to write file, due to error: %v", err)
 	}
 
-	err = exec.Command("kubectl", "create", "-f", "../../pod-delete.yaml", "-n", "litmus").Run()
+	err = exec.Command("kubectl", "create", "-f", "/tmp/pod-delete.yaml", "-n", "litmus").Run()
 
 	if err != nil {
 		klog.Infof("Unable to create Pod-Delete Experiment, due to error: %v", err)
 	}
 	//Creating Chaos-Operator
 	By("Installing Chaos-Operator")
-	err = exec.Command("kubectl", "create", "-f", "../../deploy/operator.yaml").Run()
+	err = exec.Command("kubectl", "create", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/operator.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create Chaos-operator, due to error: %v", err)
 	}
@@ -270,7 +267,7 @@ var _ = Describe("BDD on chaos-executor", func() {
 })
 
 //Deleting all unused resources
-var _ = AfterSuite(func() {
+/*var _ = AfterSuite(func() {
 
 	By("Deleting Litmus NameSpace")
 	deleteErr := k8sClientSet.CoreV1().Namespaces().Delete("litmus", &metav1.DeleteOptions{})
@@ -280,6 +277,6 @@ var _ = AfterSuite(func() {
 	)
 
 	By("Deleting all CRDs")
-	crdDeletion := exec.Command("kubectl", "delete", "-f", "../../deploy/chaos_crds.yaml").Run()
+	crdDeletion := exec.Command("kubectl", "delete", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
-})
+})*/

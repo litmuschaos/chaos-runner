@@ -1,0 +1,10 @@
+component_depth: 2
+languages:
+- go
+exclude:
+- /vendor/.*
+- /pkg/client/.*
+- /pkg/apis/litmuschaos/v1alpha1/zz_generated.*\.go
+test:
+    include:
+      - .*/test/.*\.go
