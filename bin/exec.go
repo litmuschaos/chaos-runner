@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"time"
 
 	"k8s.io/client-go/rest"
@@ -32,6 +33,7 @@ func getKubeConfig() (*rest.Config, error) {
 
 func main() {
 
+	var Logger utils.LogStruct
 	klog.InitFlags(nil)
 
 	engineDetails := utils.EngineDetails{}
@@ -40,7 +42,7 @@ func main() {
 	// Getting the kubeconfig
 	config, err := getKubeConfig()
 	if err != nil {
-		klog.V(1).Infof("Error in fetching kubeconfig, unable to proceed further due to error: %v", err)
+		Logger.WithError("Error in fetching kubeconfig, unable to proceed further due to error: %v", err)
 		return
 	}
 
@@ -51,8 +53,7 @@ func main() {
 
 	// Fetching all the ENV's needed
 	utils.GetOsEnv(&engineDetails)
-	klog.V(2).Infof("Chaos Experiments List: %v, ChaosEngine Name: %v, Chaos AppNameSpace: %v, Chaos AppLabels: %v, Chaos AppKind: %v, ChaosService AccountName: %v", engineDetails.Experiments, engineDetails.Name, engineDetails.AppNamespace, engineDetails.AppLabel, engineDetails.AppKind, engineDetails.SvcAccount)
-	klog.V(1).Infof("Chaos Experiment List: %v, ChaosEngine Name: %v, Chaos AppLabels: %v, Chaos AppKind: %v", engineDetails.Experiments, engineDetails.Name, engineDetails.AppLabel, engineDetails.AppKind)
+	klog.V(1).Infof("Chaos Experiments List: %v, ChaosEngine Name: %v, Chaos AppNameSpace: %v, Chaos AppLabels: %v, Chaos AppKind: %v, ChaosService AccountName: %v", engineDetails.Experiments, engineDetails.Name, engineDetails.AppNamespace, engineDetails.AppLabel, engineDetails.AppKind, engineDetails.SvcAccount)
 	klog.V(0).Infof("Executor trigger by chaosEngine: %v, list of ChaosExperiment to be executed: %v", engineDetails.Name, engineDetails.Experiments)
 
 	// Steps for each Experiment

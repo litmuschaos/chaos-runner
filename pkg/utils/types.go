@@ -50,6 +50,15 @@ type ClientSets struct {
 	LitmusClient *clientV1alpha1.Clientset
 }
 
+type LogStruct struct {
+	Operation    string
+	ResourceType string
+	ResourceName string
+	Verbosity    int32
+	Error        string
+	Namespace    string
+}
+
 // GenerateClientSets will generation both ClientSets (k8s, and Litmus)
 func (clientSets *ClientSets) GenerateClientSets(config *rest.Config) error {
 	k8sClientSet, err := k8s.GenerateK8sClientSet(config)
