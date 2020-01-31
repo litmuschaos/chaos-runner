@@ -55,7 +55,7 @@ type LogStruct struct {
 	ResourceType string
 	ResourceName string
 	Verbosity    int32
-	Error        string
+	String       string
 	Namespace    string
 }
 

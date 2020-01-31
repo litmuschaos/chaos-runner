@@ -2,20 +2,31 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
 )
 
 //PatchConfigMaps patches configmaps in experimentDetails struct.
 func (expDetails *ExperimentDetails) PatchConfigMaps(clients ClientSets) error {
 	expDetails.SetConfigMaps(clients)
-	klog.V(0).Infof("Validating configmaps specified in the ChaosExperiment")
+	Logger.WithString(fmt.Sprintf("Validating configmaps specified in the ChaosExperiment")).WithVerbosity(0).Log()
 	err := expDetails.ValidateConfigMaps(clients)
 	if err != nil {
-		klog.V(0).Infof("Error Validating configMaps, skipping Execution")
+		Logger.WithString(fmt.Sprintf("Error Validating configMaps, skipping Execution")).WithVerbosity(1).Log()
 		return err
 	}
 	return nil
+}
+
+// SetConfigMaps sets the value of configMaps in Experiment Structure
+func (expDetails *ExperimentDetails) SetConfigMaps(clients ClientSets) {
+
+	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	if err != nil {
+		Logger.WithNameSpace(expDetails.Namespace).WithResourceName(expDetails.Name).WithString(err.Error()).WithOperation("Get").WithVerbosity(1).WithResourceType("ChaosExperiment").Log()
+	}
+	configMaps := chaosExperimentObj.Spec.Definition.ConfigMaps
+	expDetails.ConfigMaps = configMaps
 }
 
 // ValidateConfigMap validates the configMap, before checking or creating them.
@@ -29,17 +40,6 @@ func (clientSets ClientSets) ValidateConfigMap(configMapName string, experiment 
 
 }
 
-// SetConfigMaps sets the value of configMaps in Experiment Structure
-func (expDetails *ExperimentDetails) SetConfigMaps(clients ClientSets) {
-
-	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
-	if err != nil {
-		klog.V(0).Infof("Unable to get ChaosEXperiment Resource, wouldn't not be able to patch ConfigMaps")
-	}
-	configMaps := chaosExperimentObj.Spec.Definition.ConfigMaps
-	expDetails.ConfigMaps = configMaps
-}
-
 // ValidateConfigMaps checks for configMaps in the Application Namespace
 func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) error {
 
@@ -50,9 +50,9 @@ func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) erro
 		}
 		err := clients.ValidateConfigMap(v.Name, expDetails)
 		if err != nil {
-			klog.V(0).Infof("Unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
+			Logger.WithNameSpace(expDetails.Namespace).WithResourceName(v.Name).WithString(err.Error()).WithOperation("List").WithVerbosity(1).WithResourceType("ConfigMap").Log()
 		} else {
-			klog.V(0).Infof("Succesfully Validated ConfigMap: %v", v.Name)
+			Logger.WithString(fmt.Sprintf("Succesfully Validated ConfigMap: %v", v.Name)).WithVerbosity(0).Log()
 		}
 	}
 	return nil

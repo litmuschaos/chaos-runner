@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"k8s.io/klog"
-
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -23,6 +21,8 @@ type Builder struct {
 	errs            []error
 }
 
+var Logger LogStruct
+
 // BuildContainerSpec builds a Container with following properties
 func BuildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) *container.Builder {
 	containerSpec := container.NewBuilder().
@@ -35,15 +35,13 @@ func BuildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) *
 		WithEnvsNew(envVar)
 
 	if experiment.VolumeOpts.VolumeMounts != nil {
-		klog.V(1).Infof("Building ChaosExperiment Job with VolumeMounts from ConfigMaps, and Secrets provided.")
 		containerSpec.WithVolumeMountsNew(experiment.VolumeOpts.VolumeMounts)
 	}
 
 	_, err := containerSpec.Build()
 
 	if err != nil {
-		klog.V(0).Infof("Unable to build containerSpec for chaosJob creation")
-		klog.V(1).Infof("Unable to build container Spec, due to error: %v", err)
+		Logger.WithNameSpace(experiment.Namespace).WithResourceName(experiment.JobName).WithString(err.Error()).WithOperation("Build").WithVerbosity(1).WithResourceType("COntainer").Log()
 	}
 
 	return containerSpec
@@ -69,11 +67,10 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 	// Will build a PodSpecTemplate
 	pod := BuildPodTemplateSpec(experiment, containerForPod)
 	// Build JobSpec Template
-	jobspec := BuildJobSpec(pod)
+	jobspec := BuildJobSpec(experiment, pod)
 	job, err := experiment.BuildJob(pod, jobspec)
 	if err != nil {
-		klog.V(0).Infof("Unable to build ChaosExperiment Job")
-		klog.V(1).Infof("Unable to build ChaosExperiment Job, due to error: %v", err)
+		Logger.WithNameSpace(experiment.Namespace).WithResourceName(experiment.JobName).WithString(err.Error()).WithOperation("Build").WithVerbosity(1).WithResourceType("Job").Log()
 		return err
 	}
 	// Creating the Job
@@ -87,8 +84,7 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 func (experiment *ExperimentDetails) launchJob(job *batchv1.Job, clients ClientSets) error {
 	_, err := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Create(job)
 	if err != nil {
-		klog.V(0).Infof("Unable to create Job with provided clientSet")
-		klog.V(1).Infof("Unable to create the Job with the clientSet: %v", err)
+		Logger.WithNameSpace(experiment.Namespace).WithResourceName(experiment.JobName).WithString(err.Error()).WithOperation("Create").WithVerbosity(1).WithResourceType("Job").Log()
 	}
 	return nil
 }
@@ -105,21 +101,20 @@ func BuildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		WithContainerBuildersNew(containerForPod)
 
 	if _, err := podtemplate.Build(); err != nil {
-		klog.V(0).Infof("Unable to create pod Template Spec for chaosJob")
-		klog.V(1).Infof("Unable to create the pod Template Spec, due to error: %v", err)
+		Logger.WithNameSpace(experiment.Namespace).WithResourceName(experiment.JobName).WithString(err.Error()).WithOperation("Build").WithVerbosity(1).WithResourceType("PodTemplate").Log()
 		return nil
 	}
 	return podtemplate
 }
 
 // BuildJobSpec returns a JobSpec
-func BuildJobSpec(pod *podtemplatespec.Builder) *jobspec.Builder {
+func BuildJobSpec(experiment *ExperimentDetails, pod *podtemplatespec.Builder) *jobspec.Builder {
 	jobSpecObj := jobspec.NewBuilder().
 		WithPodTemplateSpecBuilder(pod)
 	_, err := jobSpecObj.Build()
 	if err != nil {
-		klog.V(0).Infof("Unable to create Job Spec for chaosJob")
-		klog.V(1).Infof("Unable to create Job Spec, due to error: %v", err)
+		Logger.WithNameSpace(experiment.Namespace).WithResourceName(experiment.JobName).WithString(err.Error()).WithOperation("Build").WithVerbosity(1).WithResourceType("JobSpec").Log()
+		return nil
 	}
 	return jobSpecObj
 }
@@ -134,8 +129,7 @@ func (experiment *ExperimentDetails) BuildJob(pod *podtemplatespec.Builder, jobs
 		WithLabels(experiment.ExpLabels).
 		Build()
 	if err != nil {
-		klog.V(0).Infof("Unable to build Job for chaosJob")
-		klog.V(1).Infof("Unable to build Job, due to error: %v", err)
+		Logger.WithNameSpace(experiment.Namespace).WithResourceName(experiment.JobName).WithString(err.Error()).WithOperation("Build").WithVerbosity(1).WithResourceType("Job").Log()
 		return jobObj, err
 	}
 	return jobObj, nil

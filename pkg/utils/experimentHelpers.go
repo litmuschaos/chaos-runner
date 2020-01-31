@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
 )
 
 //SetValueFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
@@ -19,7 +19,7 @@ func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientS
 //SetENV sets ENV values in experimentDetails struct.
 func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) {
 	// Get the Default ENV's from ChaosExperiment
-	klog.V(0).Infoln("Getting the ENV Variables for chaosJob")
+	Logger.WithString(fmt.Sprintf("Getting the ENV Variables for chaosJob")).WithVerbosity(0).Log()
 	expDetails.SetDefaultEnv(clients)
 	// OverWriting the Defaults Varibles from the ChaosEngine ENV
 	expDetails.SetEnvFromEngine(engineDetails.Name, clients)
@@ -59,8 +59,7 @@ func (expDetails *ExperimentDetails) CheckExistence(clients ClientSets) (bool, e
 func (expDetails *ExperimentDetails) SetDefaultEnv(clients ClientSets) {
 	experimentEnv, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		klog.V(0).Infof("Unable to get the Default ENV from ChaosExperiment for chaosJob")
-		klog.V(1).Infof("Unable to get the Default ENV from ChaosExperiment, due to error : %v", err)
+		Logger.WithNameSpace(expDetails.Namespace).WithResourceName(expDetails.Name).WithString(err.Error()).WithOperation("Get").WithVerbosity(1).WithResourceType("ChaosExperiment").Log()
 	}
 
 	envList := experimentEnv.Spec.Definition.ENVList
@@ -77,8 +76,7 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 
 	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
 	if err != nil {
-		klog.V(0).Infof("Unable to get the ENV from ChaosEngine for chaosJob")
-		klog.V(1).Infof("Unable to get the ENV from ChaosEngine, due to error : %v", err)
+		Logger.WithNameSpace(expDetails.Namespace).WithResourceName(engineName).WithString(err.Error()).WithOperation("Get").WithVerbosity(1).WithResourceType("ChaosEngine").Log()
 	}
 	envList := engineSpec.Spec.Experiments
 	for i := range envList {
@@ -89,15 +87,13 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 			}
 		}
 	}
-
 }
 
 // SetLabels sets the Experiment Labels, in Experiment Structure
 func (expDetails *ExperimentDetails) SetLabels(clients ClientSets) {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		klog.V(0).Infof("Unable to get ChaosExperiment Labels for chaosJob")
-		klog.V(1).Infof("Unable to get ChaosExperiment, due to error : %v", err)
+		Logger.WithNameSpace(expDetails.Namespace).WithResourceName(expDetails.Name).WithString(err.Error()).WithOperation("Get").WithVerbosity(1).WithResourceType("ChaosExperiment").Log()
 	}
 	expDetails.ExpLabels = expirementSpec.Spec.Definition.Labels
 
@@ -107,8 +103,7 @@ func (expDetails *ExperimentDetails) SetLabels(clients ClientSets) {
 func (expDetails *ExperimentDetails) SetImage(clients ClientSets) {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		klog.V(0).Infof("Unable to get ChaosExperiment Image for chaosJob")
-		klog.V(1).Infof("Unable to get ChaosExperiment, due to error : %v", err)
+		Logger.WithNameSpace(expDetails.Namespace).WithResourceName(expDetails.Name).WithString(err.Error()).WithOperation("Get").WithVerbosity(1).WithResourceType("ChaosExperiment").Log()
 	}
 	expDetails.ExpImage = expirementSpec.Spec.Definition.Image
 }
@@ -117,8 +112,7 @@ func (expDetails *ExperimentDetails) SetImage(clients ClientSets) {
 func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		klog.V(0).Infof("Unable to get ChaosExperiment Args for chaosJob")
-		klog.V(1).Infof("Unable to get ChaosExperiment, due to error : %v", err)
+		Logger.WithNameSpace(expDetails.Namespace).WithResourceName(expDetails.Name).WithString(err.Error()).WithOperation("Get").WithVerbosity(1).WithResourceType("ChaosExperiment").Log()
 	}
 	expDetails.ExpArgs = expirementSpec.Spec.Definition.Args
 }

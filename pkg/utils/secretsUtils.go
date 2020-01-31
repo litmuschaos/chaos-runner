@@ -2,17 +2,17 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
 )
 
 // PatchSecrets patches secrets in experimentDetails.
 func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets) error {
-	klog.V(0).Infof("Validating secrets specified in the ChaosExperiment")
+	Logger.WithString(fmt.Sprintf("Validating secrets specified in the ChaosExperiment")).WithVerbosity(0).Log()
 	expDetails.SetSecrets(clients)
 	err := expDetails.ValidateSecrets(clients)
 	if err != nil {
-		klog.V(0).Infof("Error Validating secrets, skipping Execution")
+		Logger.WithString(fmt.Sprintf("Error Validating secrets, skipping Execution")).WithVerbosity(1).Log()
 		return err
 	}
 	return nil
@@ -33,7 +33,8 @@ func (expDetails *ExperimentDetails) SetSecrets(clients ClientSets) {
 
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		klog.V(0).Infof("Unable to get ChaosEXperiment Resource, wouldn't not be able to patch ConfigMaps")
+		Logger.WithNameSpace(expDetails.Namespace).WithResourceName(expDetails.Name).WithString(err.Error()).WithOperation("Get").WithVerbosity(1).WithResourceType("ChaosExperiment").Log()
+
 	}
 	secrets := chaosExperimentObj.Spec.Definition.Secrets
 	expDetails.Secrets = secrets
@@ -49,9 +50,9 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 		}
 		err := clients.ValidateSecrets(v.Name, expDetails)
 		if err != nil {
-			klog.V(0).Infof("Unable to list Secret: %v, in namespace: %v, skipping execution", v.Name, expDetails.Namespace)
+			Logger.WithNameSpace(expDetails.Namespace).WithResourceName(v.Name).WithString(err.Error()).WithOperation("List").WithVerbosity(1).WithResourceType("Secret").Log()
 		} else {
-			klog.V(0).Infof("Succesfully Validated Secret: %v", v.Name)
+			Logger.WithString(fmt.Sprintf("Succesfully Validated Secret: %v", v.Name)).WithVerbosity(0).Log()
 		}
 	}
 	return nil

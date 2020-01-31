@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"k8s.io/klog"
+	"fmt"
 )
 
 // ExperimentNotFoundPatchEngine patches the chaosEngine when ChaosExperiment is not Found
@@ -9,11 +9,10 @@ func (engineDetails EngineDetails) ExperimentNotFoundPatchEngine(experiment *Exp
 
 	var expStatus ExperimentStatus
 
-	klog.V(1).Infof("Creating Not Found Experiment Status")
+	Logger.WithString(fmt.Sprintf("Creating Not Found Experiment Status for ChaosEngine")).WithVerbosity(1).Log()
 	expStatus.NotFoundExperimentStatus(experiment)
 
 	if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
-		klog.V(0).Infof("Unable to Patch ChaosEngine Status")
-		klog.V(1).Infof("Unable to Patch ChaosEngine Status, error: %v", err)
+		Logger.WithNameSpace(engineDetails.AppNamespace).WithResourceName(engineDetails.Name).WithString(err.Error()).WithOperation("Patch").WithVerbosity(1).WithResourceType("ChaosEngine").Log()
 	}
 }

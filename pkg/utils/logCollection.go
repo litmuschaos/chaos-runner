@@ -4,11 +4,23 @@ import (
 	"k8s.io/klog"
 )
 
-func (log *LogStruct) Log(logStruct LogStruct) {
-	klog.V(0).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v, due to error: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace, log.Error)
-	if log.Operation == "" && log.ResourceName == "" && log.ResourceType == "" || log.Namespace == "" {
-		klog.V(0).Infof(log.Error)
+func (log *LogStruct) Log() {
+	if log.Operation == "" && log.ResourceName == "" && log.ResourceType == "" && log.Namespace == "" {
+		if log.Verbosity == 0 {
+			klog.V(0).Infof(log.String)
+		} else if log.Verbosity == 1 {
+			klog.V(1).Infof(log.String)
+		} else if log.Verbosity == 2 {
+			klog.V(2).Infof(log.String)
+		}
+
 	}
+	if log.Verbosity == 1 {
+		klog.V(0).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace)
+		klog.V(1).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v, due to error: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace, log.String)
+
+	}
+	clearLog(log)
 }
 
 func (log *LogStruct) WithOperation(operation string) *LogStruct {
@@ -35,7 +47,15 @@ func (log *LogStruct) WithNameSpace(namespace string) *LogStruct {
 	log.Namespace = namespace
 	return log
 }
-func (log *LogStruct) WithError(err string) *LogStruct {
-	log.Error = err
+func (log *LogStruct) WithString(str string) *LogStruct {
+	log.String = str
 	return log
+}
+
+func clearLog(log *LogStruct) {
+	log.Namespace = ""
+	log.Operation = ""
+	log.ResourceName = ""
+	log.ResourceType = ""
+	log.Verbosity = -1
 }
