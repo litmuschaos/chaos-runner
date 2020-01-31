@@ -18,6 +18,7 @@ limitations under the License.
 
 import (
 	"flag"
+	"os"
 	"os/exec"
 	"regexp"
 	"testing"
@@ -56,6 +57,7 @@ func TestChaos(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
+	kubeconfig = os.Getenv("HOME") + "/.kube/config"
 	var err error
 	config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
