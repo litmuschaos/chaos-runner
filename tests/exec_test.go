@@ -83,20 +83,20 @@ var _ = BeforeSuite(func() {
 
 	//Creating crds
 	By("Installing Litmus CRDs")
-	err = exec.Command("kubectl", "create", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
+	err = exec.Command("kubectl", "create", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create Litmus CRD's, due to error: %v", err)
 	}
 
 	//Creating rbacs
-	err = exec.Command("kubectl", "create", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/rbac.yaml").Run()
+	err = exec.Command("kubectl", "create", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/rbac.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create RBAC Permissions, due to error: %v", err)
 	}
 
 	//Creating Chaos-Operator
 	By("Installing Chaos-Operator")
-	err = exec.Command("kubectl", "create", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/operator.yaml").Run()
+	err = exec.Command("kubectl", "create", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/operator.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create Chaos-operator, due to error: %v", err)
 	}
@@ -263,6 +263,6 @@ var _ = AfterSuite(func() {
 	)
 
 	By("Deleting all CRDs")
-	crdDeletion := exec.Command("kubectl", "delete", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
+	crdDeletion := exec.Command("kubectl", "delete", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
 })
