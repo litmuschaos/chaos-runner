@@ -18,4 +18,5 @@ func GetOsEnv(engineDetails *EngineDetails) {
 	engineDetails.SvcAccount = os.Getenv("CHAOS_SVC_ACC")
 	engineDetails.ClientUUID = os.Getenv("CLIENT_UUID")
 	engineDetails.Experiments = strings.Split(experimentList, ",")
+	engineDetails.AuxiliaryAppInfo = os.Getenv("AUXILIARY_APPINFO")
 }

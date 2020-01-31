@@ -94,13 +94,13 @@ func main() {
 		Logger.WithString(fmt.Sprintf("Chaos Experiment Validated in Application Namespace %v", experiment.Namespace)).WithVerbosity(0).Log()
 
 		// Patch ConfigMaps to ChaosExperiment Job
-		if err := experiment.PatchConfigMaps(clients); err != nil {
+		if err := experiment.PatchConfigMaps(clients, engineDetails); err != nil {
 			Logger.WithNameSpace(experiment.Namespace).WithResourceName(experiment.Name).WithString(err.Error()).WithOperation("Patch").WithResourceType("ConfigMaps").WithVerbosity(0).Log()
 			break
 		}
 
 		// Patch Secrets to ChaosExperiment Job
-		if err = experiment.PatchSecrets(clients); err != nil {
+		if err = experiment.PatchSecrets(clients, engineDetails); err != nil {
 			Logger.WithNameSpace(experiment.Namespace).WithResourceName(experiment.Name).WithString(err.Error()).WithOperation("Patch").WithVerbosity(0).WithResourceType("Secrets").Log()
 			break
 		}

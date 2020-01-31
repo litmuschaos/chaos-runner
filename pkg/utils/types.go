@@ -14,13 +14,14 @@ import (
 
 // EngineDetails struct is for collecting all the engine-related details
 type EngineDetails struct {
-	Name         string
-	Experiments  []string
-	AppLabel     string
-	SvcAccount   string
-	AppKind      string
-	AppNamespace string
-	ClientUUID   string
+	Name             string
+	Experiments      []string
+	AppLabel         string
+	SvcAccount       string
+	AppKind          string
+	AppNamespace     string
+	ClientUUID       string
+	AuxiliaryAppInfo string
 }
 
 // ExperimentDetails is for collecting all the experiment-related details

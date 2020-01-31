@@ -28,6 +28,7 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 	expDetails.Env["APP_LABEL"] = engineDetails.AppLabel
 	expDetails.Env["APP_NAMESPACE"] = engineDetails.AppNamespace
 	expDetails.Env["APP_KIND"] = engineDetails.AppKind
+	expDetails.Env["AUXILIARY_APPINFO"] = engineDetails.AuxiliaryAppInfo
 }
 
 //SetValueFromChaosEngine sets value in experimentDetails struct from chaosEngine
@@ -81,7 +82,7 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 	envList := engineSpec.Spec.Experiments
 	for i := range envList {
 		if envList[i].Name == expDetails.Name {
-			keyValue := envList[i].Spec.Components
+			keyValue := envList[i].Spec.Components.ENV
 			for j := range keyValue {
 				expDetails.Env[keyValue[j].Name] = keyValue[j].Value
 			}
