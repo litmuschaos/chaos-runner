@@ -94,11 +94,6 @@ var _ = BeforeSuite(func() {
 		klog.Infof("Unable to create RBAC Permissions, due to error: %v", err)
 	}
 
-	err = exec.Command("kubectl", "create", "-f", "kubectl create -f https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml", "-n", "litmus").Run()
-
-	if err != nil {
-		klog.Infof("Unable to create Pod-Delete Experiment, due to error: %v", err)
-	}
 	//Creating Chaos-Operator
 	By("Installing Chaos-Operator")
 	err = exec.Command("kubectl", "create", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/operator.yaml").Run()
@@ -117,6 +112,11 @@ var _ = BeforeSuite(func() {
 
 		Expect(string(v.Status.Phase)).To(Equal("Running"))
 		break
+	}
+
+	err = exec.Command("kubectl", "create", "-f", "https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml", "-n", "litmus").Run()
+	if err != nil {
+		klog.Infof("Unable to create Pod-Delete Experiment, due to error: %v", err)
 	}
 })
 
@@ -253,7 +253,7 @@ var _ = Describe("BDD on chaos-executor", func() {
 })
 
 //Deleting all unused resources
-/*var _ = AfterSuite(func() {
+var _ = AfterSuite(func() {
 
 	By("Deleting Litmus NameSpace")
 	deleteErr := k8sClientSet.CoreV1().Namespaces().Delete("litmus", &metav1.DeleteOptions{})
@@ -265,4 +265,4 @@ var _ = Describe("BDD on chaos-executor", func() {
 	By("Deleting all CRDs")
 	crdDeletion := exec.Command("kubectl", "delete", "-f", "../../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
-})*/
+})
