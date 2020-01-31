@@ -18,8 +18,6 @@ limitations under the License.
 
 import (
 	"flag"
-	"io/ioutil"
-	"net/http"
 	"os/exec"
 	"regexp"
 	"testing"
@@ -94,21 +92,7 @@ var _ = BeforeSuite(func() {
 		klog.Infof("Unable to create RBAC Permissions, due to error: %v", err)
 	}
 
-	resp, err := http.Get("https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml")
-	if err != nil {
-		klog.Infof("Unable to fetch webpage URL: https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml, due to error: %v ", err)
-	}
-	html, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		klog.Infof("Unable to convert Webpage into bytes, due to error: %v", err)
-	}
-
-	err = ioutil.WriteFile("/tmp/pod-delete.yaml", html, 0644)
-	if err != nil {
-		klog.Infof("Unable to write file, due to error: %v", err)
-	}
-
-	err = exec.Command("kubectl", "create", "-f", "/tmp/pod-delete.yaml", "-n", "litmus").Run()
+	err = exec.Command("kubectl", "create", "-f", "kubectl create -f https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml", "-n", "litmus").Run()
 
 	if err != nil {
 		klog.Infof("Unable to create Pod-Delete Experiment, due to error: %v", err)
