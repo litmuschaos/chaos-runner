@@ -104,7 +104,7 @@ var _ = BeforeSuite(func() {
 	klog.Infof("Chaos-Operator installed Successfully")
 
 	//Wait for the creation of chaos-operator
-	time.Sleep(10 * time.Second)
+	time.Sleep(20 * time.Second)
 
 	//Check for the status of the chaos-operator
 	operator, _ := k8sClientSet.CoreV1().Pods("litmus").List(metav1.ListOptions{LabelSelector: "name=chaos-operator"})
