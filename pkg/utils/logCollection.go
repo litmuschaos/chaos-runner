@@ -5,20 +5,31 @@ import (
 )
 
 func (log *LogStruct) Log() {
-	if log.Operation == "" && log.ResourceName == "" && log.ResourceType == "" && log.Namespace == "" {
-		if log.Verbosity == 0 {
+	if log.Verbosity == 0 {
+		if log.Operation == "" && log.ResourceName == "" && log.ResourceType == "" && log.Namespace == "" && log.String != "" {
 			klog.V(0).Infof(log.String)
-		} else if log.Verbosity == 1 {
-			klog.V(1).Infof(log.String)
-		} else if log.Verbosity == 2 {
-			klog.V(2).Infof(log.String)
 		}
-
+		if log.Operation != "" && log.ResourceName != "" && log.ResourceType != "" && log.Namespace != "" && log.String != "" {
+			klog.V(0).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace)
+		}
 	}
 	if log.Verbosity == 1 {
-		klog.V(0).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace)
-		klog.V(1).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v, due to error: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace, log.String)
-
+		if log.Operation == "" && log.ResourceName == "" && log.ResourceType == "" && log.Namespace == "" && log.String != "" {
+			klog.V(0).Infof(log.String)
+		}
+		if log.Operation != "" && log.ResourceName != "" && log.ResourceType != "" && log.Namespace != "" && log.String != "" {
+			klog.V(0).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace)
+			klog.V(1).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v, due to error: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace, log.String)
+		}
+	}
+	if log.Verbosity == 2 {
+		if log.Operation == "" && log.ResourceName == "" && log.ResourceType == "" && log.Namespace == "" && log.String != "" {
+			klog.V(1).Infof(log.String)
+		}
+		if log.Operation != "" && log.ResourceName != "" && log.ResourceType != "" && log.Namespace != "" && log.String != "" {
+			klog.V(1).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace)
+			klog.V(2).Infof("Unable to %v chaos resource: %v, of type: %v, in Namespace: %v, due to error: %v", log.Operation, log.ResourceName, log.ResourceType, log.Namespace, log.String)
+		}
 	}
 	clearLog(log)
 }
