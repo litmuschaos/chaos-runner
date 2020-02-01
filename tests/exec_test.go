@@ -104,7 +104,7 @@ var _ = BeforeSuite(func() {
 	klog.Infof("Chaos-Operator installed Successfully")
 
 	//Wait for the creation of chaos-operator
-	time.Sleep(20 * time.Second)
+	time.Sleep(40 * time.Second)
 
 	//Check for the status of the chaos-operator
 	operator, _ := k8sClientSet.CoreV1().Pods("litmus").List(metav1.ListOptions{LabelSelector: "name=chaos-operator"})
@@ -160,7 +160,6 @@ var _ = Describe("BDD on chaos-executor", func() {
 									Image: "nginx:latest",
 									Ports: []v1.ContainerPort{
 										{
-
 											ContainerPort: 80,
 										},
 									},
@@ -265,4 +264,7 @@ var _ = AfterSuite(func() {
 	By("Deleting all CRDs")
 	crdDeletion := exec.Command("kubectl", "delete", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
+	By("Deleting RBAC Permissions")
+	rbacDeletion := exec.Command("kubectl", "delete", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/rbac.yaml").Run()
+	Expect(rbacDeletion).To(BeNil())
 })
