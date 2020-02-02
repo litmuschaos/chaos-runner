@@ -253,14 +253,6 @@ var _ = Describe("BDD on chaos-executor", func() {
 
 //Deleting all unused resources
 var _ = AfterSuite(func() {
-
-	By("Deleting Litmus NameSpace")
-	deleteErr := k8sClientSet.CoreV1().Namespaces().Delete("litmus", &metav1.DeleteOptions{})
-	Expect(deleteErr).To(
-		BeNil(),
-		"Unable to delete Litmus, might be lack of permissions",
-	)
-
 	By("Deleting all CRDs")
 	crdDeletion := exec.Command("kubectl", "delete", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
