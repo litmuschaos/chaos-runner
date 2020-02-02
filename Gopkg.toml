@@ -3,7 +3,6 @@
 # Refer to https://golang.github.io/dep/docs/Gopkg.toml.html
 # for detailed Gopkg.toml documentation.
 #
-# required = ["github.com/user/thing/cmd/thing"]
 # ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
 #
 # [[constraint]]
@@ -50,9 +49,19 @@
   source = "https://github.com/fsnotify/fsnotify.git"
 
 [[override]]
+  name = "github.com/litmuschaos/kube-helper"
+  branch = "master"
+
+[[override]]
   name = "github.com/litmuschaos/chaos-operator"
   branch = "master"
 
 [prune]
   go-tests = true
   unused-packages = true
+  non-go = true
+  
+  [[prune.project]]
+    name = "github.com/litmuschaos/chaos-operator"
+    non-go = false
+    unused-packages = false

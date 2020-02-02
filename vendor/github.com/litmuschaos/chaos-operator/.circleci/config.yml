@@ -1,0 +1,118 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2.1
+
+jobs:
+
+  build:
+    machine: 
+      image: circleci/classic:201808-01
+    working_directory: ~/go/src/github.com/litmuschaos/chaos-operator
+    environment:
+      K8S_VERSION: v1.12.0
+      KUBECONFIG: /home/circleci/.kube/config
+      MINIKUBE_VERSION: v1.3.1
+      HOME: /home/circleci
+      CHANGE_MINIKUBE_NONE_USER: true
+      REPONAME: litmuschaos
+      IMGNAME: chaos-operator
+      IMGTAG: ci
+    steps:
+      - checkout
+      - run:
+         name: Setup kubectl
+         command: | 
+           curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+      - run:
+          name: Setup minikube
+          command: |
+            curl -Lo minikube https://storage.googleapis.com/minikube/releases/${MINIKUBE_VERSION}/minikube-linux-amd64  && chmod +x minikube
+            sudo install minikube /usr/local/bin
+      - run:
+          name: Start minikube
+          command: |
+            sudo -E minikube start --vm-driver=none --cpus 2 --memory 4096 --kubernetes-version=${K8S_VERSION}
+      - run: mkdir -p workspace
+      - run: 
+          name: Setup ENV
+          command: |
+            echo 'export GOPATH="$HOME/go"' >> workspace/env-vars 
+            echo 'export PATH="$GOPATH/bin:$PATH"' >> workspace/env-vars
+            echo 'export REPONAME="litmuschaos"' >> workspace/env-vars
+            echo 'export IMGNAME="chaos-operator"' >> workspace/env-vars
+            echo 'export IMGTAG="ci"' >> workspace/env-vars
+            cat workspace/env-vars >> $BASH_ENV
+            source $BASH_ENV
+      - run: make deps
+      - run: make gotasks
+      - run: |
+          docker build . -f build/Dockerfile -t ${REPONAME}/${IMGNAME}:${IMGTAG}
+      - run: make test 
+      - run: |
+          docker save -o workspace/image.tar ${REPONAME}/${IMGNAME}:${IMGTAG}
+      - persist_to_workspace:
+          root: workspace 
+          paths: 
+            - image.tar
+            - env-vars
+
+  push:
+    machine: 
+      image: circleci/classic:201808-01
+    environment:
+      IMGTAG: ci
+    working_directory: ~/go/src/github.com/litmuschaos/chaos-operator
+    steps: 
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: |
+          cat /tmp/workspace/env-vars >> $BASH_ENV
+      - checkout
+      - run: |
+          docker load -i /tmp/workspace/image.tar
+          ~/go/src/github.com/litmuschaos/chaos-operator/buildscripts/push --type=ci
+
+  release: 
+    machine: 
+      image: circleci/classic:201808-01
+    environment:
+      IMGTAG: ci
+    working_directory: ~/go/src/github.com/litmuschaos/chaos-operator
+    steps: 
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: |
+          cat /tmp/workspace/env-vars >> $BASH_ENV
+      - checkout 
+      - run: | 
+          docker load -i /tmp/workspace/image.tar
+          ~/go/src/github.com/litmuschaos/chaos-operator/buildscripts/push --type=release
+
+workflows:
+  version: 2
+  operator_build_deploy: 
+    jobs:
+      - build:
+          filters:
+            ## build jobs needs to be run for branch commits as well as tagged releases
+            tags:
+              only: /.*/
+      - push:
+          requires: 
+            - build
+          filters:
+            ## push jobs needs to be run for branch commits as well as tagged releases
+            ## docker images push won't be performed for PRs due to ENV not being applied
+            tags:
+              only: /.*/
+      - release:
+          requires:
+            - build
+          filters:
+            ## release jobs needs to be run for tagged releases alone & not for any branch commits
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+  
