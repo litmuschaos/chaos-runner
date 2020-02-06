@@ -1,5 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/litmuschaos/chaos-executor)](https://goreportcard.com/report/github.com/litmuschaos/chaos-executor)
 [![BCH compliance](https://bettercodehub.com/edge/badge/litmuschaos/chaos-executor?branch=master)](https://bettercodehub.com/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/litmuschaos/chaos-executor.svg)](https://hub.docker.com/r/litmuschaos/chaos-executor)
 
 # CHAOS RUNNER
 
