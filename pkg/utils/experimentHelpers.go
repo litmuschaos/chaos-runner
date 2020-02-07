@@ -6,14 +6,25 @@ import (
 )
 
 //SetValueFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
-func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientSets) {
-	expDetails.SetImage(clients)
-	expDetails.SetArgs(clients)
-	expDetails.SetLabels(clients)
+func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientSets, engine *EngineDetails) error {
+	if err := expDetails.SetImage(clients); err != nil {
+		return err
+	}
+	if err := expDetails.SetArgs(clients); err != nil {
+		return err
+	}
+	// Get engineUID from the chaos-runner's label
+	if err := SetEngineUID(engine, clients); err != nil {
+		return err
+	}
+	if err := expDetails.SetLabels(engine, clients); err != nil {
+		return nil
+	}
 	// Generation of Random String for appending it into Job
 	randomString := RandomString()
 	// Setting the JobName in Experiment Realted struct
 	expDetails.JobName = expDetails.Name + "-" + randomString
+	return nil
 }
 
 //SetENV sets ENV values in experimentDetails struct.
@@ -25,10 +36,6 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails *EngineDetails, client
 	}
 	// OverWriting the Defaults Varibles from the ChaosEngine ENV
 	if err := expDetails.SetEnvFromEngine(engineDetails.Name, clients); err != nil {
-		return err
-	}
-	// Get engineUID from the chaos-runner's label
-	if err := SetEngineUID(engineDetails, clients); err != nil {
 		return err
 	}
 	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
@@ -103,31 +110,34 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 }
 
 // SetLabels sets the Experiment Labels, in Experiment Structure
-func (expDetails *ExperimentDetails) SetLabels(clients ClientSets) {
+func (expDetails *ExperimentDetails) SetLabels(engine *EngineDetails, clients ClientSets) error {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infoln(err)
+		return err
 	}
 	expDetails.ExpLabels = expirementSpec.Spec.Definition.Labels
-
+	expDetails.ExpLabels["chaosUID"] = engine.UID
+	return nil
 }
 
 // SetImage sets the Experiment Image, in Experiment Structure
-func (expDetails *ExperimentDetails) SetImage(clients ClientSets) {
+func (expDetails *ExperimentDetails) SetImage(clients ClientSets) error {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infoln(err)
+		return err
 	}
 	expDetails.ExpImage = expirementSpec.Spec.Definition.Image
+	return nil
 }
 
 // SetArgs sets the Experiment Image, in Experiment Structure
-func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) {
+func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infoln(err)
+		return err
 	}
 	expDetails.ExpArgs = expirementSpec.Spec.Definition.Args
+	return nil
 }
 
 // SetEngineUID fetch the engineUID from chaos-runner

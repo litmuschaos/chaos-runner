@@ -169,7 +169,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e4634c05dd1aca55cd66e8c5729a741ba7b8824aa0fa812ca16170f35e8bc1fb"
+  digest = "1:4be4e032d963d4e979cc8d4547e658a1f60af52995d37d528f329277411221e3"
   name = "github.com/litmuschaos/chaos-operator"
   packages = [
     "pkg/apis/litmuschaos/v1alpha1",
@@ -178,7 +178,7 @@
     "pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1"
   ]
   pruneopts = "T"
-  revision = "a0363b6c786035d9a2520bf5d64de477d8a100b2"
+  revision = "91337e8cb5075982921267f489e77ff7e2e28ed9"
 
 [[projects]]
   branch = "master"

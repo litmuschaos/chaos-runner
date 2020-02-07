@@ -55,11 +55,13 @@ func main() {
 		if engineDetails.ClientUUID != "" {
 			analytics.TriggerAnalytics(engineDetails.Experiments[i], engineDetails.ClientUUID)
 		}
-
 		experiment := utils.NewExperimentDetails()
 		experiment.SetValueFromChaosEngine(engineDetails, i)
-		experiment.SetValueFromChaosExperiment(clients)
-		err := experiment.SetENV(&engineDetails, clients)
+		err := experiment.SetValueFromChaosExperiment(clients, &engineDetails)
+		if err != nil {
+			log.Infof("Unable to set values from chaosExperiments %v", err)
+		}
+		err = experiment.SetENV(&engineDetails, clients)
 		if err != nil {
 			log.Infof("Unable to set ENV %v", err)
 			break
