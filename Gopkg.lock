@@ -160,14 +160,6 @@
   version = "v1.1.9"
 
 [[projects]]
-  digest = "1:58999a98719fddbac6303cb17e8d85b945f60b72f48e3a2df6b950b97fa926f1"
-  name = "github.com/konsorten/go-windows-terminal-sequences"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
-  version = "v1.0.2"
-
-[[projects]]
   branch = "master"
   digest = "1:4be4e032d963d4e979cc8d4547e658a1f60af52995d37d528f329277411221e3"
   name = "github.com/litmuschaos/chaos-operator"
@@ -271,12 +263,12 @@
   version = "v1.9.0"
 
 [[projects]]
-  digest = "1:f4aaa07a6c33f2b354726d0571acbc8ca118837c75709f6353203ae1a3f8eeab"
-  name = "github.com/sirupsen/logrus"
+  digest = "1:4047c378584616813d610c9f993bf90dd0d07aed8d94bd3bc299cd35ececdcba"
+  name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
-  version = "v1.4.2"
+  revision = "614d223910a179a466c1767a985424175c39b465"
+  version = "v0.9.1"
 
 [[projects]]
   digest = "1:d115708a27806831d1babbc6f28a7478ddf8e32a7095507c816e2515fb03a810"
@@ -663,7 +655,7 @@
     "github.com/litmuschaos/kube-helper/kubernetes/volume/v1alpha1",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
-    "github.com/sirupsen/logrus",
+    "github.com/pkg/errors",
     "k8s.io/api/apps/v1",
     "k8s.io/api/batch/v1",
     "k8s.io/api/core/v1",
