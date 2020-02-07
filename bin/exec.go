@@ -59,8 +59,11 @@ func main() {
 		experiment := utils.NewExperimentDetails()
 		experiment.SetValueFromChaosEngine(engineDetails, i)
 		experiment.SetValueFromChaosExperiment(clients)
-		experiment.SetENV(&engineDetails, clients)
-
+		err := experiment.SetENV(&engineDetails, clients)
+		if err != nil {
+			log.Infof("Unable to set ENV %v", err)
+			break
+		}
 		experimentStatus := utils.ExperimentStatus{}
 		experimentStatus.IntialExperimentStatus(experiment)
 		experimentStatus.InitialPatchEngine(engineDetails, clients)
