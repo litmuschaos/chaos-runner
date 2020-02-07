@@ -4,9 +4,9 @@ import (
 	"flag"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/klog"
 
 	"github.com/litmuschaos/chaos-executor/pkg/utils"
 	"github.com/litmuschaos/chaos-executor/pkg/utils/analytics"
@@ -37,16 +37,18 @@ func main() {
 	// Getting the kubeconfig
 	config, err := getKubeConfig()
 	if err != nil {
-		log.Fatalf("Error in fetching the config, error : %v", err)
+		klog.V(0).Infof("Error in fetching the config, error : %v", err)
+		return
 	}
 	// clientSet creation for further use.
 	if err = clients.GenerateClientSets(config); err != nil {
-		log.Fatalf("Unable to create ClientSets")
+		klog.V(0).Infof("Unable to create ClientSets")
+		return
 	}
 
 	// Fetching all the ENV's needed
 	utils.GetOsEnv(&engineDetails)
-	log.Infoln("Experiments List: ", engineDetails.Experiments, " ", "Engine Name: ", engineDetails.Name, " ", "appLabels : ", engineDetails.AppLabel, " ", "appNamespace: ", engineDetails.AppNamespace, " ", "appKind: ", engineDetails.AppKind, " ", "Service Account Name: ", engineDetails.SvcAccount)
+	klog.V(0).Infoln("Experiments List: ", engineDetails.Experiments, " ", "Engine Name: ", engineDetails.Name, " ", "appLabels : ", engineDetails.AppLabel, " ", "appNamespace: ", engineDetails.AppNamespace, " ", "appKind: ", engineDetails.AppKind, " ", "Service Account Name: ", engineDetails.SvcAccount)
 
 	// Steps for each Experiment
 	for i := range engineDetails.Experiments {
@@ -59,62 +61,50 @@ func main() {
 		experiment := utils.NewExperimentDetails()
 		experiment.SetValueFromChaosEngine(engineDetails, i)
 		experiment.SetValueFromChaosExperiment(clients)
-		experiment.SetENV(engineDetails, clients)
+		if err := experiment.SetENV(engineDetails, clients); err != nil {
+			klog.V(0).Infof("Unable to patch ENV, due to error: %v", err)
+		}
 
 		experimentStatus := utils.ExperimentStatus{}
 		experimentStatus.IntialExperimentStatus(experiment)
-		experimentStatus.InitialPatchEngine(engineDetails, clients)
+		if err := experimentStatus.InitialPatchEngine(engineDetails, clients); err != nil {
+			klog.V(0).Infof("Unable to set Intial Status in ChaosEngine, due to error: %v", err)
+		}
 
-		log.Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
+		klog.V(0).Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
 
-		// isFound will return the status of experiment in that namespace
-		// 1 -> found, 0 -> not-found
-		isFound, err := experiment.CheckExistence(clients)
-		log.Infoln("Experiment Found Status : ", isFound)
-
-		// If not found in AppNamespace skip the further steps
-		if !isFound {
-			engineDetails.ExperimentNotFoundPatchEngine(experiment, clients)
-			log.Infof("Unable to list Chaos Experiment: %v, in Namespace: %v, skipping execution, with error: %v", experiment.Name, experiment.Namespace, err)
+		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
+			klog.V(0).Infof("Unable to get ChaosExperiment Name: %v, in namespace: %v, due to error: %v", experiment.Name, experiment.Namespace, err)
 			break
 		}
 
-		// Patch ConfigMaps to ChaosExperiment Job
-		if err := experiment.PatchConfigMaps(clients, engineDetails); err != nil {
-			log.Infof("Unable to patch ConfigMaps, due to: %v", err)
-			break
+		if err := experiment.PatchResources(engineDetails, clients); err != nil {
+			klog.V(0).Infof("Unable to patch Chaos Resources required for Chaos Experiment: %v, due to error: %v", experiment.Name, err)
 		}
-
-		// Patch Secrets to ChaosExperiment Job
-		if err = experiment.PatchSecrets(clients, engineDetails); err != nil {
-			log.Infof("Unable to patch Secrets, due to: %v", err)
-			break
-		}
-
-		experiment.VolumeOpts.VolumeOperations(experiment.ConfigMaps, experiment.Secrets)
 
 		// Creation of PodTemplateSpec, and Final Job
 		if err = utils.BuildingAndLaunchJob(experiment, clients); err != nil {
-			log.Infof("Unable to construct chaos experiment job due to: %v", err)
+			klog.V(0).Infof("Unable to construct chaos experiment job due to: %v", err)
 			break
 		}
 
 		time.Sleep(5 * time.Second)
 
+		klog.V(0).Infof("Started Chaos Experiment Name: %v, with Job Name: %v", experiment.Name, experiment.JobName)
 		// Watching the Job till Completion
 		if err = engineDetails.WatchJobForCompletion(experiment, clients); err != nil {
-			log.Infof("Unable to Watch the Job, error: %v", err)
+			klog.V(0).Infof("Unable to Watch the Job, error: %v", err)
 			break
 		}
 
 		// Will Update the chaosEngine Status
 		if err = engineDetails.UpdateEngineWithResult(experiment, clients); err != nil {
-			log.Infof("Unable to Update ChaosEngine Status due to: %v", err)
+			klog.V(0).Infof("Unable to Update ChaosEngine Status due to: %v", err)
 		}
 
 		// Delete / retain the Job, using the jobCleanUpPolicy
 		if err = engineDetails.DeleteJobAccordingToJobCleanUpPolicy(experiment, clients); err != nil {
-			log.Infof("Unable to Delete chaosExperiment Job due to: %v", err)
+			klog.V(0).Infof("Unable to Delete chaosExperiment Job due to: %v", err)
 		}
 	}
 }

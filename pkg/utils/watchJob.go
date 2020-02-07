@@ -1,12 +1,13 @@
 package utils
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	log "github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
+
+	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
 // checkStatusListForExp loops over all the status patched in chaosEngine, to get the one, which has to be updated
@@ -22,26 +23,24 @@ func checkStatusListForExp(status []v1alpha1.ExperimentStatuses, jobName string)
 }
 
 // GetJobStatus gets status of the job
-func GetJobStatus(experimentDetails *ExperimentDetails, clients ClientSets) int32 {
+func GetJobStatus(experimentDetails *ExperimentDetails, clients ClientSets) (int32, error) {
 
 	getJob, err := clients.KubeClient.BatchV1().Jobs(experimentDetails.Namespace).Get(experimentDetails.JobName, metav1.GetOptions{})
 	if err != nil {
-		log.Infoln("Unable to get the job : ", err)
 		//TODO: check for jobStatus should not return -1 directly, look for best practices.
-		return -1
+		return -1, errors.Wrapf(err, "Unable to get ChaosExperiment Job, due to error: %v", err)
 	}
 	//TODO:check the container of the Job, rather than going with the JobStatus.
 	jobStatus := getJob.Status.Active
-	log.Infof("Watching Job: %v, and Updating Status", experimentDetails.JobName)
-	return jobStatus
+	return jobStatus, nil
 }
 
 // GetChaosEngine returns chaosEngine Object
 func (engineDetails EngineDetails) GetChaosEngine(clients ClientSets) (*v1alpha1.ChaosEngine, error) {
 	expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infof("Unable to get chaosEngine Name: %v, in NameSpace: %v", engineDetails.Name, engineDetails.AppNamespace)
-		return nil, err
+
+		return nil, errors.Wrapf(err, "Unable to get ChaosEngine Name: %v, in namespace: %v, due to error: %v", engineDetails.Name, engineDetails.AppNamespace, err)
 	}
 	return expEngine, nil
 }
@@ -55,7 +54,7 @@ func (expStatus *ExperimentStatus) PatchChaosEngineStatus(engineDetails EngineDe
 	}
 	jobIndex := checkStatusListForExp(expEngine.Status.Experiments, expStatus.Name)
 	if jobIndex == -1 {
-		return fmt.Errorf("Unable to find the status for JobName: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
+		return errors.Wrapf(err, "Unable to find the status for JobName: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
 	}
 	expEngine.Status.Experiments[jobIndex] = v1alpha1.ExperimentStatuses(*expStatus)
 	if _, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine); err != nil {
@@ -68,20 +67,20 @@ func (expStatus *ExperimentStatus) PatchChaosEngineStatus(engineDetails EngineDe
 func (engineDetails EngineDetails) WatchJobForCompletion(experiment *ExperimentDetails, clients ClientSets) error {
 
 	//TODO: use watch rather than checking for status manually.
-	jobStatus := GetJobStatus(experiment, clients)
-	if jobStatus == -1 {
-		return fmt.Errorf("Unable to get the chaosExperiment Job Status")
-	}
+	jobStatus := int32(1)
+	var err error
 	for jobStatus == 1 {
+		jobStatus, err = GetJobStatus(experiment, clients)
+		if err != nil {
+			return err
+		}
 		//checkForjobName := checkStatusListForExp(expEngine.Status.Experiments, experiment.JobName)
 		var expStatus ExperimentStatus
 		expStatus.AwaitedExperimentStatus(experiment)
 		if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
-			log.Infof("Unable to patch ChaosEngine")
-			return err
+			return errors.Wrapf(err, "Unable to patch ChaosEngine in namespace: %v, due to error: %v", engineDetails.AppNamespace, err)
 		}
 		time.Sleep(5 * time.Second)
-		jobStatus = GetJobStatus(experiment, clients)
 
 	}
 	return nil
@@ -90,7 +89,6 @@ func (engineDetails EngineDetails) WatchJobForCompletion(experiment *ExperimentD
 // GetResultName returns the resultName using the experimentName and engine Name
 func GetResultName(engineName string, experimentName string) string {
 	resultName := engineName + "-" + experimentName
-	log.Info("ResultName : " + resultName)
 	return resultName
 }
 
@@ -100,9 +98,7 @@ func (experimentDetails *ExperimentDetails) GetChaosResult(engineDetails EngineD
 	resultName := GetResultName(engineDetails.Name, experimentDetails.Name)
 	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.AppNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
-		log.Infoln("Unable to get chaosResult Resource")
-		log.Infoln(err)
-		return nil, err
+		return nil, errors.Wrapf(err, "Unable to get ChaosResult Name: %v in namespace: %v, due to error: %v", resultName, engineDetails.AppNamespace, err)
 	}
 	return expResult, nil
 }
@@ -134,15 +130,14 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 	}
 
 	if expEngine.Spec.JobCleanUpPolicy == "delete" {
-		log.Infoln("Will delete the job as jobCleanPolicy is set to : " + expEngine.Spec.JobCleanUpPolicy)
+		klog.V(0).Infoln("Will delete the job as jobCleanPolicy is set to : " + expEngine.Spec.JobCleanUpPolicy)
 
 		deletePolicy := metav1.DeletePropagationForeground
 		deleteJob := clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Delete(experiment.JobName, &metav1.DeleteOptions{
 			PropagationPolicy: &deletePolicy,
 		})
 		if deleteJob != nil {
-			log.Infoln(deleteJob)
-			return deleteJob
+			return errors.Wrapf(err, "Unable to delete ChaosExperiment Job Name: %v, in namespace: %v, due to error: %v", experiment.JobName, experiment.Namespace, err)
 		}
 	}
 	return nil

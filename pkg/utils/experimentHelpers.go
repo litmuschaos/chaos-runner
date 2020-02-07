@@ -1,8 +1,9 @@
 package utils
 
 import (
-	log "github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 //SetValueFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
@@ -17,18 +18,26 @@ func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientS
 }
 
 //SetENV sets ENV values in experimentDetails struct.
-func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) {
+func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) error {
 	// Get the Default ENV's from ChaosExperiment
-	log.Infoln("Getting the ENV Variables")
-	expDetails.SetDefaultEnv(clients)
+	klog.V(0).Infof("Getting the ENV Variables")
+	if err := expDetails.SetDefaultEnv(clients); err != nil {
+		return err
+	}
+
 	// OverWriting the Defaults Varibles from the ChaosEngine ENV
-	expDetails.SetEnvFromEngine(engineDetails.Name, clients)
+	if err := expDetails.SetEnvFromEngine(engineDetails.Name, clients); err != nil {
+		return err
+	}
+
 	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
 	expDetails.Env["CHAOSENGINE"] = engineDetails.Name
 	expDetails.Env["APP_LABEL"] = engineDetails.AppLabel
 	expDetails.Env["APP_NAMESPACE"] = engineDetails.AppNamespace
 	expDetails.Env["APP_KIND"] = engineDetails.AppKind
 	expDetails.Env["AUXILIARY_APPINFO"] = engineDetails.AuxiliaryAppInfo
+
+	return nil
 }
 
 //SetValueFromChaosEngine sets value in experimentDetails struct from chaosEngine
@@ -46,21 +55,25 @@ func NewExperimentDetails() *ExperimentDetails {
 	return &experimentDetails
 }
 
-// CheckExistence will check the experiment in the app namespace
-func (expDetails *ExperimentDetails) CheckExistence(clients ClientSets) (bool, error) {
+// HandleChaosExperimentExistence will check the experiment in the app namespace
+func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetails EngineDetails, clients ClientSets) error {
 
 	_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		return false, err
+		if err := engineDetails.ExperimentNotFoundPatchEngine(expDetails, clients); err != nil {
+			return errors.Wrapf(err, "Unable to patch Chaos Engine Name: %v, in namespace: %v, due to error: %v", engineDetails.Name, engineDetails.AppNamespace, err)
+		}
+		return errors.Wrapf(err, "Unable to list Chaos Experiment Name: %v,in Namespace: %v, due to error: %v", expDetails.Name, expDetails.Namespace, err)
 	}
-	return true, nil
+
+	return nil
 }
 
 // SetDefaultEnv sets the Env's in Experiment Structure
-func (expDetails *ExperimentDetails) SetDefaultEnv(clients ClientSets) {
+func (expDetails *ExperimentDetails) SetDefaultEnv(clients ClientSets) error {
 	experimentEnv, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infof("Unable to get the Default ENV from ChaosExperiment, error : %v", err)
+		return errors.Wrapf(err, "Unable to get the Default ENV from ChaosExperiment, error : %v", err)
 	}
 
 	envList := experimentEnv.Spec.Definition.ENVList
@@ -70,14 +83,15 @@ func (expDetails *ExperimentDetails) SetDefaultEnv(clients ClientSets) {
 		value := envList[i].Value
 		expDetails.Env[key] = value
 	}
+	return nil
 }
 
 // SetEnvFromEngine will over-ride the default variables from one provided in the chaosEngine
-func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients ClientSets) {
+func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients ClientSets) error {
 
 	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
 	if err != nil {
-		log.Infof("Unable to get the chaosEngine, error : %v", err)
+		return errors.Wrapf(err, "Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
 	}
 	envList := engineSpec.Spec.Experiments
 	for i := range envList {
@@ -88,6 +102,7 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 			}
 		}
 	}
+	return nil
 
 }
 
@@ -95,7 +110,7 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 func (expDetails *ExperimentDetails) SetLabels(clients ClientSets) {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infoln(err)
+		klog.V(0).Infoln(err)
 	}
 	expDetails.ExpLabels = expirementSpec.Spec.Definition.Labels
 
@@ -105,7 +120,7 @@ func (expDetails *ExperimentDetails) SetLabels(clients ClientSets) {
 func (expDetails *ExperimentDetails) SetImage(clients ClientSets) {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infoln(err)
+		klog.V(0).Infoln(err)
 	}
 	expDetails.ExpImage = expirementSpec.Spec.Definition.Image
 }
@@ -114,7 +129,7 @@ func (expDetails *ExperimentDetails) SetImage(clients ClientSets) {
 func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		log.Infoln(err)
+		klog.V(0).Infoln(err)
 	}
 	expDetails.ExpArgs = expirementSpec.Spec.Definition.Args
 }
