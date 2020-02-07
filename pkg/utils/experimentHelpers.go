@@ -29,14 +29,17 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 	if err := expDetails.SetEnvFromEngine(engineDetails.Name, clients); err != nil {
 		return err
 	}
-
+	// Get engineUID from the chaos-runner's label
+	if err := SetEngineUID(&engineDetails, clients); err != nil {
+		return err
+	}
 	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
 	expDetails.Env["CHAOSENGINE"] = engineDetails.Name
 	expDetails.Env["APP_LABEL"] = engineDetails.AppLabel
 	expDetails.Env["APP_NAMESPACE"] = engineDetails.AppNamespace
 	expDetails.Env["APP_KIND"] = engineDetails.AppKind
 	expDetails.Env["AUXILIARY_APPINFO"] = engineDetails.AuxiliaryAppInfo
-
+	expDetails.Env["CHAOS_UID"] = engineDetails.UID
 	return nil
 }
 
@@ -103,7 +106,6 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 		}
 	}
 	return nil
-
 }
 
 // SetLabels sets the Experiment Labels, in Experiment Structure
@@ -132,4 +134,20 @@ func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) {
 		klog.V(0).Infoln(err)
 	}
 	expDetails.ExpArgs = expirementSpec.Spec.Definition.Args
+}
+
+// SetEngineUID fetch the engineUID from chaos-runner
+func SetEngineUID(engine *EngineDetails, clients ClientSets) error {
+	runnerName := engine.Name + "-runner"
+	runnerSpec, err := clients.KubeClient.CoreV1().Pods(engine.AppNamespace).Get(runnerName, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	engineUID := runnerSpec.Labels["engineUID"]
+	if engineUID != "" {
+		engine.UID = engineUID
+	} else {
+		return errors.Wrapf(err, "Unable to get ChaosEngine UID, due to error: %v", err)
+	}
+	return nil
 }

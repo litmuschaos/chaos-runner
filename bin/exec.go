@@ -63,6 +63,7 @@ func main() {
 		experiment.SetValueFromChaosExperiment(clients)
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to patch ENV, due to error: %v", err)
+			break
 		}
 
 		experimentStatus := utils.ExperimentStatus{}
