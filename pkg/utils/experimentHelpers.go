@@ -46,15 +46,10 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 }
 
 //SetValueFromChaosEngine sets value in experimentDetails struct from chaosEngine
-func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engineDetails *EngineDetails, i int, clients ClientSets) error {
+func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engineDetails *EngineDetails, i int) {
 	expDetails.Name = engineDetails.Experiments[i]
 	expDetails.Namespace = engineDetails.AppNamespace
 	expDetails.SvcAccount = engineDetails.SvcAccount
-	// Get engineUID from the chaos-runner's label
-	if err := SetEngineUID(engineDetails, clients); err != nil {
-		return err
-	}
-	return nil
 }
 
 // NewExperimentDetails initilizes the structure
@@ -146,8 +141,8 @@ func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
 	return nil
 }
 
-// SetEngineUID fetch the engineUID from chaos-runner
-func SetEngineUID(engine *EngineDetails, clients ClientSets) error {
+// SetValueFromChaosRunner fetch the engineUID from ChaosRunner
+func (engine *EngineDetails) SetValueFromChaosRunner(clients ClientSets) error {
 	runnerName := engine.Name + "-runner"
 	runnerSpec, err := clients.KubeClient.CoreV1().Pods(engine.AppNamespace).Get(runnerName, metav1.GetOptions{})
 	if err != nil {

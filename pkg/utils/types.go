@@ -55,8 +55,8 @@ type ClientSets struct {
 	LitmusClient *clientV1alpha1.Clientset
 }
 
-// GenerateClientSets will generation both ClientSets (k8s, and Litmus)
-func (clientSets *ClientSets) GenerateClientSets() error {
+// GenerateClientSetFromKubeConfig will generation both ClientSets (k8s, and Litmus)
+func (clientSets *ClientSets) GenerateClientSetFromKubeConfig() error {
 	config, err := getKubeConfig()
 	if err != nil {
 		return err
@@ -74,6 +74,8 @@ func (clientSets *ClientSets) GenerateClientSets() error {
 
 	return nil
 }
+
+// Generate
 
 // getKubeConfig setup the config for access cluster resource
 func getKubeConfig() (*rest.Config, error) {

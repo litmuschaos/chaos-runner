@@ -15,7 +15,7 @@ func main() {
 	clients := utils.ClientSets{}
 
 	// Getting kubeConfig and Generate ClientSets
-	if err := clients.GenerateClientSets(); err != nil {
+	if err := clients.GenerateClientSetFromKubeConfig(); err != nil {
 		klog.V(0).Infof("Unable to create ClientSets, error: %v", err)
 		return
 	}
@@ -32,10 +32,14 @@ func main() {
 			analytics.TriggerAnalytics(engineDetails.Experiments[i], engineDetails.ClientUUID)
 		}
 		experiment := utils.NewExperimentDetails()
-		if err := experiment.SetValueFromChaosEngine(&engineDetails, i, clients); err != nil {
-			klog.V(0).Infof("Unable to set values from chaosEngine %v", err)
+
+		experiment.SetValueFromChaosEngine(&engineDetails, i)
+
+		if err := engineDetails.SetValueFromChaosRunner(clients); err != nil {
+			klog.V(0).Infof("Unable to set values from ChaosRunner, error: %v", err)
 			break
 		}
+
 		if err := experiment.SetValueFromChaosExperiment(clients, &engineDetails); err != nil {
 			klog.V(0).Infof("Unable to set values from chaosExperiments %v", err)
 			break
