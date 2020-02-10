@@ -2,8 +2,8 @@ FROM registry.access.redhat.com/ubi7-dev-preview/ubi-minimal:7.6
 
 LABEL maintainer="LitmusChaos"
 
-ENV EXECUTOR=/usr/local/bin/chaos-executor
+ENV RUNNER=/usr/local/bin/chaos-runner
 
-COPY build/_output/bin/chaos-executor ${EXECUTOR}
+COPY build/_output/bin/chaos-runner ${RUNNER}
 
-ENTRYPOINT ["/usr/local/bin/chaos-executor"]
+ENTRYPOINT ["/usr/local/bin/chaos-runner"]
