@@ -11,8 +11,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/litmuschaos/chaos-executor/pkg/utils/k8s"
-	"github.com/litmuschaos/chaos-executor/pkg/utils/litmus"
+	"github.com/litmuschaos/chaos-runner/pkg/utils/k8s"
+	"github.com/litmuschaos/chaos-runner/pkg/utils/litmus"
 )
 
 // EngineDetails struct is for collecting all the engine-related details
