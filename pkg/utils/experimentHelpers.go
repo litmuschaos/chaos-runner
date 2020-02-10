@@ -148,9 +148,9 @@ func (engine *EngineDetails) SetValueFromChaosRunner(clients ClientSets) error {
 	if err != nil {
 		return errors.Wrapf(err, "Unable to get runner pod in namespace: %v", engine.AppNamespace)
 	}
-	engineUID := runnerSpec.Labels["engineUID"]
-	if engineUID != "" {
-		engine.UID = engineUID
+	chaosUID := runnerSpec.Labels["chaosUID"]
+	if chaosUID != "" {
+		engine.UID = chaosUID
 	} else {
 		return errors.Wrapf(err, "Unable to get ChaosEngine UID, due to error: %v", err)
 	}
