@@ -1,6 +1,6 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/litmuschaos/chaos-executor)](https://goreportcard.com/report/github.com/litmuschaos/chaos-executor)
-[![BCH compliance](https://bettercodehub.com/edge/badge/litmuschaos/chaos-executor?branch=master)](https://bettercodehub.com/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/litmuschaos/chaos-executor.svg)](https://hub.docker.com/r/litmuschaos/chaos-executor)
+[![Go Report Card](https://goreportcard.com/badge/github.com/litmuschaos/chaos-runner)](https://goreportcard.com/report/github.com/litmuschaos/chaos-runner)
+[![BCH compliance](https://bettercodehub.com/edge/badge/litmuschaos/chaos-runner?branch=master)](https://bettercodehub.com/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/litmuschaos/chaos-runner.svg)](https://hub.docker.com/r/litmuschaos/chaos-runner)
 
 # CHAOS RUNNER
 
@@ -13,7 +13,7 @@ The chaos Runner is an operational bridge between the Chaos-Operator and the Lit
 - Cleans up the experiment job post completion based on the engine's jobCleanUpPolicy (delete or retain)
 - Patches the ChaosEngine with the verdict of the experiment 
 
-This repo consists of the go-version of the currently used ansible-based runner/executor. The motivation includes:
+This repo consists of the go-version of the currently used ansible-based runner/runner. The motivation includes:
 
 - Support a contextual/audit logging framework in litmus where the sequence of events from creation of the engine to its eventual removal 
   (with the experiment execution summary in b/w) is traceable
@@ -51,7 +51,7 @@ spec:
   components:
     runner:
       type: "go"
-      image: "litmuschaos/chaos-executor:ci"
+      image: "litmuschaos/chaos-runner:ci"
   experiments:
   - name: pod-delete 
     spec:

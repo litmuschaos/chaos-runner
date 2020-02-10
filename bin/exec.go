@@ -5,8 +5,8 @@ import (
 
 	"k8s.io/klog"
 
-	"github.com/litmuschaos/chaos-executor/pkg/utils"
-	"github.com/litmuschaos/chaos-executor/pkg/utils/analytics"
+	"github.com/litmuschaos/chaos-runner/pkg/utils"
+	"github.com/litmuschaos/chaos-runner/pkg/utils/analytics"
 )
 
 func main() {
