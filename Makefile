@@ -63,6 +63,9 @@ build:
 	@echo "------------------"
 	@go build -o build/_output/bin/chaos-runner ./bin
 
+.PHONY: gotasks
+gotasks: format lint build
+
 .PHONY: test
 test:
 	@echo "------------------"

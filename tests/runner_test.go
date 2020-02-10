@@ -252,11 +252,11 @@ var _ = Describe("BDD on chaos-runner", func() {
 })
 
 //Deleting all unused resources
-/*var _ = AfterSuite(func() {
+var _ = AfterSuite(func() {
 	By("Deleting all CRDs")
 	crdDeletion := exec.Command("kubectl", "delete", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
 	By("Deleting RBAC Permissions")
 	rbacDeletion := exec.Command("kubectl", "delete", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/rbac.yaml").Run()
 	Expect(rbacDeletion).To(BeNil())
-})*/
+})
