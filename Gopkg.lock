@@ -38,7 +38,7 @@
   name = "github.com/emicklei/go-restful"
   packages = [
     ".",
-    "log",
+    "log"
   ]
   pruneopts = "NUT"
   revision = "a2fa14558f9a828f859fcad1d5c824437d7d4388"
@@ -81,7 +81,7 @@
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
-    "sortkeys",
+    "sortkeys"
   ]
   pruneopts = "NUT"
   revision = "5628607bb4c51c3157aacc3a50f0ab707582b805"
@@ -95,7 +95,7 @@
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
-    "ptypes/timestamp",
+    "ptypes/timestamp"
   ]
   pruneopts = "NUT"
   revision = "d23c5127dc24889085f8ccea5c9d560a57a879d8"
@@ -115,7 +115,7 @@
   packages = [
     "OpenAPIv2",
     "compiler",
-    "extensions",
+    "extensions"
   ]
   pruneopts = "NUT"
   revision = "99384834bf8c58ce7ab88db353283bedcb53e1ca"
@@ -129,7 +129,7 @@
     "ratelimiter",
     "util",
     "watch",
-    "winfile",
+    "winfile"
   ]
   pruneopts = "NUT"
   revision = "a30252cb686a21eb2d0b98132633053ec2f7f1e5"
@@ -167,7 +167,7 @@
     "pkg/apis/litmuschaos/v1alpha1",
     "pkg/client/clientset/versioned",
     "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1",
+    "pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1"
   ]
   pruneopts = "T"
   revision = "91337e8cb5075982921267f489e77ff7e2e28ed9"
@@ -181,7 +181,7 @@
     "kubernetes/job",
     "kubernetes/jobspec",
     "kubernetes/podtemplatespec",
-    "kubernetes/volume/v1alpha1",
+    "kubernetes/volume/v1alpha1"
   ]
   pruneopts = "NUT"
   revision = "102614ee4ecd3d08023980d32127c4ff5d7df415"
@@ -192,7 +192,7 @@
   packages = [
     "buffer",
     "jlexer",
-    "jwriter",
+    "jwriter"
   ]
   pruneopts = "NUT"
   revision = "1b2b06f5f209fea48ff5922d8bfb2b9ed5d8f00b"
@@ -235,7 +235,7 @@
     "reporters/stenographer",
     "reporters/stenographer/support/go-colorable",
     "reporters/stenographer/support/go-isatty",
-    "types",
+    "types"
   ]
   pruneopts = "NUT"
   revision = "40598150331533e3cd497f21dcce387dae84b561"
@@ -256,7 +256,7 @@
     "matchers/support/goraph/edge",
     "matchers/support/goraph/node",
     "matchers/support/goraph/util",
-    "types",
+    "types"
   ]
   pruneopts = "NUT"
   revision = "6be6c439588487cd908a3a700795660c2a16dfec"
@@ -299,7 +299,7 @@
     "http/httpguts",
     "http2",
     "http2/hpack",
-    "idna",
+    "idna"
   ]
   pruneopts = "NUT"
   revision = "16171245cfb220d5317888b716d69c1fb4e7992b"
@@ -313,7 +313,7 @@
     "google",
     "internal",
     "jws",
-    "jwt",
+    "jwt"
   ]
   pruneopts = "NUT"
   revision = "bf48bf16ab8d622ce64ec6ce98d2c98f916b6303"
@@ -324,7 +324,7 @@
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows",
+    "windows"
   ]
   pruneopts = "NUT"
   revision = "d101bd2416d505c0448a6ce8a282482678040a89"
@@ -361,7 +361,7 @@
     "unicode/cldr",
     "unicode/norm",
     "unicode/rangetable",
-    "width",
+    "width"
   ]
   pruneopts = "NUT"
   revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
@@ -381,7 +381,7 @@
   name = "golang.org/x/xerrors"
   packages = [
     ".",
-    "internal",
+    "internal"
   ]
   pruneopts = "NUT"
   revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
@@ -399,7 +399,7 @@
     "internal/modules",
     "internal/remote_api",
     "internal/urlfetch",
-    "urlfetch",
+    "urlfetch"
   ]
   pruneopts = "NUT"
   revision = "971852bfffca25b069c31162ae8f247a3dba083b"
@@ -477,7 +477,7 @@
     "settings/v1alpha1",
     "storage/v1",
     "storage/v1alpha1",
-    "storage/v1beta1",
+    "storage/v1beta1"
   ]
   pruneopts = "NUT"
   revision = "bd6ac527cfd24ad928f66798231e5bcf7f37321b"
@@ -520,7 +520,7 @@
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
-    "third_party/forked/golang/reflect",
+    "third_party/forked/golang/reflect"
   ]
   pruneopts = "NUT"
   revision = "f2f3a405f61d6c2cdc0d00687c1b5d90de91e9f0"
@@ -591,7 +591,7 @@
     "util/flowcontrol",
     "util/homedir",
     "util/jsonpath",
-    "util/keyutil",
+    "util/keyutil"
   ]
   pruneopts = "NUT"
   revision = "06eb1244587a17d4994ff9de4ce93756a2f16f0b"
@@ -626,7 +626,7 @@
   name = "sigs.k8s.io/controller-runtime"
   packages = [
     "pkg/runtime/scheme",
-    "pkg/scheme",
+    "pkg/scheme"
   ]
   pruneopts = "NUT"
   revision = "d21241119ea4de139f1892ba2f5bc72c96d07f3f"
@@ -665,7 +665,7 @@
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
-    "k8s.io/klog",
+    "k8s.io/klog"
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

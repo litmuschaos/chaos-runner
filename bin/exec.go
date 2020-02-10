@@ -1,48 +1,22 @@
 package main
 
 import (
-	"flag"
 	"time"
 
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
 
 	"github.com/litmuschaos/chaos-executor/pkg/utils"
 	"github.com/litmuschaos/chaos-executor/pkg/utils/analytics"
 )
 
-// getKubeConfig setup the config for access cluster resource
-func getKubeConfig() (*rest.Config, error) {
-	kubeconfig := flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	flag.Parse()
-	// Use in-cluster config if kubeconfig path is specified
-	if *kubeconfig == "" {
-		config, err := rest.InClusterConfig()
-		if err != nil {
-			return config, err
-		}
-	}
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		return config, err
-	}
-	return config, err
-}
-
 func main() {
 
 	engineDetails := utils.EngineDetails{}
 	clients := utils.ClientSets{}
-	// Getting the kubeconfig
-	config, err := getKubeConfig()
-	if err != nil {
-		klog.V(0).Infof("Error in fetching the config, error : %v", err)
-		return
-	}
-	// clientSet creation for further use.
-	if err = clients.GenerateClientSets(config); err != nil {
-		klog.V(0).Infof("Unable to create ClientSets")
+
+	// Getting kubeConfig and Generate ClientSets
+	if err := clients.GenerateClientSetFromKubeConfig(); err != nil {
+		klog.V(0).Infof("Unable to create ClientSets, error: %v", err)
 		return
 	}
 
@@ -57,15 +31,23 @@ func main() {
 		if engineDetails.ClientUUID != "" {
 			analytics.TriggerAnalytics(engineDetails.Experiments[i], engineDetails.ClientUUID)
 		}
-
 		experiment := utils.NewExperimentDetails()
-		experiment.SetValueFromChaosEngine(engineDetails, i)
-		experiment.SetValueFromChaosExperiment(clients)
+
+		experiment.SetValueFromChaosEngine(&engineDetails, i)
+
+		if err := engineDetails.SetValueFromChaosRunner(clients); err != nil {
+			klog.V(0).Infof("Unable to set values from ChaosRunner, error: %v", err)
+			break
+		}
+
+		if err := experiment.SetValueFromChaosExperiment(clients, &engineDetails); err != nil {
+			klog.V(0).Infof("Unable to set values from chaosExperiments %v", err)
+			break
+		}
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to patch ENV, due to error: %v", err)
 			break
 		}
-
 		experimentStatus := utils.ExperimentStatus{}
 		experimentStatus.IntialExperimentStatus(experiment)
 		if err := experimentStatus.InitialPatchEngine(engineDetails, clients); err != nil {
@@ -84,7 +66,7 @@ func main() {
 		}
 
 		// Creation of PodTemplateSpec, and Final Job
-		if err = utils.BuildingAndLaunchJob(experiment, clients); err != nil {
+		if err := utils.BuildingAndLaunchJob(experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to construct chaos experiment job due to: %v", err)
 			break
 		}
@@ -93,18 +75,18 @@ func main() {
 
 		klog.V(0).Infof("Started Chaos Experiment Name: %v, with Job Name: %v", experiment.Name, experiment.JobName)
 		// Watching the Job till Completion
-		if err = engineDetails.WatchJobForCompletion(experiment, clients); err != nil {
+		if err := engineDetails.WatchJobForCompletion(experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to Watch the Job, error: %v", err)
 			break
 		}
 
 		// Will Update the chaosEngine Status
-		if err = engineDetails.UpdateEngineWithResult(experiment, clients); err != nil {
+		if err := engineDetails.UpdateEngineWithResult(experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to Update ChaosEngine Status due to: %v", err)
 		}
 
 		// Delete / retain the Job, using the jobCleanUpPolicy
-		if err = engineDetails.DeleteJobAccordingToJobCleanUpPolicy(experiment, clients); err != nil {
+		if err := engineDetails.DeleteJobAccordingToJobCleanUpPolicy(experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to Delete chaosExperiment Job due to: %v", err)
 		}
 	}
