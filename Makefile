@@ -2,7 +2,7 @@
 # Reference Guide - https://www.gnu.org/software/make/manual/make.html
 
 REGISTRY ?= litmuschaos
-IMG_NAME ?= chaos-executor
+IMG_NAME ?= chaos-runner
 PACKAGE_VERSION ?= ci
 IS_DOCKER_INSTALLED = $(shell which docker >> /dev/null 2>&1; echo $$?)
 HOME = $(shell echo $$HOME)
@@ -10,7 +10,7 @@ HOME = $(shell echo $$HOME)
 PACKAGES = $(shell go list ./... | grep -v '/vendor/')
 
 .PHONY: all
-all: godeps format lint build test dockerops 
+all: godeps format lint build dockerops test
 
 .PHONY: help
 help:
@@ -59,9 +59,12 @@ lint:
 .PHONY: build  
 build:
 	@echo "------------------"
-	@echo "--> Building Chaos-executor binary..."
+	@echo "--> Building Chaos-runner binary..."
 	@echo "------------------"
-	@go build -o build/_output/bin/chaos-executor ./bin
+	@go build -o build/_output/bin/chaos-runner ./bin
+
+.PHONY: gotasks
+gotasks: format lint build
 
 .PHONY: test
 test:
@@ -73,7 +76,7 @@ test:
 .PHONY: dockerops
 dockerops: 
 	@echo "------------------"
-	@echo "--> Build Chaos-executor image..." 
+	@echo "--> Build Chaos-runner image..." 
 	@echo "------------------"
 	sudo docker build . -f build/Dockerfile -t $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION)
 

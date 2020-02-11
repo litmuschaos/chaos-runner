@@ -8,7 +8,7 @@ jobs:
   build:
     machine: 
       image: circleci/classic:201808-01
-    working_directory: ~/go/src/github.com/litmuschaos/chaos-executor
+    working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
     environment:
       K8S_VERSION: v1.12.0
       KUBECONFIG: /home/circleci/.kube/config
@@ -16,7 +16,7 @@ jobs:
       HOME: /home/circleci
       CHANGE_MINIKUBE_NONE_USER: true
       REPONAME: litmuschaos
-      IMGNAME: chaos-executor
+      IMGNAME: chaos-runner
       IMGTAG: ci
     steps:
       - checkout
@@ -40,11 +40,16 @@ jobs:
             echo 'export GOPATH="$HOME/go"' >> workspace/env-vars 
             echo 'export PATH="$GOPATH/bin:$PATH"' >> workspace/env-vars
             echo 'export REPONAME="litmuschaos"' >> workspace/env-vars
-            echo 'export IMGNAME="chaos-executor"' >> workspace/env-vars
+            echo 'export IMGNAME="chaos-runner"' >> workspace/env-vars
             echo 'export IMGTAG="ci"' >> workspace/env-vars
             cat workspace/env-vars >> $BASH_ENV
             source $BASH_ENV
-      - run: make all
+      - run: eval $(minikube docker-env -u)
+      - run: make deps
+      - run: make build
+      - run: |
+          docker build . -f build/Dockerfile -t ${REPONAME}/${IMGNAME}:${IMGTAG}
+      - run: make test
       - run: |
           docker save -o workspace/image.tar ${REPONAME}/${IMGNAME}:${IMGTAG}
       - persist_to_workspace:
@@ -58,7 +63,7 @@ jobs:
       image: circleci/classic:201808-01
     environment:
       IMGTAG: ci
-    working_directory: ~/go/src/github.com/litmuschaos/chaos-executor
+    working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
     steps: 
       - attach_workspace:
           at: /tmp/workspace
@@ -67,14 +72,14 @@ jobs:
       - checkout
       - run: |
           docker load -i /tmp/workspace/image.tar
-          ~/go/src/github.com/litmuschaos/chaos-executor/build/push --type=ci
+          ~/go/src/github.com/litmuschaos/chaos-runner/build/push --type=ci
 
   release: 
     machine: 
       image: circleci/classic:201808-01
     environment:
       IMGTAG: ci
-    working_directory: ~/go/src/github.com/litmuschaos/chaos-executor
+    working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
     steps: 
       - attach_workspace:
           at: /tmp/workspace
@@ -83,11 +88,11 @@ jobs:
       - checkout 
       - run: | 
           docker load -i /tmp/workspace/image.tar
-          ~/go/src/github.com/litmuschaos/chaos-executor/build/push --type=release
+          ~/go/src/github.com/litmuschaos/chaos-runner/build/push --type=release
 
 workflows:
   version: 2
-  executor_build_deploy: 
+  runner_build_deploy: 
     jobs:
       - build:
           filters:

@@ -121,7 +121,7 @@ var _ = BeforeSuite(func() {
 })
 
 //BDD Tests to check secondary resources
-var _ = Describe("BDD on chaos-executor", func() {
+var _ = Describe("BDD on chaos-runner", func() {
 
 	// BDD TEST CASE 1
 	When("Create a test Deployment with nginx image", func() {
@@ -177,7 +177,7 @@ var _ = Describe("BDD on chaos-executor", func() {
 			)
 		})
 	})
-	When("Creating ChaosEngine to trigger chaos-executor", func() {
+	When("Creating ChaosEngine to trigger chaos-runner", func() {
 		It("Should create a runnerPod and Service ", func() {
 
 			//Creating chaosEngine
@@ -196,7 +196,7 @@ var _ = Describe("BDD on chaos-executor", func() {
 					ChaosServiceAccount: "litmus",
 					Components: v1alpha1.ComponentParams{
 						Runner: v1alpha1.RunnerInfo{
-							Image: "litmuschaos/chaos-executor:ci",
+							Image: "litmuschaos/chaos-runner:ci",
 							Type:  "go",
 						},
 					},
@@ -233,7 +233,7 @@ var _ = Describe("BDD on chaos-executor", func() {
 		})
 	})
 	var jobName string
-	When("Check if the Job is spawned by chaos-executor", func() {
+	When("Check if the Job is spawned by chaos-runner", func() {
 		It("Should create a Pod delete Job", func() {
 			jobs, _ := k8sClientSet.BatchV1().Jobs("litmus").List(metav1.ListOptions{})
 			for i := range jobs.Items {
@@ -244,7 +244,7 @@ var _ = Describe("BDD on chaos-executor", func() {
 			}
 			Expect(jobName).To(
 				Not(BeEmpty()),
-				"Unable to get the job, might be something wrong with chaos-executor",
+				"Unable to get the job, might be something wrong with chaos-runner",
 			)
 		})
 	})
