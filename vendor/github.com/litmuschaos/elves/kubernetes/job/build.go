@@ -23,7 +23,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	jobspec "github.com/litmuschaos/kube-helper/kubernetes/jobspec"
+	jobspec "github.com/litmuschaos/elves/kubernetes/jobspec"
 )
 
 // Builder is the builder object for Job
