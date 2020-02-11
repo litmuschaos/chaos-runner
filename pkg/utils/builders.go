@@ -5,10 +5,10 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/litmuschaos/kube-helper/kubernetes/container"
-	"github.com/litmuschaos/kube-helper/kubernetes/job"
-	jobspec "github.com/litmuschaos/kube-helper/kubernetes/jobspec"
-	"github.com/litmuschaos/kube-helper/kubernetes/podtemplatespec"
+	"github.com/litmuschaos/elves/kubernetes/container"
+	"github.com/litmuschaos/elves/kubernetes/job"
+	jobspec "github.com/litmuschaos/elves/kubernetes/jobspec"
+	"github.com/litmuschaos/elves/kubernetes/podtemplatespec"
 )
 
 // PodTemplateSpec is struct for creating the *core1.PodTemplateSpec
