@@ -61,7 +61,7 @@ func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) erro
 		if err != nil {
 			return errors.Wrapf(err, "Unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		}
-		klog.V(0).Infof("Succesfully Validated ConfigMap: %v", v.Name)
+		klog.V(0).Infof("Successfully Validated ConfigMap: %v", v.Name)
 	}
 	return nil
 }

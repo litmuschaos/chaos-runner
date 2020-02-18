@@ -61,7 +61,7 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 		if err != nil {
 			return errors.Wrapf(err, "Unable to get Secret with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		}
-		klog.V(0).Infof("Succesfully Validated Secret: %v", v.Name)
+		klog.V(0).Infof("Successfully Validated Secret: %v", v.Name)
 	}
 	return nil
 }

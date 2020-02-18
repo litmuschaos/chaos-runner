@@ -90,7 +90,7 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 	return nil
 }
 
-// launchJob spawn a kubernetes Job using the job Object recieved.
+// launchJob spawn a kubernetes Job using the job Object received.
 func (experiment *ExperimentDetails) launchJob(job *batchv1.Job, clients ClientSets) error {
 	_, err := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Create(job)
 	if err != nil {

@@ -20,7 +20,7 @@ const (
 	action string = "Execution"
 )
 
-// TriggerAnalytics is reponsible for sending out events
+// TriggerAnalytics is responsible for sending out events
 func TriggerAnalytics(experimentName string, uuid string) {
 	client, err := ga.NewClient(clientID)
 	if err != nil {

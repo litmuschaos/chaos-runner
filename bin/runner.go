@@ -49,9 +49,9 @@ func main() {
 			break
 		}
 		experimentStatus := utils.ExperimentStatus{}
-		experimentStatus.IntialExperimentStatus(experiment)
+		experimentStatus.InitialExperimentStatus(experiment)
 		if err := experimentStatus.InitialPatchEngine(engineDetails, clients); err != nil {
-			klog.V(0).Infof("Unable to set Intial Status in ChaosEngine, due to error: %v", err)
+			klog.V(0).Infof("Unable to set Initial Status in ChaosEngine, due to error: %v", err)
 		}
 
 		klog.V(0).Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
