@@ -5,8 +5,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// IntialExperimentStatus fills up ExperimentStatus Structure with intialValues
-func (expStatus *ExperimentStatus) IntialExperimentStatus(experimentDetails *ExperimentDetails) {
+// InitialExperimentStatus fills up ExperimentStatus Structure with InitialValues
+func (expStatus *ExperimentStatus) InitialExperimentStatus(experimentDetails *ExperimentDetails) {
 	expStatus.Name = experimentDetails.JobName
 	expStatus.Status = "Waiting for Job Creation"
 	expStatus.Verdict = "Waiting"
