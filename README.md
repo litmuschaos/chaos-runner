@@ -1,6 +1,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/litmuschaos/chaos-runner)](https://goreportcard.com/report/github.com/litmuschaos/chaos-runner)
 [![BCH compliance](https://bettercodehub.com/edge/badge/litmuschaos/chaos-runner?branch=master)](https://bettercodehub.com/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/litmuschaos/chaos-runner.svg)](https://hub.docker.com/r/litmuschaos/chaos-runner)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner?ref=badge_shield)
 
 # CHAOS RUNNER
 
@@ -62,3 +63,7 @@ spec:
 ## Further Improvements 
 
 - The Go Chaos Runner is in beta stage with further improvements coming soon!! 
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner?ref=badge_large)
