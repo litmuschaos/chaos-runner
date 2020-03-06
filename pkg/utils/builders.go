@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/litmuschaos/elves/kubernetes/container"
 	"github.com/litmuschaos/elves/kubernetes/job"
@@ -54,6 +55,15 @@ func getEnvFromMap(env map[string]string) []corev1.EnvVar {
 		perEnv.Value = v
 		envVar = append(envVar, perEnv)
 	}
+	// Getting experiment pod name from downward API
+	experimentPodName := GetValueFromDownwardAPI("v1", "metadata.name")
+
+	// Add downward api for getting pod name
+	var downwardEnv corev1.EnvVar
+	downwardEnv.Name = "POD_NAME"
+	downwardEnv.ValueFrom = &experimentPodName
+	envVar = append(envVar, downwardEnv)
+
 	return envVar
 }
 
@@ -140,4 +150,15 @@ func (experiment *ExperimentDetails) buildJob(pod *podtemplatespec.Builder, jobs
 		return jobObj, err
 	}
 	return jobObj, nil
+}
+
+// GetValueFromDownwardAPI returns the value from downwardApi
+func GetValueFromDownwardAPI(apiVersion string, fieldPath string) v1.EnvVarSource {
+	downwardENV := v1.EnvVarSource{
+		FieldRef: &v1.ObjectFieldSelector{
+			APIVersion: apiVersion,
+			FieldPath:  fieldPath,
+		},
+	}
+	return downwardENV
 }
