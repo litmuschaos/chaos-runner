@@ -7,9 +7,11 @@ import (
 	clientV1alpha1 "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned"
 	volume "github.com/litmuschaos/elves/kubernetes/volume/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/record"
 
 	"github.com/litmuschaos/chaos-runner/pkg/utils/k8s"
 	"github.com/litmuschaos/chaos-runner/pkg/utils/litmus"
@@ -53,6 +55,12 @@ type VolumeOpts struct {
 type ClientSets struct {
 	KubeClient   *kubernetes.Clientset
 	LitmusClient *clientV1alpha1.Clientset
+}
+
+// Recorder is collection of resources needed to record events for chaos-runner
+type Recorder struct {
+	EventRecorder record.EventRecorder
+	EventResource runtime.Object
 }
 
 // GenerateClientSetFromKubeConfig will generation both ClientSets (k8s, and Litmus)
