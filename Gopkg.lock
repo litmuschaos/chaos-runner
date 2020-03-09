@@ -88,6 +88,14 @@
   version = "v1.3.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:b7cb6054d3dff43b38ad2e92492f220f57ae6087ee797dca298139776749ace8"
+  name = "github.com/golang/groupcache"
+  packages = ["lru"]
+  pruneopts = "NUT"
+  revision = "8c9f03a8e57eb486e42badaed3fb287da51807ba"
+
+[[projects]]
   digest = "1:a06187c7498a14ab96bb909e09af9ce1687678f355b775bcf1dc84729e2a2100"
   name = "github.com/golang/protobuf"
   packages = [
@@ -484,7 +492,7 @@
   version = "kubernetes-1.15.4"
 
 [[projects]]
-  digest = "1:d8948a8e44ec1f0deb72d4a4f393a81094e58134122c7ac14e5ff3cadd1dcf23"
+  digest = "1:d522f075db642b9a74a919872bad9fcab700a914c745c95a3ea1d0e55e3cba68"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -511,15 +519,18 @@
     "pkg/util/framer",
     "pkg/util/intstr",
     "pkg/util/json",
+    "pkg/util/mergepatch",
     "pkg/util/naming",
     "pkg/util/net",
     "pkg/util/runtime",
     "pkg/util/sets",
+    "pkg/util/strategicpatch",
     "pkg/util/validation",
     "pkg/util/validation/field",
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
+    "third_party/forked/golang/json",
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
@@ -527,7 +538,7 @@
   version = "kubernetes-1.15.4"
 
 [[projects]]
-  digest = "1:3f0de17eb564481310ed545a316f2aae09015f25db055c8b7b28c3e3a1331e08"
+  digest = "1:38aee3cbf8e0380bd5b6466835e6660a24772d91957b355989719b0ca80741a7"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -584,6 +595,8 @@
     "tools/clientcmd/api/latest",
     "tools/clientcmd/api/v1",
     "tools/metrics",
+    "tools/record",
+    "tools/record/util",
     "tools/reference",
     "transport",
     "util/cert",
@@ -607,9 +620,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a25f899659892020bfbc94c5f9395a708fdbb7f9beeede9c286f4cd377bc5753"
+  digest = "1:5808bb1694e8727155e7c023499195cd0f9931b56545fe37795985f87f024696"
   name = "k8s.io/kube-openapi"
-  packages = ["pkg/common"]
+  packages = [
+    "pkg/common",
+    "pkg/util/proto",
+  ]
   pruneopts = "NUT"
   revision = "addea2498afe5a6d58f8bdcd9ae51363d12f12ef"
 
@@ -660,11 +676,13 @@
     "k8s.io/api/batch/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
+    "k8s.io/client-go/tools/record",
     "k8s.io/klog",
   ]
   solver-name = "gps-cdcl"

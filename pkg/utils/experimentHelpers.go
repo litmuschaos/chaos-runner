@@ -17,10 +17,6 @@ func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientS
 	if err := expDetails.SetLabels(engine, clients); err != nil {
 		return err
 	}
-	// Generation of Random String for appending it into Job
-	randomString := RandomString()
-	// Setting the JobName in Experiment Realted struct
-	expDetails.JobName = expDetails.Name + "-" + randomString
 	return nil
 }
 
@@ -45,18 +41,21 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 	return nil
 }
 
-//SetValueFromChaosEngine sets value in experimentDetails struct from chaosEngine
-func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engineDetails *EngineDetails, i int) {
-	expDetails.Name = engineDetails.Experiments[i]
-	expDetails.Namespace = engineDetails.AppNamespace
-	expDetails.SvcAccount = engineDetails.SvcAccount
-}
-
 // NewExperimentDetails initilizes the structure
-func NewExperimentDetails() *ExperimentDetails {
+func NewExperimentDetails(engineDetails *EngineDetails, i int) *ExperimentDetails {
 	var experimentDetails ExperimentDetails
 	experimentDetails.Env = make(map[string]string)
 	experimentDetails.ExpLabels = make(map[string]string)
+
+	// Initial set to values from EngineDetails Struct
+	experimentDetails.Name = engineDetails.Experiments[i]
+	experimentDetails.Namespace = engineDetails.AppNamespace
+	experimentDetails.SvcAccount = engineDetails.SvcAccount
+
+	// Generation of Random String for appending it into Job Name
+	randomString := RandomString()
+	// Setting the JobName in Experiment Realted struct
+	experimentDetails.JobName = experimentDetails.Name + "-" + randomString
 	return &experimentDetails
 }
 
@@ -138,6 +137,18 @@ func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
 		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
 	}
 	expDetails.ExpArgs = expirementSpec.Spec.Definition.Args
+	return nil
+}
+
+// SetValueFromChaosResources fetchs required values from various Chaos Resources
+func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *EngineDetails, clients ClientSets) error {
+	if err := engineDetails.SetValueFromChaosRunner(clients); err != nil {
+		return errors.Wrapf(err, "Unable to set value from Chaos Runner due to error: %v", err)
+
+	}
+	if err := expDetails.SetValueFromChaosExperiment(clients, engineDetails); err != nil {
+		return errors.Wrapf(err, "Unable to set value from Chaos Experiment due to error: %v", err)
+	}
 	return nil
 }
 
