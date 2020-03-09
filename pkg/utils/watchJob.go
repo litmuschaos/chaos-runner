@@ -128,7 +128,8 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 	if err != nil {
 		return "", err
 	}
-	if expEngine.Spec.JobCleanUpPolicy == "delete" {
+
+	if expEngine.Spec.JobCleanUpPolicy == "delete" || expEngine.Spec.JobCleanUpPolicy == "" {
 		klog.V(0).Infoln("Will delete the job as jobCleanPolicy is set to : " + expEngine.Spec.JobCleanUpPolicy)
 
 		deletePolicy := metav1.DeletePropagationForeground
