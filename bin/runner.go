@@ -15,7 +15,7 @@ func main() {
 	clients := utils.ClientSets{}
 	// Getting kubeConfig and Generate ClientSets
 	if err := clients.GenerateClientSetFromKubeConfig(); err != nil {
-		klog.V(0).Infof("Unable to create ClientSets, error: %v", err)
+		klog.Errorf("Unable to create ClientSets, error: %v", err)
 		return
 	}
 	// Fetching all the ENV's needed
@@ -24,7 +24,7 @@ func main() {
 
 	recorder, err := utils.NewEventRecorder(clients, engineDetails)
 	if err != nil {
-		klog.V(0).Infof("Unable to initiate EventRecorder for Chaos-Runner, would bot be able to add events")
+		klog.Errorf("Unable to initiate EventRecorder for Chaos-Runner, would not be able to add events")
 	}
 	// Steps for each Experiment
 	for i := range engineDetails.Experiments {
@@ -36,11 +36,11 @@ func main() {
 		experiment := utils.NewExperimentDetails(&engineDetails, i)
 
 		if err := experiment.SetValueFromChaosResources(&engineDetails, clients); err != nil {
-			klog.V(0).Infof("Unable to set values from Chaos Resources, due to error: %v", err)
+			klog.V(0).Infof("Unable to set values from Chaos Resources due to error: %v", err)
 		}
 
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
-			klog.V(0).Infof("Unable to patch ENV, due to error: %v", err)
+			klog.V(0).Infof("Unable to patch ENV due to error: %v", err)
 			break
 		}
 		experimentStatus := utils.ExperimentStatus{}
@@ -84,10 +84,10 @@ func main() {
 
 		// Delete / retain the Job, using the jobCleanUpPolicy
 		jobCleanUpPolicy, err := engineDetails.DeleteJobAccordingToJobCleanUpPolicy(experiment, clients)
-		recorder.ExperimentJobCleanUp(engineDetails.Experiments[i], jobCleanUpPolicy)
 		if err != nil {
 			klog.V(0).Infof("Unable to Delete ChaosExperiment Job due to: %v", err)
 		}
+		recorder.ExperimentJobCleanUp(experiment, jobCleanUpPolicy)
 		time.Sleep(5 * time.Second)
 	}
 }

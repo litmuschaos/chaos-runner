@@ -143,11 +143,11 @@ func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
 // SetValueFromChaosResources fetchs required values from various Chaos Resources
 func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *EngineDetails, clients ClientSets) error {
 	if err := engineDetails.SetValueFromChaosRunner(clients); err != nil {
-		return errors.Wrapf(err, "Unable to set value from Chaos Runner, due to error: %v", err)
+		return errors.Wrapf(err, "Unable to set value from Chaos Runner due to error: %v", err)
 
 	}
 	if err := expDetails.SetValueFromChaosExperiment(clients, engineDetails); err != nil {
-		return errors.Wrapf(err, "Unable to set value from Chaos Experiment, due to error: %v", err)
+		return errors.Wrapf(err, "Unable to set value from Chaos Experiment due to error: %v", err)
 	}
 	return nil
 }
