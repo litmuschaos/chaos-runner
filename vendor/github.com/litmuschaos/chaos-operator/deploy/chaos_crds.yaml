@@ -54,6 +54,9 @@ spec:
                   type: string
             auxiliaryAppInfo:
               type: string
+            engineState: 
+              type: string
+              pattern: ^(active|stop|initialized|stopped)$
             chaosServiceAccount:
               type: string
             components:
@@ -260,8 +263,6 @@ spec:
     plural: chaosresults
     singular: chaosresult
   scope: Namespaced
-  subresources:
-    status: {}
   validation:
     openAPIV3Schema:
       properties:
