@@ -27,7 +27,7 @@ func (expStatus *ExperimentStatus) CompletedExperimentStatus(chaosResult *v1alph
 	expStatus.Name = experimentDetails.JobName
 	expStatus.Status = "Execution Successful"
 	expStatus.LastUpdateTime = metav1.Now()
-	expStatus.Verdict = chaosResult.Spec.ExperimentStatus.Verdict
+	expStatus.Verdict = chaosResult.Status.ExperimentStatus.Verdict
 	//return currExpStatus
 }
 

@@ -193,6 +193,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 						Applabel: "app=nginx",
 						AppKind:  "deployment",
 					},
+					EngineState:         "active",
 					ChaosServiceAccount: "litmus",
 					Components: v1alpha1.ComponentParams{
 						Runner: v1alpha1.RunnerInfo{

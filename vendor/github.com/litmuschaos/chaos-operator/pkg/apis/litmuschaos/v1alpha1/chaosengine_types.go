@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -42,13 +43,15 @@ type ChaosEngineSpec struct {
 	//AuxiliaryAppInfo contains details of dependent applications (infra chaos)
 	AuxiliaryAppInfo string `json:"auxiliaryAppInfo,omitempty"`
 	//EngineStatus is a requirement for validation
-	EngineStatus string `json:"engineStatus"`
+	EngineState string `json:"engineState"`
 }
 
 // ChaosEngineStatus defines the observed state of ChaosEngine
 // +k8s:openapi-gen=true
 // ChaosEngineStatus derives information about status of individual experiments
 type ChaosEngineStatus struct {
+	//
+	EngineStatus string `json:"engineStatus"`
 	//Detailed status of individual experiments
 	Experiments []ExperimentStatuses `json:"experiments"`
 }
@@ -82,8 +85,14 @@ type MonitorInfo struct {
 type RunnerInfo struct {
 	//Image of the runner pod
 	Image string `json:"image,omitempty"`
-	//Type of Executor
+	//Type of runner
 	Type string `json:"type,omitempty"`
+	//Args of runner
+	Args []string `json:"args,omitempty"`
+	//Command for runner
+	Command []string `json:"command,omitempty"`
+	//ImagePullPolicy for runner pod
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 }
 
 // ExperimentList defines information about chaos experiments defined in the chaos engine
