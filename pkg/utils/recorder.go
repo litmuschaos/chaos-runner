@@ -69,5 +69,5 @@ func (r Recorder) ExperimentJobCleanUp(experiment *ExperimentDetails, jobCleanUp
 // ExperimentSkipped is an standard event spawned just after
 // an experiment is skipped
 func (r Recorder) ExperimentSkipped(experimentName string) {
-	r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, experimentSkipped, "Experiment Job creation failed, skipping Chaos Experiment: '%s'", experimentName)
+	r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeWarning, experimentSkipped, "Experiment Job creation failed, skipping Chaos Experiment: '%s'", experimentName)
 }

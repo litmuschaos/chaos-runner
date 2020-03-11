@@ -41,6 +41,7 @@ func main() {
 
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to patch ENV due to error: %v", err)
+			recorder.ExperimentSkipped(engineDetails.Experiments[i])
 			break
 		}
 		experimentStatus := utils.ExperimentStatus{}
@@ -53,6 +54,7 @@ func main() {
 
 		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to get ChaosExperiment Name: %v, in namespace: %v, due to error: %v", experiment.Name, experiment.Namespace, err)
+			recorder.ExperimentSkipped(engineDetails.Experiments[i])
 			break
 		}
 
@@ -65,6 +67,7 @@ func main() {
 		// Creation of PodTemplateSpec, and Final Job
 		if err := utils.BuildingAndLaunchJob(experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to construct chaos experiment job due to: %v", err)
+			recorder.ExperimentSkipped(engineDetails.Experiments[i])
 			break
 		}
 		recorder.ExperimentJobCreate(engineDetails.Experiments[i], experiment.JobName)
@@ -74,6 +77,7 @@ func main() {
 		// Watching the Job till Completion
 		if err := engineDetails.WatchJobForCompletion(experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to Watch the Job, error: %v", err)
+			recorder.ExperimentSkipped(engineDetails.Experiments[i])
 			break
 		}
 
