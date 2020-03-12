@@ -6,6 +6,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/record"
+	"time"
 
 	litmuschaosScheme "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/scheme"
 )
@@ -37,37 +38,35 @@ func NewEventRecorder(clients ClientSets, engineDetails EngineDetails) (*Recorde
 	}, nil
 }
 
-const (
-	experimentDependencyCheck string = "ExperimentDependencyCheck"
-	experimentJobCreate       string = "ExperimentJobCreate"
-	experimentJobCleanUp      string = "ExperimentJobCleanUp"
-	experimentSkipped         string = "ExperimentSkipped"
-)
-
 // ExperimentDepedencyCheck is an standard event spawned just after validating
 // experiment dependent resources such as ChaosExperiment, ConfigMaps and Secrets.
 func (r Recorder) ExperimentDepedencyCheck(experimentName string) {
-	r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, experimentDependencyCheck, "Experiment resources validated for Chaos Experiment: '%s'", experimentName)
+	r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentDependencyCheckReason, "Experiment resources validated for Chaos Experiment: '%s'", experimentName)
+	time.Sleep(5 * time.Second)
 }
 
 // ExperimentJobCreate is an standard event spawned just after
 // starting chaosExperiment Job
 func (r Recorder) ExperimentJobCreate(experimentName string, jobName string) {
-	r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, experimentJobCreate, "Experiment Job '%s' created for Chaos Experiment '%s'", jobName, experimentName)
+	r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCreateReason, "Experiment Job '%s' created for Chaos Experiment '%s'", jobName, experimentName)
+	time.Sleep(5 * time.Second)
 }
 
 // ExperimentJobCleanUp is an standard event spawned just after
 // starting ChaosExperiment Job
 func (r Recorder) ExperimentJobCleanUp(experiment *ExperimentDetails, jobCleanUpPolicy string) {
 	if jobCleanUpPolicy == "delete" {
-		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, experimentJobCleanUp, "Experiment Job '%s' is deleted", experiment.JobName)
+		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' is deleted", experiment.JobName)
+		time.Sleep(5 * time.Second)
 	} else {
-		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, experimentJobCleanUp, "Experiment Job '%s' will be retained", experiment.JobName)
+		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' will be retained", experiment.JobName)
+		time.Sleep(5 * time.Second)
 	}
 }
 
 // ExperimentSkipped is an standard event spawned just after
 // an experiment is skipped
-func (r Recorder) ExperimentSkipped(experimentName string) {
-	r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, experimentSkipped, "Experiment Job creation failed, skipping Chaos Experiment: '%s'", experimentName)
+func (r Recorder) ExperimentSkipped(experimentName string, reason string) {
+	r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeWarning, reason, "Experiment Job creation failed, skipping Chaos Experiment: '%s'", experimentName)
+	time.Sleep(5 * time.Second)
 }
