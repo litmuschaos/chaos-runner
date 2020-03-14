@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"k8s.io/klog"
 
 	"github.com/litmuschaos/chaos-runner/pkg/utils"
@@ -41,6 +39,7 @@ func main() {
 
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to patch ENV due to error: %v", err)
+			recorder.ExperimentSkipped(engineDetails.Experiments[i], utils.ExperimentEnvParseErrorReason)
 			break
 		}
 		experimentStatus := utils.ExperimentStatus{}
@@ -53,6 +52,7 @@ func main() {
 
 		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to get ChaosExperiment Name: %v, in namespace: %v, due to error: %v", experiment.Name, experiment.Namespace, err)
+			recorder.ExperimentSkipped(engineDetails.Experiments[i], utils.ExperimentNotFoundErrorReason)
 			break
 		}
 
@@ -65,15 +65,16 @@ func main() {
 		// Creation of PodTemplateSpec, and Final Job
 		if err := utils.BuildingAndLaunchJob(experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to construct chaos experiment job due to: %v", err)
+			recorder.ExperimentSkipped(engineDetails.Experiments[i], utils.ExperimentJobCreationErrorReason)
 			break
 		}
 		recorder.ExperimentJobCreate(engineDetails.Experiments[i], experiment.JobName)
-		time.Sleep(5 * time.Second)
 
 		klog.V(0).Infof("Started Chaos Experiment Name: %v, with Job Name: %v", experiment.Name, experiment.JobName)
 		// Watching the Job till Completion
 		if err := engineDetails.WatchJobForCompletion(experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to Watch the Job, error: %v", err)
+			recorder.ExperimentSkipped(engineDetails.Experiments[i], utils.ExperimentJobWatchErrorReason)
 			break
 		}
 
@@ -88,6 +89,5 @@ func main() {
 			klog.V(0).Infof("Unable to Delete ChaosExperiment Job due to: %v", err)
 		}
 		recorder.ExperimentJobCleanUp(experiment, jobCleanUpPolicy)
-		time.Sleep(5 * time.Second)
 	}
 }
