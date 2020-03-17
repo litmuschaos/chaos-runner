@@ -11,14 +11,14 @@ import (
 	litmuschaosScheme "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/scheme"
 )
 
-func generateEventRecorder(kubeClient *kubernetes.Clientset) (record.EventRecorder, error) {
+func generateEventRecorder(kubeClient *kubernetes.Clientset, componentName string) (record.EventRecorder, error) {
 	err := litmuschaosScheme.AddToScheme(scheme.Scheme)
 	if err != nil {
 		return nil, err
 	}
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClient.CoreV1().Events("")})
-	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "chaos-runner"})
+	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: componentName})
 	return recorder, nil
 }
 
@@ -28,7 +28,7 @@ func NewEventRecorder(clients ClientSets, engineDetails EngineDetails) (*Recorde
 	if err != nil {
 		return &Recorder{}, err
 	}
-	eventBroadCaster, err := generateEventRecorder(clients.KubeClient)
+	eventBroadCaster, err := generateEventRecorder(clients.KubeClient, engineDetails.Name+"-runner")
 	if err != nil {
 		return &Recorder{}, err
 	}
