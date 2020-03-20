@@ -37,10 +37,10 @@ func GetJobStatus(experimentDetails *ExperimentDetails, clients ClientSets) (int
 
 // GetChaosEngine returns chaosEngine Object
 func (engineDetails EngineDetails) GetChaosEngine(clients ClientSets) (*v1alpha1.ChaosEngine, error) {
-	expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Get(engineDetails.Name, metav1.GetOptions{})
+	expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 	if err != nil {
 
-		return nil, errors.Wrapf(err, "Unable to get ChaosEngine Name: %v, in namespace: %v, due to error: %v", engineDetails.Name, engineDetails.AppNamespace, err)
+		return nil, errors.Wrapf(err, "Unable to get ChaosEngine Name: %v, in namespace: %v, due to error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
 	}
 	return expEngine, nil
 }
@@ -57,7 +57,7 @@ func (expStatus *ExperimentStatus) PatchChaosEngineStatus(engineDetails EngineDe
 		return errors.Wrapf(err, "Unable to find the status for JobName: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
 	}
 	expEngine.Status.Experiments[jobIndex] = v1alpha1.ExperimentStatuses(*expStatus)
-	if _, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine); err != nil {
+	if _, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine); err != nil {
 		return err
 	}
 	return nil
@@ -78,7 +78,7 @@ func (engineDetails EngineDetails) WatchJobForCompletion(experiment *ExperimentD
 		var expStatus ExperimentStatus
 		expStatus.AwaitedExperimentStatus(experiment)
 		if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
-			return errors.Wrapf(err, "Unable to patch ChaosEngine in namespace: %v, due to error: %v", engineDetails.AppNamespace, err)
+			return errors.Wrapf(err, "Unable to patch ChaosEngine in namespace: %v, due to error: %v", engineDetails.EngineNamespace, err)
 		}
 		time.Sleep(5 * time.Second)
 
@@ -96,9 +96,9 @@ func GetResultName(engineName string, experimentName string) string {
 func (experimentDetails *ExperimentDetails) GetChaosResult(engineDetails EngineDetails, clients ClientSets) (*v1alpha1.ChaosResult, error) {
 
 	resultName := GetResultName(engineDetails.Name, experimentDetails.Name)
-	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.AppNamespace).Get(resultName, metav1.GetOptions{})
+	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.EngineNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to get ChaosResult Name: %v in namespace: %v, due to error: %v", resultName, engineDetails.AppNamespace, err)
+		return nil, errors.Wrapf(err, "Unable to get ChaosResult Name: %v in namespace: %v, due to error: %v", resultName, engineDetails.EngineNamespace, err)
 	}
 	return expResult, nil
 }
@@ -133,7 +133,7 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 		klog.V(0).Infoln("Will delete the job as jobCleanPolicy is set to : " + expEngine.Spec.JobCleanUpPolicy)
 
 		deletePolicy := metav1.DeletePropagationForeground
-		deleteJob := clients.KubeClient.BatchV1().Jobs(engineDetails.AppNamespace).Delete(experiment.JobName, &metav1.DeleteOptions{
+		deleteJob := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Delete(experiment.JobName, &metav1.DeleteOptions{
 			PropagationPolicy: &deletePolicy,
 		})
 		if deleteJob != nil {

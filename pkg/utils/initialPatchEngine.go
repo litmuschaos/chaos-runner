@@ -18,9 +18,9 @@ func (expStatus *ExperimentStatus) InitialPatchEngine(engineDetails EngineDetail
 			return errors.Wrapf(err, "Unable to get ChaosEngine, due to error: %v", err)
 		}
 		expEngine.Status.Experiments = append(expEngine.Status.Experiments, v1alpha1.ExperimentStatuses(*expStatus))
-		_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.AppNamespace).Update(expEngine)
+		_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine)
 		if updateErr != nil {
-			return errors.Wrapf(err, "Unable to update ChaosEngine in namespace: %v, due to error: %v", engineDetails.AppNamespace, err)
+			return errors.Wrapf(err, "Unable to update ChaosEngine in namespace: %v, due to error: %v", engineDetails.EngineNamespace, err)
 		}
 	}
 	return nil

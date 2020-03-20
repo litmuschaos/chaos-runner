@@ -24,10 +24,11 @@ type EngineDetails struct {
 	AppLabel         string
 	SvcAccount       string
 	AppKind          string
-	AppNamespace     string
 	ClientUUID       string
 	AuxiliaryAppInfo string
 	UID              string
+	AdminMode        bool
+	EngineNamespace  string
 }
 
 // ExperimentDetails is for collecting all the experiment-related details

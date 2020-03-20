@@ -33,7 +33,7 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		return err
 	}
 	// Store ENV in a map
-	ENVList := map[string]string{"CHAOSENGINE": engineDetails.Name, "APP_LABEL": engineDetails.AppLabel, "APP_NAMESPACE": engineDetails.AppNamespace, "APP_KIND": engineDetails.AppKind, "AUXILIARY_APPINFO": engineDetails.AuxiliaryAppInfo, "CHAOS_UID": engineDetails.UID}
+	ENVList := map[string]string{"CHAOSENGINE": engineDetails.Name, "APP_LABEL": engineDetails.AppLabel, "ENGINE_NAMESPACE": engineDetails.EngineNamespace, "APP_NAMESPACE": expDetails.Namespace, "APP_KIND": engineDetails.AppKind, "AUXILIARY_APPINFO": engineDetails.AuxiliaryAppInfo, "CHAOS_UID": engineDetails.UID}
 	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
 	for key, value := range ENVList {
 		expDetails.Env[key] = value
@@ -49,7 +49,6 @@ func NewExperimentDetails(engineDetails *EngineDetails, i int) *ExperimentDetail
 
 	// Initial set to values from EngineDetails Struct
 	experimentDetails.Name = engineDetails.Experiments[i]
-	experimentDetails.Namespace = engineDetails.AppNamespace
 	experimentDetails.SvcAccount = engineDetails.SvcAccount
 
 	// Generation of Random String for appending it into Job Name
@@ -65,7 +64,7 @@ func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetail
 	_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		if err := engineDetails.ExperimentNotFoundPatchEngine(expDetails, clients); err != nil {
-			return errors.Wrapf(err, "Unable to patch Chaos Engine Name: %v, in namespace: %v, due to error: %v", engineDetails.Name, engineDetails.AppNamespace, err)
+			return errors.Wrapf(err, "Unable to patch Chaos Engine Name: %v, in namespace: %v, due to error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
 		}
 		return errors.Wrapf(err, "Unable to list Chaos Experiment Name: %v,in Namespace: %v, due to error: %v", expDetails.Name, expDetails.Namespace, err)
 	}
@@ -149,15 +148,19 @@ func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *E
 	if err := expDetails.SetValueFromChaosExperiment(clients, engineDetails); err != nil {
 		return errors.Wrapf(err, "Unable to set value from Chaos Experiment due to error: %v", err)
 	}
+	if err := expDetails.SetValueFromChaosEngine(engineDetails, clients); err != nil {
+		return errors.Wrapf(err, "Unable to set value from Chaos Engine due to error: %v", err)
+	}
+	expDetails.SetNamespaceAccordingToAdminMode(engineDetails)
 	return nil
 }
 
 // SetValueFromChaosRunner fetch the engineUID from ChaosRunner
 func (engine *EngineDetails) SetValueFromChaosRunner(clients ClientSets) error {
 	runnerName := engine.Name + "-runner"
-	runnerSpec, err := clients.KubeClient.CoreV1().Pods(engine.AppNamespace).Get(runnerName, metav1.GetOptions{})
+	runnerSpec, err := clients.KubeClient.CoreV1().Pods(engine.EngineNamespace).Get(runnerName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "Unable to get runner pod in namespace: %v", engine.AppNamespace)
+		return errors.Wrapf(err, "Unable to get runner pod in namespace: %v", engine.EngineNamespace)
 	}
 	chaosUID := runnerSpec.Labels["chaosUID"]
 	if chaosUID != "" {
@@ -166,4 +169,20 @@ func (engine *EngineDetails) SetValueFromChaosRunner(clients ClientSets) error {
 		return errors.Wrapf(err, "Unable to get ChaosEngine UID, due to error: %v", err)
 	}
 	return nil
+}
+
+func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetails, clients ClientSets) error {
+
+	chaosEngine, err := engine.GetChaosEngine(clients)
+	if err != nil {
+		return errors.Wrapf(err, "Unable to get chaosEngine in namespace: %s", engine.EngineNamespace)
+	}
+	expDetails.Namespace = chaosEngine.Spec.Appinfo.Appns
+	return nil
+}
+
+func (expDetails *ExperimentDetails) SetNamespaceAccordingToAdminMode(engine *EngineDetails) {
+	if engine.AdminMode {
+		expDetails.Namespace = engine.EngineNamespace
+	}
 }
