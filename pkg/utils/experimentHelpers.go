@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
+	"os"
 )
 
 //SetValueFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
@@ -33,7 +34,7 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		return err
 	}
 	// Store ENV in a map
-	ENVList := map[string]string{"CHAOSENGINE": engineDetails.Name, "APP_LABEL": engineDetails.AppLabel, "ENGINE_NAMESPACE": engineDetails.EngineNamespace, "APP_NAMESPACE": expDetails.Namespace, "APP_KIND": engineDetails.AppKind, "AUXILIARY_APPINFO": engineDetails.AuxiliaryAppInfo, "CHAOS_UID": engineDetails.UID}
+	ENVList := map[string]string{"CHAOSENGINE": engineDetails.Name, "APP_LABEL": engineDetails.AppLabel, "ENGINE_NAMESPACE": engineDetails.EngineNamespace, "APP_NAMESPACE": os.Getenv("APP_NAMESPACE"), "APP_KIND": engineDetails.AppKind, "AUXILIARY_APPINFO": engineDetails.AuxiliaryAppInfo, "CHAOS_UID": engineDetails.UID}
 	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
 	for key, value := range ENVList {
 		expDetails.Env[key] = value
