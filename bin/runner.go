@@ -18,7 +18,7 @@ func main() {
 	}
 	// Fetching all the ENV's needed
 	utils.GetOsEnv(&engineDetails)
-	klog.V(0).Infoln("Experiments List: ", engineDetails.Experiments, " ", "Engine Name: ", engineDetails.Name, " ", "appLabels : ", engineDetails.AppLabel, " ", "appNamespace: ", engineDetails.AppNamespace, " ", "appKind: ", engineDetails.AppKind, " ", "Service Account Name: ", engineDetails.SvcAccount)
+	klog.V(0).Infoln("Experiments List: ", engineDetails.Experiments, " ", "Engine Name: ", engineDetails.Name, " ", "appLabels : ", engineDetails.AppLabel, " ", "appKind: ", engineDetails.AppKind, " ", "Service Account Name: ", engineDetails.SvcAccount)
 
 	recorder, err := utils.NewEventRecorder(clients, engineDetails)
 	if err != nil {
@@ -31,10 +31,12 @@ func main() {
 		if engineDetails.ClientUUID != "" {
 			analytics.TriggerAnalytics(engineDetails.Experiments[i], engineDetails.ClientUUID)
 		}
+
 		experiment := utils.NewExperimentDetails(&engineDetails, i)
 
 		if err := experiment.SetValueFromChaosResources(&engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to set values from Chaos Resources due to error: %v", err)
+			recorder.ExperimentSkipped(engineDetails.Experiments[i], utils.ExperimentNotFoundErrorReason)
 		}
 
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
@@ -49,12 +51,6 @@ func main() {
 		}
 
 		klog.V(0).Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
-
-		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
-			klog.V(0).Infof("Unable to get ChaosExperiment Name: %v, in namespace: %v, due to error: %v", experiment.Name, experiment.Namespace, err)
-			recorder.ExperimentSkipped(engineDetails.Experiments[i], utils.ExperimentNotFoundErrorReason)
-			break
-		}
 
 		if err := experiment.PatchResources(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to patch Chaos Resources required for Chaos Experiment: %v, due to error: %v", experiment.Name, err)

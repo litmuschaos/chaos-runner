@@ -141,17 +141,21 @@ func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
 
 // SetValueFromChaosResources fetchs required values from various Chaos Resources
 func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *EngineDetails, clients ClientSets) error {
+	if err := expDetails.SetValueFromChaosEngine(engineDetails, clients); err != nil {
+		return errors.Wrapf(err, "Unable to set value from Chaos Engine due to error: %v", err)
+	}
+
 	if err := engineDetails.SetValueFromChaosRunner(clients); err != nil {
 		return errors.Wrapf(err, "Unable to set value from Chaos Runner due to error: %v", err)
 
 	}
+	expDetails.SetNamespaceAccordingToAdminMode(engineDetails)
+	if err := expDetails.HandleChaosExperimentExistence(*engineDetails, clients); err != nil {
+		return errors.Wrapf(err, "Unable to get ChaosExperiment Name: %v, in namespace: %v, due to error: %v", expDetails.Name, expDetails.Namespace, err)
+	}
 	if err := expDetails.SetValueFromChaosExperiment(clients, engineDetails); err != nil {
 		return errors.Wrapf(err, "Unable to set value from Chaos Experiment due to error: %v", err)
 	}
-	if err := expDetails.SetValueFromChaosEngine(engineDetails, clients); err != nil {
-		return errors.Wrapf(err, "Unable to set value from Chaos Engine due to error: %v", err)
-	}
-	expDetails.SetNamespaceAccordingToAdminMode(engineDetails)
 	return nil
 }
 
@@ -182,7 +186,10 @@ func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetai
 }
 
 func (expDetails *ExperimentDetails) SetNamespaceAccordingToAdminMode(engine *EngineDetails) {
+	klog.Infof("AdminMode set to: %v", engine.AdminMode)
 	if engine.AdminMode {
+		klog.Infof("AdminMode enabled, will change the experiment namespace to chaosEngine Namespace: %s", engine.EngineNamespace)
 		expDetails.Namespace = engine.EngineNamespace
 	}
+
 }

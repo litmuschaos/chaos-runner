@@ -16,4 +16,9 @@ func GetOsEnv(engineDetails *EngineDetails) {
 	engineDetails.ClientUUID = os.Getenv("CLIENT_UUID")
 	engineDetails.Experiments = strings.Split(experimentList, ",")
 	engineDetails.AuxiliaryAppInfo = os.Getenv("AUXILIARY_APPINFO")
+
+	engineDetails.AdminMode = false
+	if os.Getenv("ADMIN_MODE") == "true" {
+		engineDetails.AdminMode = true
+	}
 }
