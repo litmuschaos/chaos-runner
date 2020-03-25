@@ -18,7 +18,7 @@ func main() {
 	}
 	// Fetching all the ENV's needed
 	utils.GetOsEnv(&engineDetails)
-	klog.V(0).Infoln("Experiments List: ", engineDetails.Experiments, " ", "Engine Name: ", engineDetails.Name, " ", "appLabels : ", engineDetails.AppLabel, " ", "appKind: ", engineDetails.AppKind, " ", "Service Account Name: ", engineDetails.SvcAccount)
+	klog.V(0).Infoln("Experiments List: ", engineDetails.Experiments, " ", "Engine Name: ", engineDetails.Name, " ", "appLabels : ", engineDetails.AppLabel, " ", "appKind: ", engineDetails.AppKind, " ", "Service Account Name: ", engineDetails.SvcAccount, "Engine Namespace: ", engineDetails.EngineNamespace)
 
 	recorder, err := utils.NewEventRecorder(clients, engineDetails)
 	if err != nil {
