@@ -27,7 +27,6 @@ type EngineDetails struct {
 	ClientUUID       string
 	AuxiliaryAppInfo string
 	UID              string
-	AdminMode        bool
 	EngineNamespace  string
 }
 

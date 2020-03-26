@@ -17,8 +17,9 @@ func GetOsEnv(engineDetails *EngineDetails) {
 	engineDetails.Experiments = strings.Split(experimentList, ",")
 	engineDetails.AuxiliaryAppInfo = os.Getenv("AUXILIARY_APPINFO")
 
-	engineDetails.AdminMode = false
-	if os.Getenv("ADMIN_MODE") == "true" {
-		engineDetails.AdminMode = true
-	}
+	//TODO: Use engineDetails.AdminMode, to change behaviour of chaos-runner
+	// engineDetails.AdminMode = false
+	// if os.Getenv("ADMIN_MODE") == "true" {
+	// 	engineDetails.AdminMode = true
+	// }
 }
