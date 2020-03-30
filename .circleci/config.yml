@@ -60,6 +60,8 @@ jobs:
 
   trivy-check:
     machine: true
+    environment:
+      TRIVYARCH: "64bit"
     steps:
       - run: |
           export VERSION=$(curl --silent "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
