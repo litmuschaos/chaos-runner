@@ -68,6 +68,7 @@ jobs:
           echo ${VERSION} 
           wget https://github.com/aquasecurity/trivy/releases/download/v${VERSION}/trivy_${VERSION}_Linux-${TRIVYARCH}.tar.gz
           tar zxvf trivy_${VERSION}_Linux-${TRIVYARCH}.tar.gz
+      - run: |
           ./trivy --exit-code 0 --severity HIGH --no-progress litmuschaos/chaos-runner:ci
           ./trivy --exit-code 1 --severity CRITICAL --no-progress litmuschaos/chaos-runner:ci
           
