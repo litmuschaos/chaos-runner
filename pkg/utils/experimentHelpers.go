@@ -8,12 +8,12 @@ import (
 	"k8s.io/klog"
 )
 
-func CreateExperimentList(engineDetails *EngineDetails) *[]ExperimentDetails {
+func CreateExperimentList(engineDetails *EngineDetails) []ExperimentDetails {
 	var ExperimentDetailsList []ExperimentDetails
 	for i, _ := range engineDetails.Experiments {
 		ExperimentDetailsList = append(ExperimentDetailsList, NewExperimentDetails(engineDetails, i))
 	}
-	return &ExperimentDetailsList
+	return ExperimentDetailsList
 }
 
 //SetValueFromChaosExperiment sets value in experimentDetails struct from chaosExperiment

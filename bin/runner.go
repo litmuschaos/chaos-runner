@@ -20,13 +20,15 @@ func main() {
 	utils.GetOsEnv(&engineDetails)
 	klog.V(0).Infoln("Experiments List: ", engineDetails.Experiments, " ", "Engine Name: ", engineDetails.Name, " ", "appLabels : ", engineDetails.AppLabel, " ", "appKind: ", engineDetails.AppKind, " ", "Service Account Name: ", engineDetails.SvcAccount, "Engine Namespace: ", engineDetails.EngineNamespace)
 	experimentList := utils.CreateExperimentList(&engineDetails)
-	utils.InitialPatchEngine(engineDetails, clients, *experimentList)
+	if err := utils.InitialPatchEngine(engineDetails, clients, experimentList); err != nil {
+		klog.Errorf("Unable to create Initial ExpeirmentStatus in ChaosEngine, due to error: %v", err)
+	}
 	recorder, err := utils.NewEventRecorder(clients, engineDetails)
 	if err != nil {
 		klog.Errorf("Unable to initiate EventRecorder for Chaos-Runner, would not be able to add events")
 	}
 	// Steps for each Experiment
-	for _, experiment := range *experimentList {
+	for _, experiment := range experimentList {
 
 		// Sending event to GA instance
 		if engineDetails.ClientUUID != "" {
