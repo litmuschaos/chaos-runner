@@ -225,12 +225,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 			//Fetching engine-nginx-runner pod
 			runner, err := k8sClientSet.CoreV1().Pods("litmus").Get("engine-nginx-runner", metav1.GetOptions{})
 			Expect(err).To(BeNil())
-			//Fetching engine-nginx-exporter pod
-			exporter, err := k8sClientSet.CoreV1().Pods("litmus").Get("engine-nginx-monitor", metav1.GetOptions{})
-			Expect(err).To(BeNil())
 			Expect(string(runner.Status.Phase)).To(Or(Equal("Running"), Equal("Succeeded")))
-			Expect(string(exporter.Status.Phase)).To(Equal("Running"))
-
 		})
 	})
 	var jobName string
