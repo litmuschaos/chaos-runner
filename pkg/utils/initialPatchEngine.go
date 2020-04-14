@@ -9,15 +9,17 @@ import (
 type ExperimentStatus v1alpha1.ExperimentStatuses
 
 // InitialPatchEngine patches the chaosEngine with the initial ExperimentStatuses
-func (expStatus *ExperimentStatus) InitialPatchEngine(engineDetails EngineDetails, clients ClientSets) error {
+func InitialPatchEngine(engineDetails EngineDetails, clients ClientSets, experimentList []ExperimentDetails) error {
 
 	// TODO: check for the status before patching
-	for range engineDetails.Experiments {
+	for _, v := range experimentList {
 		expEngine, err := engineDetails.GetChaosEngine(clients)
 		if err != nil {
 			return errors.Wrapf(err, "Unable to get ChaosEngine, due to error: %v", err)
 		}
-		expEngine.Status.Experiments = append(expEngine.Status.Experiments, v1alpha1.ExperimentStatuses(*expStatus))
+		var expStatus ExperimentStatus
+		expStatus.InitialExperimentStatus(v.JobName)
+		expEngine.Status.Experiments = append(expEngine.Status.Experiments, v1alpha1.ExperimentStatuses(expStatus))
 		_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine)
 		if updateErr != nil {
 			return errors.Wrapf(err, "Unable to update ChaosEngine in namespace: %v, due to error: %v", engineDetails.EngineNamespace, err)

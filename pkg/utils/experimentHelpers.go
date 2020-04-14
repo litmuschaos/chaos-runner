@@ -8,6 +8,14 @@ import (
 	"k8s.io/klog"
 )
 
+func CreateExperimentList(engineDetails *EngineDetails) []ExperimentDetails {
+	var ExperimentDetailsList []ExperimentDetails
+	for i, _ := range engineDetails.Experiments {
+		ExperimentDetailsList = append(ExperimentDetailsList, NewExperimentDetails(engineDetails, i))
+	}
+	return ExperimentDetailsList
+}
+
 //SetValueFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
 func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientSets, engine *EngineDetails) error {
 	if err := expDetails.SetImage(clients); err != nil {
@@ -44,7 +52,7 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 }
 
 // NewExperimentDetails initilizes the structure
-func NewExperimentDetails(engineDetails *EngineDetails, i int) *ExperimentDetails {
+func NewExperimentDetails(engineDetails *EngineDetails, i int) ExperimentDetails {
 	var experimentDetails ExperimentDetails
 	experimentDetails.Env = make(map[string]string)
 	experimentDetails.ExpLabels = make(map[string]string)
@@ -58,7 +66,7 @@ func NewExperimentDetails(engineDetails *EngineDetails, i int) *ExperimentDetail
 	randomString := RandomString()
 	// Setting the JobName in Experiment Realted struct
 	experimentDetails.JobName = experimentDetails.Name + "-" + randomString
-	return &experimentDetails
+	return experimentDetails
 }
 
 // HandleChaosExperimentExistence will check the experiment in the app namespace
