@@ -6,8 +6,8 @@ import (
 )
 
 // InitialExperimentStatus fills up ExperimentStatus Structure with InitialValues
-func (expStatus *ExperimentStatus) InitialExperimentStatus(experimentDetails *ExperimentDetails) {
-	expStatus.Name = experimentDetails.JobName
+func (expStatus *ExperimentStatus) InitialExperimentStatus(jobName string) {
+	expStatus.Name = jobName
 	expStatus.Status = "Waiting for Job Creation"
 	expStatus.Verdict = "Waiting"
 	expStatus.LastUpdateTime = metav1.Now()
