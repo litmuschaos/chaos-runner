@@ -114,7 +114,7 @@ var _ = BeforeSuite(func() {
 		break
 	}
 
-	err = exec.Command("kubectl", "create", "-f", "https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml", "-n", "litmus").Run()
+	err = exec.Command("kubectl", "create", "-f", "https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/experiments.yaml", "-n", "litmus").Run()
 	if err != nil {
 		klog.Infof("Unable to create Pod-Delete Experiment, due to error: %v", err)
 	}
