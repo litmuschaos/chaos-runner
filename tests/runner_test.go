@@ -114,7 +114,7 @@ var _ = BeforeSuite(func() {
 		break
 	}
 
-	err = exec.Command("kubectl", "create", "-f", "https://hub.litmuschaos.io/api/chaos?file=charts/generic/pod-delete/experiment.yaml", "-n", "litmus").Run()
+	err = exec.Command("kubectl", "create", "-f", "https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/experiments.yaml", "-n", "litmus").Run()
 	if err != nil {
 		klog.Infof("Unable to create Pod-Delete Experiment, due to error: %v", err)
 	}
@@ -225,12 +225,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 			//Fetching engine-nginx-runner pod
 			runner, err := k8sClientSet.CoreV1().Pods("litmus").Get("engine-nginx-runner", metav1.GetOptions{})
 			Expect(err).To(BeNil())
-			//Fetching engine-nginx-exporter pod
-			exporter, err := k8sClientSet.CoreV1().Pods("litmus").Get("engine-nginx-monitor", metav1.GetOptions{})
-			Expect(err).To(BeNil())
 			Expect(string(runner.Status.Phase)).To(Or(Equal("Running"), Equal("Succeeded")))
-			Expect(string(exporter.Status.Phase)).To(Equal("Running"))
-
 		})
 	})
 	var jobName string
