@@ -43,6 +43,7 @@ type ExperimentDetails struct {
 	Secrets    []v1alpha1.Secret
 	VolumeOpts VolumeOpts
 	SvcAccount string
+	Annotations map[string]string
 }
 
 //VolumeOpts is a strcuture for all volume related operations

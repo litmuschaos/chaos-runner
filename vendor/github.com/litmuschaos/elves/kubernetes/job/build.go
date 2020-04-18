@@ -135,3 +135,16 @@ func (b *Builder) Build() (*batchv1.Job, error) {
 	}
 	return b.job.object, nil
 }
+
+// WithAnnotations sets the annotations field of Job with provided value
+func (b *Builder) WithAnnotations(annotation map[string]string) *Builder {
+
+	if b.job.object.Annotations == nil {
+		b.job.object.Annotations = map[string]string{}
+	}
+
+	for key, value := range annotation {
+		b.job.object.Annotations[key] = value
+	}
+	return b
+}
