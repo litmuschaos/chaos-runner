@@ -115,6 +115,7 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		WithName(experiment.JobName).
 		WithNamespace(experiment.Namespace).
 		WithLabels(experiment.ExpLabels).
+		WithAnnotations(experiment.Annotations).
 		WithServiceAccountName(experiment.SvcAccount).
 		WithRestartPolicy(corev1.RestartPolicyOnFailure).
 		WithVolumeBuilders(experiment.VolumeOpts.VolumeBuilders).
@@ -142,6 +143,7 @@ func (experiment *ExperimentDetails) buildJob(pod *podtemplatespec.Builder, jobs
 	//restartPolicy := corev1.RestartPolicyOnFailure
 	jobObj, err := job.NewBuilder().
 		WithJobSpecBuilder(jobspec).
+		WithAnnotations(experiment.Annotations).
 		WithName(experiment.JobName).
 		WithNamespace(experiment.Namespace).
 		WithLabels(experiment.ExpLabels).

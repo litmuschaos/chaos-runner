@@ -191,5 +191,26 @@ func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetai
 		return errors.Wrapf(err, "Unable to get chaosEngine in namespace: %s", engine.EngineNamespace)
 	}
 	expDetails.Namespace = chaosEngine.Namespace
+	if err := expDetails.SetExpAnnotationFromEngine(engine.Name, clients); err != nil {
+		return err
+	}
+	return nil
+}
+
+
+// SetExpAnnotationFromEngine will over-ride the default exp annotation with the one provided in the chaosEngine
+func (expDetails *ExperimentDetails) SetExpAnnotationFromEngine(engineName string, clients ClientSets) error {
+
+	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+	}
+
+	expRefList := engineSpec.Spec.Experiments
+	for i := range expRefList {
+		if expRefList[i].Name == expDetails.Name {
+			expDetails.Annotations = expRefList[i].Spec.Components.ExperimentAnnotations
+		}
+	}
 	return nil
 }
