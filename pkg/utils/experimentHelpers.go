@@ -10,7 +10,7 @@ import (
 
 func CreateExperimentList(engineDetails *EngineDetails) []ExperimentDetails {
 	var ExperimentDetailsList []ExperimentDetails
-	for i, _ := range engineDetails.Experiments {
+	for i := range engineDetails.Experiments {
 		ExperimentDetailsList = append(ExperimentDetailsList, NewExperimentDetails(engineDetails, i))
 	}
 	return ExperimentDetailsList
@@ -196,7 +196,6 @@ func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetai
 	}
 	return nil
 }
-
 
 // SetExpAnnotationFromEngine will over-ride the default exp annotation with the one provided in the chaosEngine
 func (expDetails *ExperimentDetails) SetExpAnnotationFromEngine(engineName string, clients ClientSets) error {

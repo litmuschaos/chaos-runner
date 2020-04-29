@@ -140,5 +140,5 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 			return "", errors.Wrapf(err, "Unable to delete ChaosExperiment Job Name: %v, in namespace: %v, due to error: %v", experiment.JobName, experiment.Namespace, err)
 		}
 	}
-	return expEngine.Spec.JobCleanUpPolicy, nil
+	return string(expEngine.Spec.JobCleanUpPolicy), nil
 }

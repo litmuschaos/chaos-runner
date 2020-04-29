@@ -43,7 +43,7 @@ func main() {
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to patch ENV due to error: %v", err)
 			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentEnvParseErrorReason)
-			break
+			continue
 		}
 
 		klog.V(0).Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
@@ -58,7 +58,7 @@ func main() {
 		if err := utils.BuildingAndLaunchJob(&experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to construct chaos experiment job due to: %v", err)
 			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentJobCreationErrorReason)
-			break
+			continue
 		}
 		recorder.ExperimentJobCreate(experiment.Name, experiment.JobName)
 
@@ -67,7 +67,7 @@ func main() {
 		if err := engineDetails.WatchJobForCompletion(&experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to Watch the Job, error: %v", err)
 			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentJobWatchErrorReason)
-			break
+			continue
 		}
 
 		// Will Update the chaosEngine Status
