@@ -56,11 +56,11 @@ func (r Recorder) ExperimentJobCreate(experimentName string, jobName string) {
 // ExperimentJobCleanUp is an standard event spawned just after
 // starting ChaosExperiment Job
 func (r Recorder) ExperimentJobCleanUp(experiment *ExperimentDetails, jobCleanUpPolicy v1alpha1.CleanUpPolicy) {
-	if jobCleanUpPolicy == v1alpha1.CleanUpPolicyDelete {
-		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' is deleted", experiment.JobName)
+	if jobCleanUpPolicy == v1alpha1.CleanUpPolicyRetain {
+		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' will be retained", experiment.JobName)
 		time.Sleep(5 * time.Second)
 	} else {
-		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' will be retained", experiment.JobName)
+		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' is deleted", experiment.JobName)
 		time.Sleep(5 * time.Second)
 	}
 }
