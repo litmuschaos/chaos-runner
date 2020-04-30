@@ -30,7 +30,7 @@ func main() {
 	// Steps for each Experiment
 	for _, experiment := range experimentList {
 
-		// Sending event to GA instance
+		// Sending event to GA instance"delete"
 		if engineDetails.ClientUUID != "" {
 			analytics.TriggerAnalytics(experiment.Name, engineDetails.ClientUUID)
 		}
@@ -38,6 +38,7 @@ func main() {
 		if err := experiment.SetValueFromChaosResources(&engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to set values from Chaos Resources due to error: %v", err)
 			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentNotFoundErrorReason)
+			continue
 		}
 
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
@@ -50,8 +51,8 @@ func main() {
 
 		if err := experiment.PatchResources(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to patch Chaos Resources required for Chaos Experiment: %v, due to error: %v", experiment.Name, err)
-		}
 
+		}
 		recorder.ExperimentDepedencyCheck(experiment.Name)
 
 		// Creation of PodTemplateSpec, and Final Job

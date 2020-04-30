@@ -122,14 +122,14 @@ func (engineDetails EngineDetails) UpdateEngineWithResult(experiment *Experiment
 }
 
 // DeleteJobAccordingToJobCleanUpPolicy deletes the chaosExperiment Job according to jobCleanUpPolicy
-func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experiment *ExperimentDetails, clients ClientSets) (string, error) {
+func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experiment *ExperimentDetails, clients ClientSets) (v1alpha1.CleanUpPolicy, error) {
 
 	expEngine, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
 		return "", err
 	}
 
-	if expEngine.Spec.JobCleanUpPolicy == "delete" || expEngine.Spec.JobCleanUpPolicy == "" {
+	if expEngine.Spec.JobCleanUpPolicy == v1alpha1.CleanUpPolicyDelete || string(expEngine.Spec.JobCleanUpPolicy) == "" {
 		klog.V(0).Infoln("Will delete the job as jobCleanPolicy is set to : " + expEngine.Spec.JobCleanUpPolicy)
 
 		deletePolicy := metav1.DeletePropagationForeground
@@ -140,5 +140,5 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 			return "", errors.Wrapf(err, "Unable to delete ChaosExperiment Job Name: %v, in namespace: %v, due to error: %v", experiment.JobName, experiment.Namespace, err)
 		}
 	}
-	return string(expEngine.Spec.JobCleanUpPolicy), nil
+	return expEngine.Spec.JobCleanUpPolicy, nil
 }
