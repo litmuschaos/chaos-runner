@@ -73,13 +73,6 @@ func (b *Builder) WithNamespace(namespace string) *Builder {
 // WithAnnotations merges existing annotations if any
 // with the ones that are provided here
 func (b *Builder) WithAnnotations(annotations map[string]string) *Builder {
-	if len(annotations) == 0 {
-		b.errs = append(
-			b.errs,
-			errors.New("failed to build deployment object: missing annotations"),
-		)
-		return b
-	}
 
 	if b.podtemplatespec.Object.Annotations == nil {
 		return b.WithAnnotationsNew(annotations)
@@ -94,15 +87,6 @@ func (b *Builder) WithAnnotations(annotations map[string]string) *Builder {
 // WithAnnotationsNew resets the annotation field of podtemplatespec
 // with provided arguments
 func (b *Builder) WithAnnotationsNew(annotations map[string]string) *Builder {
-	if len(annotations) == 0 {
-		b.errs = append(
-			b.errs,
-			errors.New(
-				"failed to build podtemplatespec object: missing annotations",
-			),
-		)
-		return b
-	}
 
 	// copy of original map
 	newannotations := map[string]string{}

@@ -115,10 +115,10 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		WithName(experiment.JobName).
 		WithNamespace(experiment.Namespace).
 		WithLabels(experiment.ExpLabels).
-		WithAnnotations(experiment.Annotations).
 		WithServiceAccountName(experiment.SvcAccount).
 		WithRestartPolicy(corev1.RestartPolicyOnFailure).
 		WithVolumeBuilders(experiment.VolumeOpts.VolumeBuilders).
+		WithAnnotations(experiment.Annotations).
 		WithContainerBuildersNew(containerForPod)
 
 	if _, err := podtemplate.Build(); err != nil {

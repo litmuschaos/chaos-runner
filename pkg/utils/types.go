@@ -32,17 +32,17 @@ type EngineDetails struct {
 
 // ExperimentDetails is for collecting all the experiment-related details
 type ExperimentDetails struct {
-	Name       string
-	Env        map[string]string
-	ExpLabels  map[string]string
-	ExpImage   string
-	ExpArgs    []string
-	JobName    string
-	Namespace  string
-	ConfigMaps []v1alpha1.ConfigMap
-	Secrets    []v1alpha1.Secret
-	VolumeOpts VolumeOpts
-	SvcAccount string
+	Name        string
+	Env         map[string]string
+	ExpLabels   map[string]string
+	ExpImage    string
+	ExpArgs     []string
+	JobName     string
+	Namespace   string
+	ConfigMaps  []v1alpha1.ConfigMap
+	Secrets     []v1alpha1.Secret
+	VolumeOpts  VolumeOpts
+	SvcAccount  string
 	Annotations map[string]string
 }
 

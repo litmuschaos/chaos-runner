@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"time"
 
+	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	litmuschaosScheme "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/scheme"
 )
 
@@ -54,12 +55,12 @@ func (r Recorder) ExperimentJobCreate(experimentName string, jobName string) {
 
 // ExperimentJobCleanUp is an standard event spawned just after
 // starting ChaosExperiment Job
-func (r Recorder) ExperimentJobCleanUp(experiment *ExperimentDetails, jobCleanUpPolicy string) {
-	if jobCleanUpPolicy == "delete" {
-		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' is deleted", experiment.JobName)
+func (r Recorder) ExperimentJobCleanUp(experiment *ExperimentDetails, jobCleanUpPolicy v1alpha1.CleanUpPolicy) {
+	if jobCleanUpPolicy == v1alpha1.CleanUpPolicyRetain {
+		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' will be retained", experiment.JobName)
 		time.Sleep(5 * time.Second)
 	} else {
-		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' will be retained", experiment.JobName)
+		r.EventRecorder.Eventf(r.EventResource, corev1.EventTypeNormal, ExperimentJobCleanUpReason, "Experiment Job '%s' is deleted", experiment.JobName)
 		time.Sleep(5 * time.Second)
 	}
 }

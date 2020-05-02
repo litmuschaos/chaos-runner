@@ -38,27 +38,28 @@ func main() {
 		if err := experiment.SetValueFromChaosResources(&engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to set values from Chaos Resources due to error: %v", err)
 			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentNotFoundErrorReason)
+			continue
 		}
 
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to patch ENV due to error: %v", err)
 			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentEnvParseErrorReason)
-			break
+			continue
 		}
 
 		klog.V(0).Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
 
 		if err := experiment.PatchResources(engineDetails, clients); err != nil {
 			klog.V(0).Infof("Unable to patch Chaos Resources required for Chaos Experiment: %v, due to error: %v", experiment.Name, err)
-		}
 
+		}
 		recorder.ExperimentDepedencyCheck(experiment.Name)
 
 		// Creation of PodTemplateSpec, and Final Job
 		if err := utils.BuildingAndLaunchJob(&experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to construct chaos experiment job due to: %v", err)
 			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentJobCreationErrorReason)
-			break
+			continue
 		}
 		recorder.ExperimentJobCreate(experiment.Name, experiment.JobName)
 
@@ -67,7 +68,7 @@ func main() {
 		if err := engineDetails.WatchJobForCompletion(&experiment, clients); err != nil {
 			klog.V(0).Infof("Unable to Watch the Job, error: %v", err)
 			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentJobWatchErrorReason)
-			break
+			continue
 		}
 
 		// Will Update the chaosEngine Status
