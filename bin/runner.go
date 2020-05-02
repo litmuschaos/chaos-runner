@@ -30,7 +30,7 @@ func main() {
 	// Steps for each Experiment
 	for _, experiment := range experimentList {
 
-		// Sending event to GA instance"delete"
+		// Sending event to GA instance
 		if engineDetails.ClientUUID != "" {
 			analytics.TriggerAnalytics(experiment.Name, engineDetails.ClientUUID)
 		}
