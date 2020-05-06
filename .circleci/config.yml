@@ -49,6 +49,12 @@ jobs:
       - run: make build
       - run: |
           docker build . -f build/Dockerfile -t ${REPONAME}/${IMGNAME}:${IMGTAG}
+      - run: |
+          mkdir ./vendor/github.com/litmuschaos/chaos-operator/deploy
+          cd ./vendor/github.com/litmuschaos/chaos-operator/deploy
+          wget https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/chaos_crds.yaml
+          wget https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/rbac.yaml
+          wget https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/operator.yaml
       - run: make test
       - run: |
           docker save -o workspace/image.tar ${REPONAME}/${IMGNAME}:${IMGTAG}
