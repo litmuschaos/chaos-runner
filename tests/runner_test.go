@@ -83,20 +83,20 @@ var _ = BeforeSuite(func() {
 
 	//Creating crds
 	By("Installing Litmus CRDs")
-	err = exec.Command("kubectl", "create", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
+	err = exec.Command("kubectl", "create", "-f", "../build/_output/test/chaos_crds.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create Litmus CRD's, due to error: %v", err)
 	}
 
 	//Creating rbacs
-	err = exec.Command("kubectl", "create", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/rbac.yaml").Run()
+	err = exec.Command("kubectl", "create", "-f", "../build/_output/test/rbac.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create RBAC Permissions, due to error: %v", err)
 	}
 
 	//Creating Chaos-Operator
 	By("Installing Chaos-Operator")
-	err = exec.Command("kubectl", "create", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/operator.yaml").Run()
+	err = exec.Command("kubectl", "create", "-f", "../build/_output/test/operator.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create Chaos-operator, due to error: %v", err)
 	}
@@ -170,6 +170,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 				},
 			}
 			By("Creating nginx deployment")
+			k8sClientSet.CoreV1().Pods("litmus").Patch()
 			_, err := k8sClientSet.AppsV1().Deployments("litmus").Create(deployment)
 			Expect(err).To(
 				BeNil(),
@@ -250,9 +251,9 @@ var _ = Describe("BDD on chaos-runner", func() {
 //Deleting all unused resources
 var _ = AfterSuite(func() {
 	By("Deleting all CRDs")
-	crdDeletion := exec.Command("kubectl", "delete", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/chaos_crds.yaml").Run()
+	crdDeletion := exec.Command("kubectl", "delete", "-f", "../build/_output/test/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
 	By("Deleting RBAC Permissions")
-	rbacDeletion := exec.Command("kubectl", "delete", "-f", "../vendor/github.com/litmuschaos/chaos-operator/deploy/rbac.yaml").Run()
+	rbacDeletion := exec.Command("kubectl", "delete", "-f", "../build/_output/test/rbac.yaml").Run()
 	Expect(rbacDeletion).To(BeNil())
 })

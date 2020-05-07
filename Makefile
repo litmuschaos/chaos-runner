@@ -71,7 +71,7 @@ test:
 	@echo "------------------"
 	@echo "Aquire YAML for performing tests"
 	@echo "------------------"
-	@mkdir -p ./vendor/github.com/litmuschaos/chaos-operator/deploy;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/chaos_crds.yaml -P ./vendor/github.com/litmuschaos/chaos-operator/deploy ;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/rbac.yaml -P ./vendor/github.com/litmuschaos/chaos-operator/deploy; wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/operator.yaml -P ./vendor/github.com/litmuschaos/chaos-operator/deploy
+	@mkdir -p ./build/_output/test;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/chaos_crds.yaml -P ./build/_output/test ;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/rbac.yaml -P ./build/_output/test; wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/operator.yaml -P ./build/_output/test
 	@echo "------------------"
 	@echo "--> Run Go Test"
 	@echo "------------------"
