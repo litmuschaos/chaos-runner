@@ -170,7 +170,6 @@ var _ = Describe("BDD on chaos-runner", func() {
 				},
 			}
 			By("Creating nginx deployment")
-			k8sClientSet.CoreV1().Pods("litmus").Patch()
 			_, err := k8sClientSet.AppsV1().Deployments("litmus").Create(deployment)
 			Expect(err).To(
 				BeNil(),
