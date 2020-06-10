@@ -21,6 +21,9 @@ func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientS
 	if err := expDetails.SetImage(clients); err != nil {
 		return err
 	}
+	if err := expDetails.SetImagePullPolicy(clients); err != nil {
+		return err
+	}
 	if err := expDetails.SetArgs(clients); err != nil {
 		return err
 	}
@@ -140,6 +143,16 @@ func (expDetails *ExperimentDetails) SetImage(clients ClientSets) error {
 	return nil
 }
 
+// SetImagePullPolicy sets the Experiment ImagePullPolicy, in Experiment Structure
+func (expDetails *ExperimentDetails) SetImagePullPolicy(clients ClientSets) error {
+	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
+	}
+	expDetails.ExpImagePullPolicy = expirementSpec.Spec.Definition.ImagePullPolicy
+	return nil
+}
+
 // SetArgs sets the Experiment Image, in Experiment Structure
 func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
 	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
@@ -150,7 +163,7 @@ func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
 	return nil
 }
 
-// SetValueFromChaosResources fetchs required values from various Chaos Resources
+// SetValueFromChaosResources fetches required values from various Chaos Resources
 func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *EngineDetails, clients ClientSets) error {
 	if err := expDetails.SetValueFromChaosEngine(engineDetails, clients); err != nil {
 		return errors.Wrapf(err, "Unable to set value from Chaos Engine due to error: %v", err)

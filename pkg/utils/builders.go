@@ -30,7 +30,7 @@ func buildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) (
 		WithImage(experiment.ExpImage).
 		WithCommandNew([]string{"/bin/bash"}).
 		WithArgumentsNew(experiment.ExpArgs).
-		WithImagePullPolicy("Always").
+		WithImagePullPolicy(experiment.ExpImagePullPolicy).
 		WithEnvsNew(envVar)
 
 	if experiment.VolumeOpts.VolumeMounts != nil {
