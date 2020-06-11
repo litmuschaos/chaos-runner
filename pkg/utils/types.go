@@ -65,6 +65,11 @@ type Recorder struct {
 	EventResource runtime.Object
 }
 
+var (
+    // DefaultExpImagePullPolicy contains the defaults value (Always) of imagePullPolicy for exp container
+    DefaultExpImagePullPolicy corev1.PullPolicy = "Always"
+)
+
 const (
 	ExperimentDependencyCheckReason  string = "ExperimentDependencyCheck"
 	ExperimentJobCreateReason        string = "ExperimentJobCreate"

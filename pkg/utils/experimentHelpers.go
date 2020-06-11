@@ -149,9 +149,14 @@ func (expDetails *ExperimentDetails) SetImagePullPolicy(clients ClientSets) erro
 	if err != nil {
 		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
 	}
-	expDetails.ExpImagePullPolicy = expirementSpec.Spec.Definition.ImagePullPolicy
+    //TODO: additional checks
+    if expirementSpec.Spec.Definition.ImagePullPolicy == "" {
+        expDetails.ExpImagePullPolicy = DefaultExpImagePullPolicy
+    } else {
+	    expDetails.ExpImagePullPolicy = expirementSpec.Spec.Definition.ImagePullPolicy
+    }
 	return nil
-}
+ }
 
 // SetArgs sets the Experiment Image, in Experiment Structure
 func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
