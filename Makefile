@@ -16,16 +16,16 @@ all: godeps format lint build dockerops test
 help:
 	@echo ""
 	@echo "Usage:-"
-	@echo "\tmake all   -- [default] builds the chaos exporter container"
+	@echo "\tmake all   -- [default] builds the chaos runner container"
 	@echo ""
 
 .PHONY: godeps
 godeps:
 	@echo ""
-	@echo "INFO:\tverifying dependencies for chaos exporter build ..."
+	@echo "INFO:\tverifying dependencies for chaos runner build ..."
 	@go get -u -v golang.org/x/lint/golint
 	@go get -u -v golang.org/x/tools/cmd/goimports
-	@go get -u -v github.com/golang/dep/cmd/dep
+	#@go get -u -v github.com/golang/dep/cmd/dep
 
 _build_check_docker:
 	@if [ $(IS_DOCKER_INSTALLED) -eq 1 ]; \

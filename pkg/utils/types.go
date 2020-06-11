@@ -32,18 +32,19 @@ type EngineDetails struct {
 
 // ExperimentDetails is for collecting all the experiment-related details
 type ExperimentDetails struct {
-	Name        string
-	Env         map[string]string
-	ExpLabels   map[string]string
-	ExpImage    string
-	ExpArgs     []string
-	JobName     string
-	Namespace   string
-	ConfigMaps  []v1alpha1.ConfigMap
-	Secrets     []v1alpha1.Secret
-	VolumeOpts  VolumeOpts
-	SvcAccount  string
-	Annotations map[string]string
+	Name               string
+	Env                map[string]string
+	ExpLabels          map[string]string
+	ExpImage           string
+	ExpImagePullPolicy corev1.PullPolicy
+	ExpArgs            []string
+	JobName            string
+	Namespace          string
+	ConfigMaps         []v1alpha1.ConfigMap
+	Secrets            []v1alpha1.Secret
+	VolumeOpts         VolumeOpts
+	SvcAccount         string
+	Annotations        map[string]string
 }
 
 //VolumeOpts is a strcuture for all volume related operations
@@ -63,6 +64,11 @@ type Recorder struct {
 	EventRecorder record.EventRecorder
 	EventResource runtime.Object
 }
+
+var (
+    // DefaultExpImagePullPolicy contains the defaults value (Always) of imagePullPolicy for exp container
+    DefaultExpImagePullPolicy corev1.PullPolicy = "Always"
+)
 
 const (
 	ExperimentDependencyCheckReason  string = "ExperimentDependencyCheck"
