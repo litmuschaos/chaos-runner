@@ -210,3 +210,17 @@ func (b *Builder) WithVolumeMountsNew(volumeMounts []corev1.VolumeMount) *Builde
 	b.con.object.VolumeMounts = newvolumeMounts
 	return b
 }
+
+// WithSecurityContext sets the security context of the container
+func (b *Builder) WithSecurityContext(sc corev1.SecurityContext) *Builder {
+	// if sc == nil {
+	// 	b.errors = append(
+	// 		b.errors,
+	// 		errors.New("failed to build container object: nil security context"),
+	// 	)
+	// 	return b
+	// }
+
+	b.con.object.SecurityContext = &sc
+	return b
+}

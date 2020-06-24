@@ -8,6 +8,7 @@ import (
 	"k8s.io/klog"
 )
 
+// CreateExperimentList make the list of all experiment, provided inside chaosengine
 func CreateExperimentList(engineDetails *EngineDetails) []ExperimentDetails {
 	var ExperimentDetailsList []ExperimentDetails
 	for i := range engineDetails.Experiments {
@@ -28,6 +29,12 @@ func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientS
 		return err
 	}
 	if err := expDetails.SetLabels(engine, clients); err != nil {
+		return err
+	}
+	if err := expDetails.SetSecurityContext(clients); err != nil {
+		return err
+	}
+	if err := expDetails.SetHostPID(clients); err != nil {
 		return err
 	}
 	return nil
@@ -149,14 +156,14 @@ func (expDetails *ExperimentDetails) SetImagePullPolicy(clients ClientSets) erro
 	if err != nil {
 		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
 	}
-    //TODO: additional checks
-    if expirementSpec.Spec.Definition.ImagePullPolicy == "" {
-        expDetails.ExpImagePullPolicy = DefaultExpImagePullPolicy
-    } else {
-	    expDetails.ExpImagePullPolicy = expirementSpec.Spec.Definition.ImagePullPolicy
-    }
+	//TODO: additional checks
+	if expirementSpec.Spec.Definition.ImagePullPolicy == "" {
+		expDetails.ExpImagePullPolicy = DefaultExpImagePullPolicy
+	} else {
+		expDetails.ExpImagePullPolicy = expirementSpec.Spec.Definition.ImagePullPolicy
+	}
 	return nil
- }
+}
 
 // SetArgs sets the Experiment Image, in Experiment Structure
 func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
@@ -202,6 +209,7 @@ func (engine *EngineDetails) SetValueFromChaosRunner(clients ClientSets) error {
 	return nil
 }
 
+// SetValueFromChaosEngine set the value from chaosengine
 func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetails, clients ClientSets) error {
 
 	chaosEngine, err := engine.GetChaosEngine(clients)
@@ -229,5 +237,25 @@ func (expDetails *ExperimentDetails) SetExpAnnotationFromEngine(engineName strin
 			expDetails.Annotations = expRefList[i].Spec.Components.ExperimentAnnotations
 		}
 	}
+	return nil
+}
+
+// SetSecurityContext sets the security context, in Experiment Structure
+func (expDetails *ExperimentDetails) SetSecurityContext(clients ClientSets) error {
+	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
+	}
+	expDetails.SecurityContext = expirementSpec.Spec.Definition.SecurityContext
+	return nil
+}
+
+// SetHostPID sets the hostPID, in Experiment Structure
+func (expDetails *ExperimentDetails) SetHostPID(clients ClientSets) error {
+	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
+	}
+	expDetails.HostPID = expirementSpec.Spec.Definition.HostPID
 	return nil
 }

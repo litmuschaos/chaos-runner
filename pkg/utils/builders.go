@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"reflect"
+
 	"github.com/pkg/errors"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -32,6 +34,12 @@ func buildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) (
 		WithArgumentsNew(experiment.ExpArgs).
 		WithImagePullPolicy(experiment.ExpImagePullPolicy).
 		WithEnvsNew(envVar)
+
+	if !reflect.DeepEqual(experiment.SecurityContext.ContainerSecurityContext, corev1.SecurityContext{}) {
+
+		containerSpec.WithSecurityContext(experiment.SecurityContext.ContainerSecurityContext)
+
+	}
 
 	if experiment.VolumeOpts.VolumeMounts != nil {
 		containerSpec.WithVolumeMountsNew(experiment.VolumeOpts.VolumeMounts)
@@ -120,6 +128,16 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		WithVolumeBuilders(experiment.VolumeOpts.VolumeBuilders).
 		WithAnnotations(experiment.Annotations).
 		WithContainerBuildersNew(containerForPod)
+
+	if !reflect.DeepEqual(experiment.SecurityContext.PodSecurityContext, corev1.PodSecurityContext{}) {
+
+		podtemplate.WithSecurityContext(experiment.SecurityContext.PodSecurityContext)
+
+	}
+
+	if experiment.HostPID {
+		podtemplate.WithHostPID(experiment.HostPID)
+	}
 
 	if _, err := podtemplate.Build(); err != nil {
 		return nil, err
