@@ -149,14 +149,14 @@ func (expDetails *ExperimentDetails) SetImagePullPolicy(clients ClientSets) erro
 	if err != nil {
 		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
 	}
-    //TODO: additional checks
-    if expirementSpec.Spec.Definition.ImagePullPolicy == "" {
-        expDetails.ExpImagePullPolicy = DefaultExpImagePullPolicy
-    } else {
-	    expDetails.ExpImagePullPolicy = expirementSpec.Spec.Definition.ImagePullPolicy
-    }
+	//TODO: additional checks
+	if expirementSpec.Spec.Definition.ImagePullPolicy == "" {
+		expDetails.ExpImagePullPolicy = DefaultExpImagePullPolicy
+	} else {
+		expDetails.ExpImagePullPolicy = expirementSpec.Spec.Definition.ImagePullPolicy
+	}
 	return nil
- }
+}
 
 // SetArgs sets the Experiment Image, in Experiment Structure
 func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
@@ -182,6 +182,9 @@ func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *E
 	}
 	if err := expDetails.SetValueFromChaosExperiment(clients, engineDetails); err != nil {
 		return errors.Wrapf(err, "Unable to set value from Chaos Experiment due to error: %v", err)
+	}
+	if err := expDetails.SetExpImageFromEngine(engineDetails.Name, clients); err != nil {
+		return errors.Wrapf(err, "Unable to set image from Chaos Engine due to error: %v", err)
 	}
 	return nil
 }
@@ -227,6 +230,26 @@ func (expDetails *ExperimentDetails) SetExpAnnotationFromEngine(engineName strin
 	for i := range expRefList {
 		if expRefList[i].Name == expDetails.Name {
 			expDetails.Annotations = expRefList[i].Spec.Components.ExperimentAnnotations
+		}
+	}
+	return nil
+}
+
+// SetExpImageFromEngine will over-ride the default exp image with the one provided in the chaosEngine
+func (expDetails *ExperimentDetails) SetExpImageFromEngine(engineName string, clients ClientSets) error {
+
+	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+	}
+
+	expRefList := engineSpec.Spec.Experiments
+	for i := range expRefList {
+		if expRefList[i].Name == expDetails.Name {
+
+			if expRefList[i].Spec.Components.ExperimentImage != "" {
+				expDetails.ExpImage = expRefList[i].Spec.Components.ExperimentImage
+			}
 		}
 	}
 	return nil
