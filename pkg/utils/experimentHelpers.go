@@ -184,7 +184,7 @@ func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *E
 		return errors.Wrapf(err, "Unable to set value from Chaos Experiment due to error: %v", err)
 	}
 	if err := expDetails.SetExpImageFromEngine(engineDetails.Name, clients); err != nil {
-		return errors.Wrapf(err, "Unable to set iamge from Chaos Engine due to error: %v", err)
+		return errors.Wrapf(err, "Unable to set image from Chaos Engine due to error: %v", err)
 	}
 	return nil
 }
