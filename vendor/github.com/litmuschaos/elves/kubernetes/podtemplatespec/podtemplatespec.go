@@ -16,6 +16,7 @@ package podtemplatespec
 import (
 	"errors"
 	"fmt"
+	"reflect"
 
 	container "github.com/litmuschaos/elves/kubernetes/container"
 	volume "github.com/litmuschaos/elves/kubernetes/volume/v1alpha1"
@@ -409,4 +410,24 @@ func (b *Builder) validate() error {
 		)
 	}
 	return nil
+}
+
+// WithSecurityContext sets the security context of the pod
+func (b *Builder) WithSecurityContext(sc corev1.PodSecurityContext) *Builder {
+
+	if reflect.DeepEqual(sc, corev1.PodSecurityContext{}) {
+		b.errs = append(
+			b.errs,
+			errors.New("failed to build podtemplatespec: missing pod security context"),
+		)
+	}
+	b.podtemplatespec.Object.Spec.SecurityContext = &sc
+	return b
+}
+
+// WithHostPID sets the hostPID in the pod
+func (b *Builder) WithHostPID(hostPID bool) *Builder {
+
+	b.podtemplatespec.Object.Spec.HostPID = hostPID
+	return b
 }
