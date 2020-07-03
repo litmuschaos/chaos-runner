@@ -190,6 +190,9 @@ func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *E
 	if err := expDetails.SetValueFromChaosExperiment(clients, engineDetails); err != nil {
 		return errors.Wrapf(err, "Unable to set value from Chaos Experiment due to error: %v", err)
 	}
+	if err := expDetails.SetExpImageFromEngine(engineDetails.Name, clients); err != nil {
+		return errors.Wrapf(err, "Unable to set image from Chaos Engine due to error: %v", err)
+	}
 	return nil
 }
 
@@ -257,5 +260,26 @@ func (expDetails *ExperimentDetails) SetHostPID(clients ClientSets) error {
 		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
 	}
 	expDetails.HostPID = expirementSpec.Spec.Definition.HostPID
+
+	return nil
+}
+
+// SetExpImageFromEngine will over-ride the default exp image with the one provided in the chaosEngine
+func (expDetails *ExperimentDetails) SetExpImageFromEngine(engineName string, clients ClientSets) error {
+
+	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+	}
+
+	expRefList := engineSpec.Spec.Experiments
+	for i := range expRefList {
+		if expRefList[i].Name == expDetails.Name {
+
+			if expRefList[i].Spec.Components.ExperimentImage != "" {
+				expDetails.ExpImage = expRefList[i].Spec.Components.ExperimentImage
+			}
+		}
+	}
 	return nil
 }
