@@ -127,6 +127,7 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		WithRestartPolicy(corev1.RestartPolicyOnFailure).
 		WithVolumeBuilders(experiment.VolumeOpts.VolumeBuilders).
 		WithAnnotations(experiment.Annotations).
+        WithNodeSelector(experiment.NodeSelector).
 		WithContainerBuildersNew(containerForPod)
 
 	if !reflect.DeepEqual(experiment.SecurityContext.PodSecurityContext, corev1.PodSecurityContext{}) {
