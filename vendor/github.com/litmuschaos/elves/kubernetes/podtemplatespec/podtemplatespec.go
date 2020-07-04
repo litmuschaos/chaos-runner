@@ -100,6 +100,54 @@ func (b *Builder) WithAnnotationsNew(annotations map[string]string) *Builder {
 	return b
 }
 
+
+// WithNodeSelector merges the nodeselectors if present
+// with the provided arguments
+func (b *Builder) WithNodeSelector(nodeselectors map[string]string) *Builder {
+	if len(nodeselectors) == 0 {
+		b.errs = append(
+			b.errs,
+			errors.New(
+				"failed to build podtemplatespec object: missing nodeselectors",
+			),
+		)
+		return b
+	}
+
+	if b.podtemplatespec.Object.Spec.NodeSelector == nil {
+		return b.WithNodeSelectorNew(nodeselectors)
+	}
+
+	for key, value := range nodeselectors {
+		b.podtemplatespec.Object.Spec.NodeSelector[key] = value
+	}
+	return b
+}
+
+// WithNodeSelectorNew resets the nodeselector field of podtemplatespec
+// with provided arguments
+func (b *Builder) WithNodeSelectorNew(nodeselectors map[string]string) *Builder {
+	if len(nodeselectors) == 0 {
+		b.errs = append(
+			b.errs,
+			errors.New(
+				"failed to build podtemplatespec object: missing nodeselectors",
+			),
+		)
+		return b
+	}
+
+	// copy of original map
+	newnodeselectors := map[string]string{}
+	for key, value := range nodeselectors {
+		newnodeselectors[key] = value
+	}
+
+	// override
+	b.podtemplatespec.Object.Spec.NodeSelector = newnodeselectors
+	return b
+}
+
 // WithLabels merges existing labels if any
 // with the ones that are provided here
 func (b *Builder) WithLabels(labels map[string]string) *Builder {
@@ -151,53 +199,6 @@ func (b *Builder) WithLabelsNew(labels map[string]string) *Builder {
 // with provided arguments
 func (b *Builder) WithRestartPolicy(restartPolicy corev1.RestartPolicy) *Builder {
 	b.podtemplatespec.Object.Spec.RestartPolicy = restartPolicy
-	return b
-}
-
-// WithNodeSelector merges the nodeselectors if present
-// with the provided arguments
-func (b *Builder) WithNodeSelector(nodeselectors map[string]string) *Builder {
-	if len(nodeselectors) == 0 {
-		b.errs = append(
-			b.errs,
-			errors.New(
-				"failed to build podtemplatespec object: missing nodeselectors",
-			),
-		)
-		return b
-	}
-
-	if b.podtemplatespec.Object.Spec.NodeSelector == nil {
-		return b.WithNodeSelectorNew(nodeselectors)
-	}
-
-	for key, value := range nodeselectors {
-		b.podtemplatespec.Object.Spec.NodeSelector[key] = value
-	}
-	return b
-}
-
-// WithNodeSelectorNew resets the nodeselector field of podtemplatespec
-// with provided arguments
-func (b *Builder) WithNodeSelectorNew(nodeselectors map[string]string) *Builder {
-	if len(nodeselectors) == 0 {
-		b.errs = append(
-			b.errs,
-			errors.New(
-				"failed to build podtemplatespec object: missing nodeselectors",
-			),
-		)
-		return b
-	}
-
-	// copy of original map
-	newnodeselectors := map[string]string{}
-	for key, value := range nodeselectors {
-		newnodeselectors[key] = value
-	}
-
-	// override
-	b.podtemplatespec.Object.Spec.NodeSelector = newnodeselectors
 	return b
 }
 
