@@ -139,6 +139,10 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		podtemplate.WithHostPID(experiment.HostPID)
 	}
 
+	if len(experiment.NodeSelector) != 0 {
+		podtemplate.WithNodeSelector(experiment.NodeSelector)
+	}
+
 	if _, err := podtemplate.Build(); err != nil {
 		return nil, err
 	}
