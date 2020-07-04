@@ -45,7 +45,7 @@ type ExperimentDetails struct {
 	VolumeOpts         VolumeOpts
 	SvcAccount         string
 	Annotations        map[string]string
-    NodeSelector       map[string]string
+	NodeSelector       map[string]string
 	SecurityContext    v1alpha1.SecurityContext
 	HostPID            bool
 }
