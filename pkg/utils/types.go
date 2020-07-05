@@ -45,6 +45,9 @@ type ExperimentDetails struct {
 	VolumeOpts         VolumeOpts
 	SvcAccount         string
 	Annotations        map[string]string
+	NodeSelector       map[string]string
+	SecurityContext    v1alpha1.SecurityContext
+	HostPID            bool
 }
 
 //VolumeOpts is a strcuture for all volume related operations
@@ -66,8 +69,8 @@ type Recorder struct {
 }
 
 var (
-    // DefaultExpImagePullPolicy contains the defaults value (Always) of imagePullPolicy for exp container
-    DefaultExpImagePullPolicy corev1.PullPolicy = "Always"
+	// DefaultExpImagePullPolicy contains the defaults value (Always) of imagePullPolicy for exp container
+	DefaultExpImagePullPolicy corev1.PullPolicy = "Always"
 )
 
 const (
