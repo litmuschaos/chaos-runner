@@ -81,7 +81,7 @@ type ExperimentDef struct {
 	ConfigMaps []ConfigMap `json:"configmaps,omitempty"`
 	// Secrets contains a list of Secrets
 	Secrets []Secret `json:"secrets,omitempty"`
-	// HostFileVolumes defines the host directory/file to be mounted
+	// HostFileVolume defines the host directory/file to be mounted
 	HostFileVolumes []HostFile `json:"hostFileVolumes,omitempty"`
 	// Annotations that needs to be provided in the pod for pod that is getting created
 	ExperimentAnnotations map[string]string `json:"experimentannotations,omitempty"`
