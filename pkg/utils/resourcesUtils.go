@@ -15,5 +15,9 @@ func (expDetails *ExperimentDetails) PatchResources(engineDetails EngineDetails,
 	if err := expDetails.PatchSecrets(clients, engineDetails); err != nil {
 		return errors.Wrapf(err, "Unable to patch Secrets to Chaos Experiment, due to error: %v", err)
 	}
+	// Patch HostFileVolumes to ChaosExperiment Job
+	if err := expDetails.PatchHostFileVolumes(clients, engineDetails); err != nil {
+		return errors.Wrapf(err, "Unable to patch hostFileVolumes to Chaos Experiment, due to error: %v", err)
+	}
 	return nil
 }

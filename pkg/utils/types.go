@@ -42,6 +42,7 @@ type ExperimentDetails struct {
 	Namespace          string
 	ConfigMaps         []v1alpha1.ConfigMap
 	Secrets            []v1alpha1.Secret
+	HostFileVolumes    []v1alpha1.HostFile
 	VolumeOpts         VolumeOpts
 	SvcAccount         string
 	Annotations        map[string]string
