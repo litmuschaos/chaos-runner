@@ -1,10 +1,11 @@
 package utils
 
 import (
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
+
+	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
 //NOTE: The hostFileVolumeUtils doesn't contain the function to derive hostFileVols from chaosengine
@@ -22,7 +23,7 @@ func (expDetails *ExperimentDetails) PatchHostFileVolumes(clients ClientSets, en
 	}
 
 	klog.V(0).Infof("Validating HostFileVolumes details specified in the ChaosExperiment")
-	err = expDetails.ValidateHostFileVolumes(clients)
+	err = expDetails.ValidateHostFileVolumes()
 	if err != nil {
 		return err
 	}
@@ -43,7 +44,7 @@ func (expDetails *ExperimentDetails) SetHostFileVolumes(clients ClientSets, engi
 }
 
 // ValidateHostFileVolumes validates the hostFileVolume definition in experiment CR spec
-func (expDetails *ExperimentDetails) ValidateHostFileVolumes(clients ClientSets) error {
+func (expDetails *ExperimentDetails) ValidateHostFileVolumes() error {
 
     for _, v := range expDetails.HostFileVolumes {
 		if v.Name == "" || v.MountPath == "" || v.NodePath == "" {
@@ -58,10 +59,7 @@ func (expDetails *ExperimentDetails) ValidateHostFileVolumes(clients ClientSets)
 func getExperimentHostFileVolumes(clients ClientSets, expDetails *ExperimentDetails) ([]v1alpha1.HostFile, error) {
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 
-    //var nilStructForHostFile v1alpha1.HostFile
-
 	if err != nil {
-		//return nilStructForHostFile, errors.Wrapf(err, "Unable to get ChaosExperiment Resource,  error: %v", err)
 		return nil, errors.Wrapf(err, "Unable to get ChaosExperiment Resource,  error: %v", err)
 	}
 	expHostFileVolumes := chaosExperimentObj.Spec.Definition.HostFileVolumes

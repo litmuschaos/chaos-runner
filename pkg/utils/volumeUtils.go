@@ -12,7 +12,7 @@ var (
 )
 
 
-// CreateVolumeBuilder build Volume needed in execution of experiments
+// CreateVolumeBuilders build Volume needed in execution of experiments
 func CreateVolumeBuilders(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret, hostFileVolumes []v1alpha1.HostFile) []*volume.Builder {
 	volumeBuilderList := []*volume.Builder{}
 
@@ -79,7 +79,6 @@ func BuildVolumeMountsForSecrets(secrets []v1alpha1.Secret) []corev1.VolumeMount
 func BuildVolumeMountsForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) []corev1.VolumeMount {
 	var volumeMountsList []corev1.VolumeMount
 
-	//var volumeMount corev1.VolumeMount
     for _, v := range hostFileVolumes {
 		var volumeMount corev1.VolumeMount
 		volumeMount.Name = v.Name
