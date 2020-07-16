@@ -46,7 +46,7 @@ github.com/imdario/mergo
 github.com/jpillora/go-ogle-analytics
 # github.com/json-iterator/go v1.1.9
 github.com/json-iterator/go
-# github.com/litmuschaos/chaos-operator v0.0.0-20200704092059-5a5aeb9f619e
+# github.com/litmuschaos/chaos-operator v0.0.0-20200715104845-7a2261b1dab9
 github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/scheme
