@@ -6,8 +6,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// CreateVolumeBuilder build Volume needed in execution of experiments
-func CreateVolumeBuilder(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret) []*volume.Builder {
+var (
+	// hostpathTypeFile represents the hostpath type
+    hostpathTypeFile = corev1.HostPathFile
+)
+
+
+// CreateVolumeBuilders build Volume needed in execution of experiments
+func CreateVolumeBuilders(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret, hostFileVolumes []v1alpha1.HostFile) []*volume.Builder {
 	volumeBuilderList := []*volume.Builder{}
 
 	volumeBuilderForConfigMaps := BuildVolumeBuilderForConfigMaps(configMaps)
@@ -16,11 +22,14 @@ func CreateVolumeBuilder(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Sec
 	volumeBuilderForSecrets := BuildVolumeBuilderForSecrets(secrets)
 	volumeBuilderList = append(volumeBuilderList, volumeBuilderForSecrets...)
 
+	volumeBuilderForHostFileVolumes := BuildVolumeBuilderForHostFileVolumes(hostFileVolumes)
+	volumeBuilderList = append(volumeBuilderList, volumeBuilderForHostFileVolumes...)
+
 	return volumeBuilderList
 }
 
 // CreateVolumeMounts mounts Volume needed in execution of experiments
-func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret) []corev1.VolumeMount {
+func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret, hostFileVolumes []v1alpha1.HostFile) []corev1.VolumeMount {
 
 	var volumeMountsList []corev1.VolumeMount
 
@@ -30,13 +39,16 @@ func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secr
 	volumeMountsListForSecrets := BuildVolumeMountsForSecrets(secrets)
 	volumeMountsList = append(volumeMountsList, volumeMountsListForSecrets...)
 
+	volumeMountsListForHostFileVolumes := BuildVolumeMountsForHostFileVolumes(hostFileVolumes)
+	volumeMountsList = append(volumeMountsList, volumeMountsListForHostFileVolumes...)
+
 	return volumeMountsList
 }
 
 // VolumeOperations filles up VolumeOpts strucuture
-func (volumeOpts *VolumeOpts) VolumeOperations(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret) {
-	volumeOpts.VolumeBuilders = CreateVolumeBuilder(configMaps, secrets)
-	volumeOpts.VolumeMounts = CreateVolumeMounts(configMaps, secrets)
+func (volumeOpts *VolumeOpts) VolumeOperations(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret, hostFileVolumes []v1alpha1.HostFile) {
+	volumeOpts.VolumeBuilders = CreateVolumeBuilders(configMaps, secrets, hostFileVolumes)
+	volumeOpts.VolumeMounts = CreateVolumeMounts(configMaps, secrets, hostFileVolumes)
 }
 
 // BuildVolumeMountsForConfigMaps builds VolumeMounts for ConfigMaps
@@ -60,6 +72,19 @@ func BuildVolumeMountsForSecrets(secrets []v1alpha1.Secret) []corev1.VolumeMount
 		volumeMount.MountPath = v.MountPath
 		volumeMountsList = append(volumeMountsList, volumeMount)
 	}
+	return volumeMountsList
+}
+
+// BuildVolumeMountsForHostFileVolumes  builds VolumeMounts for HostFileVolume
+func BuildVolumeMountsForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) []corev1.VolumeMount {
+	var volumeMountsList []corev1.VolumeMount
+
+    for _, v := range hostFileVolumes {
+		var volumeMount corev1.VolumeMount
+		volumeMount.Name = v.Name
+		volumeMount.MountPath = v.MountPath
+		volumeMountsList = append(volumeMountsList, volumeMount)
+    }
 	return volumeMountsList
 }
 
@@ -88,5 +113,24 @@ func BuildVolumeBuilderForSecrets(secrets []v1alpha1.Secret) []*volume.Builder {
 			WithSecret(v.Name)
 		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
 	}
+	return volumeBuilderList
+}
+
+// BuildVolumeBuilderForHostFileVolumes builds VolumeBuilders for HostFileVolume
+func BuildVolumeBuilderForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) []*volume.Builder {
+	volumeBuilderList := []*volume.Builder{}
+	if hostFileVolumes == nil {
+		return nil
+    }
+
+    for _, v := range hostFileVolumes {
+		volumeBuilder := volume.NewBuilder().
+			WithName(v.Name).
+			WithHostPathAndType(
+				v.NodePath,
+				&hostpathTypeFile,
+			)
+		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
+    }
 	return volumeBuilderList
 }

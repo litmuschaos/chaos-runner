@@ -77,7 +77,7 @@ func getEnvFromMap(env map[string]string) []corev1.EnvVar {
 
 // BuildingAndLaunchJob builds Job, and then launch it.
 func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) error {
-	experiment.VolumeOpts.VolumeOperations(experiment.ConfigMaps, experiment.Secrets)
+	experiment.VolumeOpts.VolumeOperations(experiment.ConfigMaps, experiment.Secrets, experiment.HostFileVolumes)
 
 	envVar := getEnvFromMap(experiment.Env)
 	//Build Container to add in the Pod
