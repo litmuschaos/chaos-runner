@@ -75,14 +75,14 @@ var (
 )
 
 const (
-	ExperimentDependencyCheckReason  string = "ExperimentDependencyCheck"
-	ExperimentJobCreateReason        string = "ExperimentJobCreate"
-	ExperimentJobCleanUpReason       string = "ExperimentJobCleanUp"
-	ExperimentSkippedReason          string = "ExperimentSkipped"
-	ExperimentEnvParseErrorReason    string = "EnvParseError"
-	ExperimentNotFoundErrorReason    string = "ExperimentNotFound"
-	ExperimentJobCreationErrorReason string = "JobCreationError"
-	ExperimentJobWatchErrorReason    string = "JobWatchNotPermitted"
+	ExperimentDependencyCheckReason          string = "ExperimentDependencyCheck"
+	ExperimentJobCreateReason                string = "ExperimentJobCreate"
+	ExperimentJobCleanUpReason               string = "ExperimentJobCleanUp"
+	ExperimentSkippedReason                  string = "ExperimentSkipped"
+	ExperimentEnvParseErrorReason            string = "EnvParseError"
+	ExperimentNotFoundErrorReason            string = "ExperimentNotFound"
+	ExperimentJobCreationErrorReason         string = "JobCreationError"
+	ExperimentChaosContainerWatchErrorReason string = "ChaosContainerWatchNotPermitted"
 )
 
 // GenerateClientSetFromKubeConfig will generation both ClientSets (k8s, and Litmus)

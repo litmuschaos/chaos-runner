@@ -64,10 +64,10 @@ func main() {
 		recorder.ExperimentJobCreate(experiment.Name, experiment.JobName)
 
 		klog.V(0).Infof("Started Chaos Experiment Name: %v, with Job Name: %v", experiment.Name, experiment.JobName)
-		// Watching the Job till Completion
-		if err := engineDetails.WatchJobForCompletion(&experiment, clients); err != nil {
-			klog.V(0).Infof("Unable to Watch the Job, error: %v", err)
-			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentJobWatchErrorReason)
+		// Watching the chaos container till Completion
+		if err := engineDetails.WatchChaosContainerForCompletion(&experiment, clients); err != nil {
+			klog.V(0).Infof("Unable to Watch the chaos container, error: %v", err)
+			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentChaosContainerWatchErrorReason)
 			continue
 		}
 
