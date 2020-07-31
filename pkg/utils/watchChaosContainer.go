@@ -8,13 +8,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-
-var (
-	//chaosPod holds the experiment pod spec
-	chaosPod = &corev1.Pod{}
-)
-
-
 // GetChaosPod gets the chaos experiment pod object launched by the runner
 func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod, error){
 	chaosPodList, err := clients.KubeClient.CoreV1().Pods(expDetails.Namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
@@ -26,14 +19,11 @@ func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod
 		return nil, errors.New("Multiple pods exist with same jobname label")
 	}
 
-	for _, pod := range chaosPodList.Items {
-		chaosPod = &pod
-	}
-
+	// Note: We error out upon existence of multiple exp pods for the same experiment 
+	// & hence use index [0]
+	chaosPod := &chaosPodList.Items[0]
 	return chaosPod, nil
 }
-
-
 
 // GetChaosContainerStatus gets status of the chaos container
 func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients ClientSets) (bool, error) {
@@ -77,9 +67,9 @@ func (engineDetails EngineDetails) WatchChaosContainerForCompletion(experiment *
 
 		var expStatus ExperimentStatus
 		chaosPod, err := GetChaosPod(experiment, clients)
-        if err != nil {
+		if err != nil {
 			return errors.Wrapf(err, "Unable to get the chaos pod, due to error: %v", err)
-        }
+		}
 
 		expStatus.AwaitedExperimentStatus(experiment.Name, engineDetails.Name, chaosPod.Name)
 		if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {

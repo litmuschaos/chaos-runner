@@ -76,9 +76,9 @@ func (engineDetails EngineDetails) UpdateEngineWithResult(experiment *Experiment
 
 	var currExpStatus ExperimentStatus
 	chaosPod, err := GetChaosPod(experiment, clients)
-    if err != nil {
+	if err != nil {
 		return errors.Wrapf(err, "Unable to get the chaos pod, due to error: %v", err)
-    }
+	}
 	currExpStatus.CompletedExperimentStatus(chaosResult, engineDetails.Name, chaosPod.Name)
 	if err = currExpStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
 		return err

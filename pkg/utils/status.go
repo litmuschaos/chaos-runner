@@ -31,10 +31,9 @@ func (expStatus *ExperimentStatus) CompletedExperimentStatus(chaosResult *v1alph
 	expStatus.Name = chaosResult.Spec.ExperimentName
 	expStatus.Runner = engineName + "-runner"
 	expStatus.ExpPod = experimentPodName
-	expStatus.Status = "Execution Successful"
+	expStatus.Status = "Completed"
 	expStatus.LastUpdateTime = metav1.Now()
 	expStatus.Verdict = chaosResult.Status.ExperimentStatus.Verdict
-	//return currExpStatus
 }
 
 // NotFoundExperimentStatus initilize experiment struct using the following values.
