@@ -2,6 +2,7 @@ package utils
 
 import (
 	"time"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,7 +15,7 @@ var (
 )
 
 
-// GetChaosPodName gets the name of the chaos experiment pod launched by the runner
+// GetChaosPod gets the chaos experiment pod object launched by the runner
 func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod, error){
 	chaosPodList, err := clients.KubeClient.CoreV1().Pods(expDetails.Namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
 	if err != nil || len(chaosPodList.Items) == 0 {
@@ -75,7 +76,7 @@ func (engineDetails EngineDetails) WatchChaosContainerForCompletion(experiment *
 		}
 
 		var expStatus ExperimentStatus
-        chaosPod, err := GetChaosPod(experiment, clients)
+		chaosPod, err := GetChaosPod(experiment, clients)
         if err != nil {
 			return errors.Wrapf(err, "Unable to get the chaos pod, due to error: %v", err)
         }
