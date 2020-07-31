@@ -10,10 +10,10 @@ import (
 
 // checkStatusListForExp loops over all the status patched in chaosEngine, to get the one, which has to be updated
 // Can go with updated the last status(status[n-1])
-// But would'nt work for the pararllel execution
-func checkStatusListForExp(status []v1alpha1.ExperimentStatuses, jobName string) int {
+// But would'nt work for the parallel execution
+func checkStatusListForExp(status []v1alpha1.ExperimentStatuses, ExperimentName string) int {
 	for i := range status {
-		if status[i].Name == jobName {
+		if status[i].Name == ExperimentName {
 			return i
 		}
 	}
@@ -37,11 +37,11 @@ func (expStatus *ExperimentStatus) PatchChaosEngineStatus(engineDetails EngineDe
 	if err != nil {
 		return err
 	}
-	jobIndex := checkStatusListForExp(expEngine.Status.Experiments, expStatus.Name)
-	if jobIndex == -1 {
-		return errors.Wrapf(err, "Unable to find the status for JobName: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
+	experimentIndex := checkStatusListForExp(expEngine.Status.Experiments, expStatus.Name)
+	if experimentIndex == -1 {
+		return errors.Wrapf(err, "Unable to find the status for Experiment: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
 	}
-	expEngine.Status.Experiments[jobIndex] = v1alpha1.ExperimentStatuses(*expStatus)
+	expEngine.Status.Experiments[experimentIndex] = v1alpha1.ExperimentStatuses(*expStatus)
 	if _, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine); err != nil {
 		return err
 	}
@@ -75,7 +75,11 @@ func (engineDetails EngineDetails) UpdateEngineWithResult(experiment *Experiment
 	}
 
 	var currExpStatus ExperimentStatus
-	currExpStatus.CompletedExperimentStatus(chaosResult, experiment)
+    chaosPod, err := GetChaosPod(experiment, clients)
+    if err != nil {
+		return errors.Wrapf(err, "Unable to get the chaos pod, due to error: %v", err)
+    }
+	currExpStatus.CompletedExperimentStatus(chaosResult, engineDetails.Name, chaosPod.Name)
 	if err = currExpStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
 		return err
 	}
