@@ -8,7 +8,7 @@ import (
 func (engineDetails EngineDetails) ExperimentNotFoundPatchEngine(experiment *ExperimentDetails, clients ClientSets) error {
 
 	var expStatus ExperimentStatus
-	expStatus.NotFoundExperimentStatus(experiment)
+	expStatus.NotFoundExperimentStatus(experiment.Name, engineDetails.Name)
 	if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
 		return errors.Wrapf(err, "Unable to Patch ChaosEngine with Status, error: %v", err)
 	}

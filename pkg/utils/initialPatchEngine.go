@@ -18,7 +18,7 @@ func InitialPatchEngine(engineDetails EngineDetails, clients ClientSets, experim
 			return errors.Wrapf(err, "Unable to get ChaosEngine, due to error: %v", err)
 		}
 		var expStatus ExperimentStatus
-		expStatus.InitialExperimentStatus(v.JobName)
+		expStatus.InitialExperimentStatus(v.Name, engineDetails.Name)
 		expEngine.Status.Experiments = append(expEngine.Status.Experiments, v1alpha1.ExperimentStatuses(expStatus))
 		_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine)
 		if updateErr != nil {
