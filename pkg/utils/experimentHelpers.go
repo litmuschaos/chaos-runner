@@ -2,7 +2,10 @@ package utils
 
 import (
 	"os"
+	"reflect"
+	"strconv"
 
+	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
@@ -117,13 +120,23 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 	if err != nil {
 		return errors.Wrapf(err, "Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
 	}
-	envList := engineSpec.Spec.Experiments
-	for i := range envList {
-		if envList[i].Name == expDetails.Name {
-			keyValue := envList[i].Spec.Components.ENV
+	expList := engineSpec.Spec.Experiments
+	for i := range expList {
+		if expList[i].Name == expDetails.Name {
+			keyValue := expList[i].Spec.Components.ENV
 			for j := range keyValue {
 				expDetails.Env[keyValue[j].Name] = keyValue[j].Value
 			}
+			statusCheckTimeout := expList[i].Spec.Components.StatusCheckTimeouts
+			if !reflect.DeepEqual(statusCheckTimeout, litmuschaosv1alpha1.StatusCheckTimeout{}) {
+
+				expDetails.Env["STATUS_CHECK_DELAY"] = strconv.Itoa(statusCheckTimeout.Delay)
+				expDetails.Env["STATUS_CHECK_TIMEOUT"] = strconv.Itoa(statusCheckTimeout.Timeout)
+			} else {
+				expDetails.Env["STATUS_CHECK_DELAY"] = "2"
+				expDetails.Env["STATUS_CHECK_TIMEOUT"] = "180"
+			}
+
 		}
 	}
 	return nil
