@@ -124,7 +124,7 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		WithNamespace(experiment.Namespace).
 		WithLabels(experiment.ExpLabels).
 		WithServiceAccountName(experiment.SvcAccount).
-		WithRestartPolicy(corev1.RestartPolicyOnFailure).
+		WithRestartPolicy(corev1.RestartPolicyNever).
 		WithVolumeBuilders(experiment.VolumeOpts.VolumeBuilders).
 		WithAnnotations(experiment.Annotations).
 		WithContainerBuildersNew(containerForPod)
