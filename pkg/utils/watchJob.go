@@ -49,15 +49,19 @@ func (expStatus *ExperimentStatus) PatchChaosEngineStatus(engineDetails EngineDe
 }
 
 // GetResultName returns the resultName using the experimentName and engine Name
-func GetResultName(engineName string, experimentName string) string {
+func GetResultName(engineName, experimentName, instanceID string) string {
 	resultName := engineName + "-" + experimentName
+	if instanceID != "" {
+		resultName = resultName + "-" + instanceID
+	}
+
 	return resultName
 }
 
 // GetChaosResult returns ChaosResult object.
 func (experimentDetails *ExperimentDetails) GetChaosResult(engineDetails EngineDetails, clients ClientSets) (*v1alpha1.ChaosResult, error) {
 
-	resultName := GetResultName(engineDetails.Name, experimentDetails.Name)
+	resultName := GetResultName(engineDetails.Name, experimentDetails.Name, experimentDetails.InstanceID)
 	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.EngineNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unable to get ChaosResult Name: %v in namespace: %v, due to error: %v", resultName, engineDetails.EngineNamespace, err)
