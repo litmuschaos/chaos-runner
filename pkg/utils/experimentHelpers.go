@@ -126,6 +126,11 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 			keyValue := expList[i].Spec.Components.ENV
 			for j := range keyValue {
 				expDetails.Env[keyValue[j].Name] = keyValue[j].Value
+				// extracting and storing instance id explicitly
+				// as we need this variable while generating chaos-result name
+				if keyValue[j].Name == "INSTANCE_ID" {
+					expDetails.InstanceID = keyValue[j].Value
+				}
 			}
 			statusCheckTimeout := expList[i].Spec.Components.StatusCheckTimeouts
 			if !reflect.DeepEqual(statusCheckTimeout, litmuschaosv1alpha1.StatusCheckTimeout{}) {

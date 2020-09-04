@@ -49,6 +49,9 @@ type ExperimentDetails struct {
 	NodeSelector       map[string]string
 	SecurityContext    v1alpha1.SecurityContext
 	HostPID            bool
+	// InstanceID is passed as env inside chaosengine
+	// It is separately specified here because this attribute is common for all experiment.
+	InstanceID string
 }
 
 //VolumeOpts is a strcuture for all volume related operations
