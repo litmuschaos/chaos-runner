@@ -56,7 +56,16 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		return err
 	}
 	// Store ENV in a map
-	ENVList := map[string]string{"CHAOSENGINE": engineDetails.Name, "APP_LABEL": engineDetails.AppLabel, "CHAOS_NAMESPACE": engineDetails.EngineNamespace, "APP_NAMESPACE": os.Getenv("APP_NAMESPACE"), "APP_KIND": engineDetails.AppKind, "AUXILIARY_APPINFO": engineDetails.AuxiliaryAppInfo, "CHAOS_UID": engineDetails.UID}
+	ENVList := map[string]string{
+		"CHAOSENGINE":       engineDetails.Name,
+		"APP_LABEL":         engineDetails.AppLabel,
+		"CHAOS_NAMESPACE":   engineDetails.EngineNamespace,
+		"APP_NAMESPACE":     os.Getenv("APP_NAMESPACE"),
+		"APP_KIND":          engineDetails.AppKind,
+		"AUXILIARY_APPINFO": engineDetails.AuxiliaryAppInfo,
+		"CHAOS_UID":         engineDetails.UID,
+		"EXPERIMENT_NAME":   expDetails.Name,
+	}
 	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
 	for key, value := range ENVList {
 		expDetails.Env[key] = value
