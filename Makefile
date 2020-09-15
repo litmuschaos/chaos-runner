@@ -3,7 +3,7 @@
 
 REGISTRY ?= litmuschaos
 IMG_NAME ?= chaos-runner
-PACKAGE_VERSION ?= ci
+PACKAGE_VERSION ?= dev
 IS_DOCKER_INSTALLED = $(shell which docker >> /dev/null 2>&1; echo $$?)
 HOME = $(shell echo $$HOME)
 # list only our namespaced directories
@@ -58,10 +58,10 @@ lint:
 
 .PHONY: build  
 build:
-	@echo "------------------"
+	@echo "-----------------------------------"
 	@echo "--> Building Chaos-runner binary..."
-	@echo "------------------"
-	@go build -o build/_output/bin/chaos-runner ./bin
+	@echo "-----------------------------------"
+	@./build/go-multiarch-build.sh ./bin
 
 .PHONY: gotasks
 gotasks: format lint build
@@ -82,8 +82,8 @@ dockerops:
 	@echo "------------------"
 	@echo "--> Build Chaos-runner image..." 
 	@echo "------------------"
-	sudo docker build . -f build/Dockerfile -t $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION)
+	@docker buildx build --file build/Dockerfile  --progress plane --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .    
 
 .PHONY: push
 push:
-	sudo docker push $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION)
+	@docker buildx build --file build/Dockerfile  --progress plane ----progress plane --push --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .
