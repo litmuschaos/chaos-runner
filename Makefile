@@ -3,7 +3,7 @@
 
 REGISTRY ?= litmuschaos
 IMG_NAME ?= chaos-runner
-PACKAGE_VERSION ?= ci
+PACKAGE_VERSION ?= dev
 IS_DOCKER_INSTALLED = $(shell which docker >> /dev/null 2>&1; echo $$?)
 HOME = $(shell echo $$HOME)
 # list only our namespaced directories

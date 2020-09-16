@@ -17,7 +17,7 @@ jobs:
       CHANGE_MINIKUBE_NONE_USER: true
       REPONAME: litmuschaos
       IMGNAME: chaos-runner
-      IMGTAG: ci
+      IMGTAG: dev
     steps:
       - checkout
       - run:
@@ -41,7 +41,7 @@ jobs:
             echo 'export PATH="$GOPATH/bin:$PATH"' >> workspace/env-vars
             echo 'export REPONAME="litmuschaos"' >> workspace/env-vars
             echo 'export IMGNAME="chaos-runner"' >> workspace/env-vars
-            echo 'export IMGTAG="ci"' >> workspace/env-vars
+            echo 'export IMGTAG="dev"' >> workspace/env-vars
             cat workspace/env-vars >> $BASH_ENV
             source $BASH_ENV
       - run: eval $(minikube docker-env -u)
@@ -71,13 +71,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install rpm
       - run: |
-          ./trivy --exit-code 0 --severity HIGH --no-progress litmuschaos/chaos-runner:ci
-          ./trivy --exit-code 0 --severity CRITICAL --no-progress litmuschaos/chaos-runner:ci
+          ./trivy --exit-code 0 --severity HIGH --no-progress litmuschaos/chaos-runner:dev
+          ./trivy --exit-code 0 --severity CRITICAL --no-progress litmuschaos/chaos-runner:dev
   push:
     machine: 
       image: circleci/classic:201808-01
     environment:
-      IMGTAG: ci
+      IMGTAG: dev
     working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
     steps: 
       - attach_workspace:
@@ -93,7 +93,7 @@ jobs:
     machine: 
       image: circleci/classic:201808-01
     environment:
-      IMGTAG: ci
+      IMGTAG: dev
     working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
     steps: 
       - attach_workspace:
