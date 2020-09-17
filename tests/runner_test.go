@@ -17,7 +17,6 @@ limitations under the License.
 */
 
 import (
-	"flag"
 	"os"
 	"os/exec"
 	"regexp"
@@ -46,10 +45,6 @@ var (
 	litmusClientSet *chaosClient.LitmuschaosV1alpha1Client
 )
 
-func init() {
-	flag.StringVar(&kubeconfig, "kubeconfig", "", "path to kubeconfig to invoke kubernetes API calls")
-	flag.Parse()
-}
 func TestChaos(t *testing.T) {
 
 	RegisterFailHandler(Fail)
