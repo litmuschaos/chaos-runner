@@ -10,7 +10,7 @@ func (engineDetails EngineDetails) ExperimentNotFoundPatchEngine(experiment *Exp
 	var expStatus ExperimentStatus
 	expStatus.NotFoundExperimentStatus(experiment.Name, engineDetails.Name)
 	if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
-		return errors.Wrapf(err, "Unable to Patch ChaosEngine with Status, error: %v", err)
+		return errors.Errorf("Unable to Patch ChaosEngine with Status, error: %v", err)
 	}
 	return nil
 }
