@@ -3,9 +3,9 @@ package utils
 import (
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-runner/pkg/log"
 )
 
 // checkStatusListForExp loops over all the status patched in chaosEngine, to get the one, which has to be updated
@@ -25,7 +25,7 @@ func (engineDetails EngineDetails) GetChaosEngine(clients ClientSets) (*v1alpha1
 	expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 	if err != nil {
 
-		return nil, errors.Wrapf(err, "Unable to get ChaosEngine Name: %v, in namespace: %v, due to error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
+		return nil, errors.Errorf("Unable to get ChaosEngine Name: %v, in namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
 	}
 	return expEngine, nil
 }
@@ -39,7 +39,7 @@ func (expStatus *ExperimentStatus) PatchChaosEngineStatus(engineDetails EngineDe
 	}
 	experimentIndex := checkStatusListForExp(expEngine.Status.Experiments, expStatus.Name)
 	if experimentIndex == -1 {
-		return errors.Wrapf(err, "Unable to find the status for Experiment: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
+		return errors.Errorf("Unable to find the status for Experiment: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
 	}
 	expEngine.Status.Experiments[experimentIndex] = v1alpha1.ExperimentStatuses(*expStatus)
 	if _, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine); err != nil {
@@ -64,7 +64,7 @@ func (experimentDetails *ExperimentDetails) GetChaosResult(engineDetails EngineD
 	resultName := GetResultName(engineDetails.Name, experimentDetails.Name, experimentDetails.InstanceID)
 	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.EngineNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to get ChaosResult Name: %v in namespace: %v, due to error: %v", resultName, engineDetails.EngineNamespace, err)
+		return nil, errors.Errorf("Unable to get ChaosResult Name: %v in namespace: %v, error: %v", resultName, engineDetails.EngineNamespace, err)
 	}
 	return expResult, nil
 }
@@ -81,7 +81,7 @@ func (engineDetails EngineDetails) UpdateEngineWithResult(experiment *Experiment
 	var currExpStatus ExperimentStatus
 	chaosPod, err := GetChaosPod(experiment, clients)
 	if err != nil {
-		return errors.Wrapf(err, "Unable to get the chaos pod, due to error: %v", err)
+		return errors.Errorf("Unable to get the chaos pod, error: %v", err)
 	}
 	currExpStatus.CompletedExperimentStatus(chaosResult, engineDetails.Name, chaosPod.Name)
 	if err = currExpStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
@@ -100,14 +100,14 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 	}
 
 	if expEngine.Spec.JobCleanUpPolicy == v1alpha1.CleanUpPolicyDelete || string(expEngine.Spec.JobCleanUpPolicy) == "" {
-		klog.V(0).Infoln("Will delete the job as jobCleanPolicy is set to : " + expEngine.Spec.JobCleanUpPolicy)
+		log.Infof("deleting the job as jobCleanPolicy is set to %v", expEngine.Spec.JobCleanUpPolicy)
 
 		deletePolicy := metav1.DeletePropagationForeground
 		deleteJob := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Delete(experiment.JobName, &metav1.DeleteOptions{
 			PropagationPolicy: &deletePolicy,
 		})
 		if deleteJob != nil {
-			return "", errors.Wrapf(err, "Unable to delete ChaosExperiment Job Name: %v, in namespace: %v, due to error: %v", experiment.JobName, experiment.Namespace, err)
+			return "", errors.Errorf("Unable to delete ChaosExperiment Job Name: %v, in namespace: %v, error: %v", experiment.JobName, experiment.Namespace, err)
 		}
 	}
 	return expEngine.Spec.JobCleanUpPolicy, nil

@@ -2,7 +2,7 @@ package analytics
 
 import (
 	ga "github.com/jpillora/go-ogle-analytics"
-	"k8s.io/klog"
+	"github.com/litmuschaos/chaos-runner/pkg/log"
 )
 
 const (
@@ -24,11 +24,11 @@ const (
 func TriggerAnalytics(experimentName string, uuid string) {
 	client, err := ga.NewClient(clientID)
 	if err != nil {
-		klog.Error(err, "GA Client ID Error")
+		log.Errorf("Unable to create GA client, error: %v", err)
 	}
 	client.ClientID(uuid)
 	err = client.Send(ga.NewEvent(category, action).Label(experimentName))
 	if err != nil {
-		klog.Infoln("Unable to send GA event", err)
+		log.Errorf("Unable to send GA event, error: %v", err)
 	}
 }

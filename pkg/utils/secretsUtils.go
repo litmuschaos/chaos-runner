@@ -3,9 +3,9 @@ package utils
 import (
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-runner/pkg/log"
 )
 
 // PatchSecrets patches secrets in experimentDetails.
@@ -15,7 +15,7 @@ func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets, engineDeta
 		return err
 	}
 
-	klog.V(0).Infof("Validating secrets specified in the ChaosExperiment & ChaosEngine")
+	log.Infof("Validating secrets specified in the ChaosExperiment & ChaosEngine")
 	err = expDetails.ValidateSecrets(clients)
 	if err != nil {
 		return err
@@ -55,13 +55,13 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 
 	for _, v := range expDetails.Secrets {
 		if v.Name == "" || v.MountPath == "" {
-			return errors.New("Incomplete Information in Secret, will skip execution")
+			return errors.Errorf("Incomplete Information in Secret, will skip execution")
 		}
 		err := clients.ValidateSecrets(v.Name, expDetails)
 		if err != nil {
-			return errors.Wrapf(err, "Unable to get Secret with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
+			return errors.Errorf("Unable to get Secret with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		}
-		klog.V(0).Infof("Successfully Validated Secret: %v", v.Name)
+		log.Infof("Successfully Validated Secret: %v", v.Name)
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 func getExperimentSecrets(clients ClientSets, expDetails *ExperimentDetails) ([]v1alpha1.Secret, error) {
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to get ChaosExperiment Resource,  error: %v", err)
+		return nil, errors.Errorf("Unable to get ChaosExperiment Resource, error: %v", err)
 	}
 	experimentSecrets := chaosExperimentObj.Spec.Definition.Secrets
 
@@ -79,7 +79,7 @@ func getExperimentSecrets(clients ClientSets, expDetails *ExperimentDetails) ([]
 func getEngineSecrets(clients ClientSets, engineDetails EngineDetails, expDetails *ExperimentDetails) ([]v1alpha1.Secret, error) {
 	chaosEngineObj, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to get ChaosEngine Resource,  error: %v", err)
+		return nil, errors.Errorf("Unable to get ChaosEngine Resource, error: %v", err)
 	}
 	experimentsList := chaosEngineObj.Spec.Experiments
 	for i := range experimentsList {
@@ -88,7 +88,7 @@ func getEngineSecrets(clients ClientSets, engineDetails EngineDetails, expDetail
 			return engineSecrets, nil
 		}
 	}
-	return nil, errors.Wrapf(err, "No experiment found with %v name in ChaosEngine", expDetails.Name)
+	return nil, errors.Errorf("No experiment found with %v name in ChaosEngine", expDetails.Name)
 }
 
 // OverridingSecrets will override secrets from ChaosEngine

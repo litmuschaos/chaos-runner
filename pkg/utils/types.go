@@ -86,6 +86,7 @@ const (
 	ExperimentNotFoundErrorReason            string = "ExperimentNotFound"
 	ExperimentJobCreationErrorReason         string = "JobCreationError"
 	ExperimentChaosContainerWatchErrorReason string = "ChaosContainerWatchNotPermitted"
+	ChaosResourceNotFoundReason              string = "ChaosResourceNotFound"
 )
 
 // GenerateClientSetFromKubeConfig will generation both ClientSets (k8s, and Litmus)
