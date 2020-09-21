@@ -8,16 +8,16 @@ import (
 func (expDetails *ExperimentDetails) PatchResources(engineDetails EngineDetails, clients ClientSets) error {
 	// Patch ConfigMaps to ChaosExperiment Job
 	if err := expDetails.PatchConfigMaps(clients, engineDetails); err != nil {
-		return errors.Wrapf(err, "Unable to patch ConfigMaps to Chaos Experiment, due to error: %v", err)
+		return errors.Errorf("Unable to patch ConfigMaps to Chaos Experiment, error: %v", err)
 	}
 
 	// Patch Secrets to ChaosExperiment Job
 	if err := expDetails.PatchSecrets(clients, engineDetails); err != nil {
-		return errors.Wrapf(err, "Unable to patch Secrets to Chaos Experiment, due to error: %v", err)
+		return errors.Errorf("Unable to patch Secrets to Chaos Experiment, error: %v", err)
 	}
 	// Patch HostFileVolumes to ChaosExperiment Job
 	if err := expDetails.PatchHostFileVolumes(clients, engineDetails); err != nil {
-		return errors.Wrapf(err, "Unable to patch hostFileVolumes to Chaos Experiment, due to error: %v", err)
+		return errors.Errorf("Unable to patch hostFileVolumes to Chaos Experiment, error: %v", err)
 	}
 	return nil
 }

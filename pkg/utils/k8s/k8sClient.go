@@ -11,7 +11,7 @@ import (
 func GenerateK8sClientSet(config *rest.Config) (*kubernetes.Clientset, error) {
 	k8sClientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to generate kubernetes clientSet %s: ", err)
+		return nil, errors.Errorf("Unable to generate kubernetes clientSet, error: %v: ", err)
 	}
 	return k8sClientSet, nil
 }

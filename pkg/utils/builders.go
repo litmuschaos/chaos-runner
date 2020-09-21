@@ -83,13 +83,13 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 	//Build Container to add in the Pod
 	containerForPod, err := buildContainerSpec(experiment, envVar)
 	if err != nil {
-		return errors.Wrapf(err, "Unable to build Container for Chaos Experiment, due to error: %v", err)
+		return errors.Errorf("Unable to build Container for Chaos Experiment, error: %v", err)
 	}
 	// Will build a PodSpecTemplate
 	pod, err := buildPodTemplateSpec(experiment, containerForPod)
 	if err != nil {
 
-		return errors.Wrapf(err, "Unable to build PodTemplateSpec for Chaos Experiment, due to error: %v", err)
+		return errors.Errorf("Unable to build PodTemplateSpec for Chaos Experiment, error: %v", err)
 	}
 	// Build JobSpec Template
 	jobspec, err := buildJobSpec(pod)
@@ -99,11 +99,11 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 	//Build Job
 	job, err := experiment.buildJob(pod, jobspec)
 	if err != nil {
-		return errors.Wrapf(err, "Unable to Build ChaosExperiment Job, due to error: %v", err)
+		return errors.Errorf("Unable to Build ChaosExperiment Job, error: %v", err)
 	}
 	// Creating the Job
 	if err = experiment.launchJob(job, clients); err != nil {
-		return errors.Wrapf(err, "Unable to launch ChaosExperiment Job, due to error: %v", err)
+		return errors.Errorf("Unable to launch ChaosExperiment Job, error: %v", err)
 	}
 	return nil
 }
