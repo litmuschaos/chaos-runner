@@ -242,6 +242,9 @@ func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetai
 	if err := expDetails.SetExpNodeSelectorFromEngine(engine.Name, clients); err != nil {
 		return err
 	}
+	if err := expDetails.SetResourceRequirementsFromEngine(engine.Name, clients); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -257,6 +260,23 @@ func (expDetails *ExperimentDetails) SetExpAnnotationFromEngine(engineName strin
 	for i := range expRefList {
 		if expRefList[i].Name == expDetails.Name {
 			expDetails.Annotations = expRefList[i].Spec.Components.ExperimentAnnotations
+		}
+	}
+	return nil
+}
+
+// SetResourceRequirementsFromEngine will add the resource requirements provided inside chaosengine
+func (expDetails *ExperimentDetails) SetResourceRequirementsFromEngine(engineName string, clients ClientSets) error {
+
+	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
+	if err != nil {
+		return errors.Errorf("Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+	}
+
+	expRefList := engineSpec.Spec.Experiments
+	for i := range expRefList {
+		if expRefList[i].Name == expDetails.Name {
+			expDetails.ResourceRequirements = expRefList[i].Spec.Components.Resources
 		}
 	}
 	return nil
