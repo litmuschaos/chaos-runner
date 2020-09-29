@@ -6,9 +6,9 @@ import (
 	"strconv"
 
 	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-runner/pkg/log"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
 )
 
 // CreateExperimentList make the list of all experiment, provided inside chaosengine
@@ -22,22 +22,28 @@ func CreateExperimentList(engineDetails *EngineDetails) []ExperimentDetails {
 
 //SetValueFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
 func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientSets, engine *EngineDetails) error {
-	if err := expDetails.SetImage(clients); err != nil {
+
+	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Errorf("Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
+	}
+
+	if err := expDetails.SetImage(clients, expirementSpec); err != nil {
 		return err
 	}
-	if err := expDetails.SetImagePullPolicy(clients); err != nil {
+	if err := expDetails.SetImagePullPolicy(clients, expirementSpec); err != nil {
 		return err
 	}
-	if err := expDetails.SetArgs(clients); err != nil {
+	if err := expDetails.SetArgs(clients, expirementSpec); err != nil {
 		return err
 	}
-	if err := expDetails.SetLabels(engine, clients); err != nil {
+	if err := expDetails.SetLabels(engine, clients, expirementSpec); err != nil {
 		return err
 	}
-	if err := expDetails.SetSecurityContext(clients); err != nil {
+	if err := expDetails.SetSecurityContext(clients, expirementSpec); err != nil {
 		return err
 	}
-	if err := expDetails.SetHostPID(clients); err != nil {
+	if err := expDetails.SetHostPID(clients, expirementSpec); err != nil {
 		return err
 	}
 	return nil
@@ -46,7 +52,7 @@ func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientS
 //SetENV sets ENV values in experimentDetails struct.
 func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) error {
 	// Get the Default ENV's from ChaosExperiment
-	klog.V(0).Infof("Getting the ENV Variables")
+	log.Info("Getting the ENV Variables")
 	if err := expDetails.SetDefaultEnv(clients); err != nil {
 		return err
 	}
@@ -97,9 +103,9 @@ func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetail
 	_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		if err := engineDetails.ExperimentNotFoundPatchEngine(expDetails, clients); err != nil {
-			return errors.Wrapf(err, "Unable to patch Chaos Engine Name: %v, in namespace: %v, due to error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
+			return errors.Errorf("Unable to patch Chaos Engine Name: %v, namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
 		}
-		return errors.Wrapf(err, "Unable to list Chaos Experiment Name: %v,in Namespace: %v, due to error: %v", expDetails.Name, expDetails.Namespace, err)
+		return errors.Errorf("Unable to list Chaos Experiment Name: %v,in Namespace: %v, due to error: %v", expDetails.Name, expDetails.Namespace, err)
 	}
 
 	return nil
@@ -109,7 +115,7 @@ func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetail
 func (expDetails *ExperimentDetails) SetDefaultEnv(clients ClientSets) error {
 	experimentEnv, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "Unable to get the Default ENV from ChaosExperiment, error : %v", err)
+		return errors.Errorf("Unable to get the Default ENV from ChaosExperiment, error: %v", err)
 	}
 
 	envList := experimentEnv.Spec.Definition.ENVList
@@ -127,7 +133,7 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 
 	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+		return errors.Errorf("Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
 	}
 	expList := engineSpec.Spec.Experiments
 	for i := range expList {
@@ -157,33 +163,20 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 }
 
 // SetLabels sets the Experiment Labels, in Experiment Structure
-func (expDetails *ExperimentDetails) SetLabels(engine *EngineDetails, clients ClientSets) error {
-	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
-	}
+func (expDetails *ExperimentDetails) SetLabels(engine *EngineDetails, clients ClientSets, expirementSpec *litmuschaosv1alpha1.ChaosExperiment) error {
 	expDetails.ExpLabels = expirementSpec.Spec.Definition.Labels
 	expDetails.ExpLabels["chaosUID"] = engine.UID
 	return nil
 }
 
 // SetImage sets the Experiment Image, in Experiment Structure
-func (expDetails *ExperimentDetails) SetImage(clients ClientSets) error {
-	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
-	}
+func (expDetails *ExperimentDetails) SetImage(clients ClientSets, expirementSpec *litmuschaosv1alpha1.ChaosExperiment) error {
 	expDetails.ExpImage = expirementSpec.Spec.Definition.Image
 	return nil
 }
 
 // SetImagePullPolicy sets the Experiment ImagePullPolicy, in Experiment Structure
-func (expDetails *ExperimentDetails) SetImagePullPolicy(clients ClientSets) error {
-	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
-	}
-	//TODO: additional checks
+func (expDetails *ExperimentDetails) SetImagePullPolicy(clients ClientSets, expirementSpec *litmuschaosv1alpha1.ChaosExperiment) error {
 	if expirementSpec.Spec.Definition.ImagePullPolicy == "" {
 		expDetails.ExpImagePullPolicy = DefaultExpImagePullPolicy
 	} else {
@@ -193,11 +186,7 @@ func (expDetails *ExperimentDetails) SetImagePullPolicy(clients ClientSets) erro
 }
 
 // SetArgs sets the Experiment Image, in Experiment Structure
-func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
-	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
-	}
+func (expDetails *ExperimentDetails) SetArgs(clients ClientSets, expirementSpec *litmuschaosv1alpha1.ChaosExperiment) error {
 	expDetails.ExpArgs = expirementSpec.Spec.Definition.Args
 	return nil
 }
@@ -205,20 +194,20 @@ func (expDetails *ExperimentDetails) SetArgs(clients ClientSets) error {
 // SetValueFromChaosResources fetches required values from various Chaos Resources
 func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *EngineDetails, clients ClientSets) error {
 	if err := expDetails.SetValueFromChaosEngine(engineDetails, clients); err != nil {
-		return errors.Wrapf(err, "Unable to set value from Chaos Engine due to error: %v", err)
+		return errors.Errorf("Unable to set value from Chaos Engine, error: %v", err)
 	}
 
 	if err := engineDetails.SetValueFromChaosRunner(clients); err != nil {
-		return errors.Wrapf(err, "Unable to set value from Chaos Runner due to error: %v", err)
+		return errors.Errorf("Unable to set value from Chaos Runner, error: %v", err)
 	}
 	if err := expDetails.HandleChaosExperimentExistence(*engineDetails, clients); err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosExperiment Name: %v, in namespace: %v, due to error: %v", expDetails.Name, expDetails.Namespace, err)
+		return errors.Errorf("Unable to get ChaosExperiment Name: %v, in namespace: %v, error: %v", expDetails.Name, expDetails.Namespace, err)
 	}
 	if err := expDetails.SetValueFromChaosExperiment(clients, engineDetails); err != nil {
-		return errors.Wrapf(err, "Unable to set value from Chaos Experiment due to error: %v", err)
+		return errors.Errorf("Unable to set value from Chaos Experiment, error: %v", err)
 	}
 	if err := expDetails.SetExpImageFromEngine(engineDetails.Name, clients); err != nil {
-		return errors.Wrapf(err, "Unable to set image from Chaos Engine due to error: %v", err)
+		return errors.Errorf("Unable to set image from Chaos Engine, error: %v", err)
 	}
 	return nil
 }
@@ -228,13 +217,13 @@ func (engine *EngineDetails) SetValueFromChaosRunner(clients ClientSets) error {
 	runnerName := engine.Name + "-runner"
 	runnerSpec, err := clients.KubeClient.CoreV1().Pods(engine.EngineNamespace).Get(runnerName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "Unable to get runner pod in namespace: %v", engine.EngineNamespace)
+		return errors.Errorf("Unable to get runner pod in namespace: %v", engine.EngineNamespace)
 	}
 	chaosUID := runnerSpec.Labels["chaosUID"]
 	if chaosUID != "" {
 		engine.UID = chaosUID
 	} else {
-		return errors.Wrapf(err, "Unable to get ChaosEngine UID, due to error: %v", err)
+		return errors.Errorf("Unable to get ChaosEngine UID, error: %v", err)
 	}
 	return nil
 }
@@ -244,13 +233,16 @@ func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetai
 
 	chaosEngine, err := engine.GetChaosEngine(clients)
 	if err != nil {
-		return errors.Wrapf(err, "Unable to get chaosEngine in namespace: %s", engine.EngineNamespace)
+		return errors.Errorf("Unable to get chaosEngine in namespace: %s", engine.EngineNamespace)
 	}
 	expDetails.Namespace = chaosEngine.Namespace
 	if err := expDetails.SetExpAnnotationFromEngine(engine.Name, clients); err != nil {
 		return err
 	}
 	if err := expDetails.SetExpNodeSelectorFromEngine(engine.Name, clients); err != nil {
+		return err
+	}
+	if err := expDetails.SetResourceRequirementsFromEngine(engine.Name, clients); err != nil {
 		return err
 	}
 	return nil
@@ -261,7 +253,7 @@ func (expDetails *ExperimentDetails) SetExpAnnotationFromEngine(engineName strin
 
 	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+		return errors.Errorf("Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
 	}
 
 	expRefList := engineSpec.Spec.Experiments
@@ -273,12 +265,29 @@ func (expDetails *ExperimentDetails) SetExpAnnotationFromEngine(engineName strin
 	return nil
 }
 
+// SetResourceRequirementsFromEngine will add the resource requirements provided inside chaosengine
+func (expDetails *ExperimentDetails) SetResourceRequirementsFromEngine(engineName string, clients ClientSets) error {
+
+	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
+	if err != nil {
+		return errors.Errorf("Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+	}
+
+	expRefList := engineSpec.Spec.Experiments
+	for i := range expRefList {
+		if expRefList[i].Name == expDetails.Name {
+			expDetails.ResourceRequirements = expRefList[i].Spec.Components.Resources
+		}
+	}
+	return nil
+}
+
 // SetExpNodeSelectorFromEngine will add the nodeSelector attribute based the key/value provided in the chaosEngine
 func (expDetails *ExperimentDetails) SetExpNodeSelectorFromEngine(engineName string, clients ClientSets) error {
 
 	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+		return errors.Errorf("Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
 	}
 
 	expRefList := engineSpec.Spec.Experiments
@@ -291,21 +300,14 @@ func (expDetails *ExperimentDetails) SetExpNodeSelectorFromEngine(engineName str
 }
 
 // SetSecurityContext sets the security context, in Experiment Structure
-func (expDetails *ExperimentDetails) SetSecurityContext(clients ClientSets) error {
-	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
-	}
+func (expDetails *ExperimentDetails) SetSecurityContext(clients ClientSets, expirementSpec *litmuschaosv1alpha1.ChaosExperiment) error {
+
 	expDetails.SecurityContext = expirementSpec.Spec.Definition.SecurityContext
 	return nil
 }
 
 // SetHostPID sets the hostPID, in Experiment Structure
-func (expDetails *ExperimentDetails) SetHostPID(clients ClientSets) error {
-	expirementSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosExperiment instance in namespace: %v", expDetails.Namespace)
-	}
+func (expDetails *ExperimentDetails) SetHostPID(clients ClientSets, expirementSpec *litmuschaosv1alpha1.ChaosExperiment) error {
 	expDetails.HostPID = expirementSpec.Spec.Definition.HostPID
 
 	return nil
@@ -316,7 +318,7 @@ func (expDetails *ExperimentDetails) SetExpImageFromEngine(engineName string, cl
 
 	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+		return errors.Errorf("Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
 	}
 
 	expRefList := engineSpec.Spec.Experiments

@@ -7,6 +7,7 @@ import (
 	clientV1alpha1 "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned"
 	volume "github.com/litmuschaos/elves/kubernetes/volume/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -51,7 +52,8 @@ type ExperimentDetails struct {
 	HostPID            bool
 	// InstanceID is passed as env inside chaosengine
 	// It is separately specified here because this attribute is common for all experiment.
-	InstanceID string
+	InstanceID           string
+	ResourceRequirements v1.ResourceRequirements
 }
 
 //VolumeOpts is a strcuture for all volume related operations
@@ -86,6 +88,7 @@ const (
 	ExperimentNotFoundErrorReason            string = "ExperimentNotFound"
 	ExperimentJobCreationErrorReason         string = "JobCreationError"
 	ExperimentChaosContainerWatchErrorReason string = "ChaosContainerWatchNotPermitted"
+	ChaosResourceNotFoundReason              string = "ChaosResourceNotFound"
 )
 
 // GenerateClientSetFromKubeConfig will generation both ClientSets (k8s, and Litmus)
