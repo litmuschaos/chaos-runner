@@ -41,6 +41,12 @@ func buildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) (
 
 	}
 
+	if !reflect.DeepEqual(experiment.ResourceRequirements, corev1.ResourceRequirements{}) {
+
+		containerSpec.WithResourceRequirements(experiment.ResourceRequirements)
+
+	}
+
 	if experiment.VolumeOpts.VolumeMounts != nil {
 		containerSpec.WithVolumeMountsNew(experiment.VolumeOpts.VolumeMounts)
 	}
