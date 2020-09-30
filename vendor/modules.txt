@@ -48,12 +48,12 @@ github.com/jpillora/go-ogle-analytics
 github.com/json-iterator/go
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/litmuschaos/chaos-operator v0.0.0-20200929102701-8805f49fa9cf
+# github.com/litmuschaos/chaos-operator v0.0.0-20200930144434-36c150f292b8
 github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/scheme
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1
-# github.com/litmuschaos/elves v0.0.0-20200929113647-fbf07cc3600f
+# github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b
 github.com/litmuschaos/elves/kubernetes/container
 github.com/litmuschaos/elves/kubernetes/job
 github.com/litmuschaos/elves/kubernetes/jobspec

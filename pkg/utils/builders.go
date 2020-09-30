@@ -145,6 +145,10 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		podtemplate.WithHostPID(experiment.HostPID)
 	}
 
+	if experiment.ImagePullSecrets != nil {
+		podtemplate.WithImagePullSecrets(experiment.ImagePullSecrets)
+	}
+
 	if len(experiment.NodeSelector) != 0 {
 		podtemplate.WithNodeSelector(experiment.NodeSelector)
 	}
