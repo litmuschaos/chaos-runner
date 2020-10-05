@@ -432,3 +432,19 @@ func (b *Builder) WithHostPID(hostPID bool) *Builder {
 	b.podtemplatespec.Object.Spec.HostPID = hostPID
 	return b
 }
+
+// WithImagePullSecrets sets the image pull secret for the container
+func (b *Builder) WithImagePullSecrets(secrets []corev1.LocalObjectReference) *Builder {
+    if len(secrets) == 0 {
+        b.errs = append(
+            b.errs,
+            errors.New(
+                "failed to build container object: missing imagepullsecrets",
+            ),
+        )
+        return b
+    }
+
+    b.podtemplatespec.Object.Spec.ImagePullSecrets = secrets
+    return b
+}

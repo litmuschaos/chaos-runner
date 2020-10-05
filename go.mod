@@ -5,11 +5,12 @@ go 1.13
 require (
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
-	github.com/litmuschaos/chaos-operator v0.0.0-20200813024250-a5d1a83bb863
-	github.com/litmuschaos/elves v0.0.0-20200704104545-672722932140
+	github.com/litmuschaos/chaos-operator v0.0.0-20201005085043-a2a0664927f6
+	github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
 	github.com/pkg/errors v0.9.1
+	github.com/sirupsen/logrus v1.4.2
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
 	k8s.io/api v0.17.3
