@@ -41,6 +41,12 @@ func buildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) (
 
 	}
 
+	if !reflect.DeepEqual(experiment.ResourceRequirements, corev1.ResourceRequirements{}) {
+
+		containerSpec.WithResourceRequirements(experiment.ResourceRequirements)
+
+	}
+
 	if experiment.VolumeOpts.VolumeMounts != nil {
 		containerSpec.WithVolumeMountsNew(experiment.VolumeOpts.VolumeMounts)
 	}
@@ -137,6 +143,10 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 
 	if experiment.HostPID {
 		podtemplate.WithHostPID(experiment.HostPID)
+	}
+
+	if experiment.ImagePullSecrets != nil {
+		podtemplate.WithImagePullSecrets(experiment.ImagePullSecrets)
 	}
 
 	if len(experiment.NodeSelector) != 0 {

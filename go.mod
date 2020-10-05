@@ -5,8 +5,8 @@ go 1.13
 require (
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
-	github.com/litmuschaos/chaos-operator v0.0.0-20200917035646-2633098da932
-	github.com/litmuschaos/elves v0.0.0-20200704104545-672722932140
+	github.com/litmuschaos/chaos-operator v0.0.0-20201005102541-be0f9bb115ce
+	github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
 	github.com/pkg/errors v0.9.1
