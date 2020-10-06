@@ -48,6 +48,9 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 				}
 			}
 		}
+
+	} else if pod.Status.Phase == corev1.PodFailed {
+		return isCompleted, errors.Errorf("status check failed as chaos pod status is %v", pod.Status.Phase)
 	}
 	return isCompleted, nil
 }
