@@ -152,6 +152,7 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 
 				expDetails.Env["STATUS_CHECK_DELAY"] = strconv.Itoa(statusCheckTimeout.Delay)
 				expDetails.Env["STATUS_CHECK_TIMEOUT"] = strconv.Itoa(statusCheckTimeout.Timeout)
+				expDetails.StatusCheckTimeout = statusCheckTimeout.Timeout
 			} else {
 				expDetails.Env["STATUS_CHECK_DELAY"] = "2"
 				expDetails.Env["STATUS_CHECK_TIMEOUT"] = "180"

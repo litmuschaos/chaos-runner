@@ -54,7 +54,8 @@ type ExperimentDetails struct {
 	// It is separately specified here because this attribute is common for all experiment.
 	InstanceID           string
 	ResourceRequirements v1.ResourceRequirements
-	ImagePullSecrets	[]corev1.LocalObjectReference
+	ImagePullSecrets     []corev1.LocalObjectReference
+	StatusCheckTimeout   int
 }
 
 //VolumeOpts is a strcuture for all volume related operations
