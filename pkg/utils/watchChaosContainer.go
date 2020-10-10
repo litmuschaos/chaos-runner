@@ -3,6 +3,7 @@ package utils
 import (
 	"time"
 
+	"github.com/litmuschaos/litmus-go/pkg/utils/retry"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,7 +35,6 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 	if err != nil {
 		return false, errors.Errorf("Unable to get the chaos pod, error: %v", err)
 	}
-
 	if pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodSucceeded {
 		for _, container := range pod.Status.ContainerStatuses {
 
@@ -49,9 +49,28 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 			}
 		}
 
+	} else if pod.Status.Phase == corev1.PodPending {
+		delay := 5
+		err := retry.
+			Times(uint(experimentDetails.StatusCheckTimeout / delay)).
+			Wait(time.Duration(delay) * time.Second).
+			Try(func(attempt uint) error {
+				pod, err := GetChaosPod(experimentDetails, clients)
+				if err != nil {
+					return errors.Errorf("Unable to get the chaos pod, error: %v", err)
+				}
+				if pod.Status.Phase == corev1.PodPending {
+					return errors.Errorf("chaos pod is in %v state", corev1.PodPending)
+				}
+				return nil
+			})
+		if err != nil {
+			return isCompleted, err
+		}
 	} else if pod.Status.Phase == corev1.PodFailed {
 		return isCompleted, errors.Errorf("status check failed as chaos pod status is %v", pod.Status.Phase)
 	}
+
 	return isCompleted, nil
 }
 
