@@ -3,23 +3,24 @@ package utils
 import (
 	"time"
 
+	"github.com/litmuschaos/litmus-go/pkg/utils/retry"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // GetChaosPod gets the chaos experiment pod object launched by the runner
-func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod, error){
+func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod, error) {
 	chaosPodList, err := clients.KubeClient.CoreV1().Pods(expDetails.Namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
 	if err != nil || len(chaosPodList.Items) == 0 {
-    	return nil, errors.Wrapf(err, "Unable to get the chaos pod, due to error: %v", err)
+		return nil, errors.Errorf("Unable to get the chaos pod, error: %v", err)
 	} else if len(chaosPodList.Items) > 1 {
-		// Cases where experiment pod is rescheduled by the job controller due to 
+		// Cases where experiment pod is rescheduled by the job controller due to
 		// issues while the older pod is still not cleaned-up
-		return nil, errors.New("Multiple pods exist with same jobname label")
+		return nil, errors.Errorf("Multiple pods exist with same jobname label")
 	}
 
-	// Note: We error out upon existence of multiple exp pods for the same experiment 
+	// Note: We error out upon existence of multiple exp pods for the same experiment
 	// & hence use index [0]
 	chaosPod := &chaosPodList.Items[0]
 	return chaosPod, nil
@@ -32,9 +33,8 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 
 	pod, err := GetChaosPod(experimentDetails, clients)
 	if err != nil {
-		return false, errors.Wrapf(err, "Unable to get the chaos pod, due to error: %v", err)
+		return false, errors.Errorf("Unable to get the chaos pod, error: %v", err)
 	}
-
 	if pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodSucceeded {
 		for _, container := range pod.Status.ContainerStatuses {
 
@@ -48,7 +48,29 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 				}
 			}
 		}
+
+	} else if pod.Status.Phase == corev1.PodPending {
+		delay := 5
+		err := retry.
+			Times(uint(experimentDetails.StatusCheckTimeout / delay)).
+			Wait(time.Duration(delay) * time.Second).
+			Try(func(attempt uint) error {
+				pod, err := GetChaosPod(experimentDetails, clients)
+				if err != nil {
+					return errors.Errorf("Unable to get the chaos pod, error: %v", err)
+				}
+				if pod.Status.Phase == corev1.PodPending {
+					return errors.Errorf("chaos pod is in %v state", corev1.PodPending)
+				}
+				return nil
+			})
+		if err != nil {
+			return isCompleted, err
+		}
+	} else if pod.Status.Phase == corev1.PodFailed {
+		return isCompleted, errors.Errorf("status check failed as chaos pod status is %v", pod.Status.Phase)
 	}
+
 	return isCompleted, nil
 }
 
@@ -68,12 +90,12 @@ func (engineDetails EngineDetails) WatchChaosContainerForCompletion(experiment *
 		var expStatus ExperimentStatus
 		chaosPod, err := GetChaosPod(experiment, clients)
 		if err != nil {
-			return errors.Wrapf(err, "Unable to get the chaos pod, due to error: %v", err)
+			return errors.Errorf("Unable to get the chaos pod, error: %v", err)
 		}
 
 		expStatus.AwaitedExperimentStatus(experiment.Name, engineDetails.Name, chaosPod.Name)
 		if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
-			return errors.Wrapf(err, "Unable to patch ChaosEngine in namespace: %v, due to error: %v", engineDetails.EngineNamespace, err)
+			return errors.Errorf("Unable to patch ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, err)
 		}
 		time.Sleep(5 * time.Second)
 

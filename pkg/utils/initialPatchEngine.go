@@ -15,14 +15,14 @@ func InitialPatchEngine(engineDetails EngineDetails, clients ClientSets, experim
 	for _, v := range experimentList {
 		expEngine, err := engineDetails.GetChaosEngine(clients)
 		if err != nil {
-			return errors.Wrapf(err, "Unable to get ChaosEngine, due to error: %v", err)
+			return errors.Errorf("Unable to get ChaosEngine, error: %v", err)
 		}
 		var expStatus ExperimentStatus
 		expStatus.InitialExperimentStatus(v.Name, engineDetails.Name)
 		expEngine.Status.Experiments = append(expEngine.Status.Experiments, v1alpha1.ExperimentStatuses(expStatus))
 		_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine)
 		if updateErr != nil {
-			return errors.Wrapf(err, "Unable to update ChaosEngine in namespace: %v, due to error: %v", engineDetails.EngineNamespace, err)
+			return errors.Errorf("Unable to update ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, err)
 		}
 	}
 	return nil

@@ -17,6 +17,7 @@ limitations under the License.
 */
 
 import (
+	"flag"
 	"os"
 	"os/exec"
 	"regexp"
@@ -45,6 +46,9 @@ var (
 	litmusClientSet *chaosClient.LitmuschaosV1alpha1Client
 )
 
+func init() {
+	flag.StringVar(&kubeconfig, "kubeconfig", os.Getenv("HOME")+"/.kube/config", "path to kubeconfig to invoke kubernetes API calls")
+}
 func TestChaos(t *testing.T) {
 
 	RegisterFailHandler(Fail)
@@ -52,7 +56,9 @@ func TestChaos(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	kubeconfig = os.Getenv("HOME") + "/.kube/config"
+
+	flag.Parse()
+
 	var err error
 	config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
@@ -78,20 +84,20 @@ var _ = BeforeSuite(func() {
 
 	//Creating crds
 	By("Installing Litmus CRDs")
-	err = exec.Command("kubectl", "create", "-f", "../build/_output/test/chaos_crds.yaml").Run()
+	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/chaos_crds.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create Litmus CRD's, due to error: %v", err)
 	}
 
 	//Creating rbacs
-	err = exec.Command("kubectl", "create", "-f", "../build/_output/test/rbac.yaml").Run()
+	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/rbac.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create RBAC Permissions, due to error: %v", err)
 	}
 
 	//Creating Chaos-Operator
 	By("Installing Chaos-Operator")
-	err = exec.Command("kubectl", "create", "-f", "../build/_output/test/operator.yaml").Run()
+	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/operator.yaml").Run()
 	if err != nil {
 		klog.Infof("Unable to create Chaos-operator, due to error: %v", err)
 	}
@@ -109,9 +115,14 @@ var _ = BeforeSuite(func() {
 		break
 	}
 
-	err = exec.Command("kubectl", "create", "-f", "https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/experiments.yaml", "-n", "litmus").Run()
+	err = exec.Command("kubectl", "apply", "-f", "https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/experiments.yaml", "-n", "litmus").Run()
 	if err != nil {
 		klog.Infof("Unable to create Pod-Delete Experiment, due to error: %v", err)
+	}
+
+	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/pod_delete_rbac.yaml", "-n", "litmus").Run()
+	if err != nil {
+		klog.Infof("Unable to create pod-delete rbac, due to error: %v", err)
 	}
 })
 
@@ -148,7 +159,6 @@ var _ = Describe("BDD on chaos-runner", func() {
 							},
 						},
 						Spec: v1.PodSpec{
-							ServiceAccountName: "litmus",
 							Containers: []v1.Container{
 								{
 									Name:  "nginx",
@@ -189,7 +199,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 						AppKind:  "deployment",
 					},
 					EngineState:         "active",
-					ChaosServiceAccount: "litmus",
+					ChaosServiceAccount: "pod-delete-sa",
 					Components: v1alpha1.ComponentParams{
 						Runner: v1alpha1.RunnerInfo{
 							Image: "litmuschaos/chaos-runner:ci",
