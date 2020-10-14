@@ -45,11 +45,18 @@ jobs:
             cat workspace/env-vars >> $BASH_ENV
             source $BASH_ENV
       - run: eval $(minikube docker-env -u)
-      - run: make deps
-      - run: make build
-      - run: |
-          docker build . -f build/Dockerfile -t ${REPONAME}/${IMGNAME}:${IMGTAG}
-      - run: make test
+      - run:
+          name: Installing deps
+          command: make deps
+          working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
+      - run:
+          name: Building docker image
+          command: docker build . -f build/Dockerfile -t ${REPONAME}/${IMGNAME}:${IMGTAG}
+          working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
+      - run:
+          name: Running tests
+          command: make test
+          working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
       - run: |
           docker save -o workspace/image.tar ${REPONAME}/${IMGNAME}:${IMGTAG}
       - persist_to_workspace:
