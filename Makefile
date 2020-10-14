@@ -56,13 +56,6 @@ lint:
 	@echo "------------------"
 	@go vet $(PACKAGES)
 
-.PHONY: build  
-build:
-	@echo "------------------"
-	@echo "--> Building Chaos-runner binary..."
-	@echo "------------------"
-	@go build -o build/_output/bin/chaos-runner ./bin
-
 .PHONY: gotasks
 gotasks: format lint build
 

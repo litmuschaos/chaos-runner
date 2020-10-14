@@ -12,7 +12,7 @@ WORKDIR ${RUNNER}
 RUN go build -o build/_output/bin/chaos-runner ./bin
 
 ## DEPLOY STAGE
-FROM alpine:latest
+FROM registry.access.redhat.com/ubi7-dev-preview/ubi-minimal:7.6
 
 LABEL maintainer="LitmusChaos"
 
