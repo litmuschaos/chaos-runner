@@ -40,12 +40,14 @@ jobs:
           source $BASH_ENV
       - checkout
       - run:
+          command: ls && pwd
+      - run:
           name: Build chaos-runner image
           command: docker build . -f build/Dockerfile -t ${REPONAME}/${IMGNAME}:${IMGTAG}
-          working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
+          working_directory: ~/project
       - run:
           name: Save chaos-runner docker image
-          command: docker save -o workspace/image.tar ${REPONAME}/${IMGNAME}:${IMGTAG}
+          command: docker save -o /tmp/workspace/image.tar ${REPONAME}/${IMGNAME}:${IMGTAG}
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -54,6 +56,7 @@ jobs:
     machine:
       image: circleci/classic:201808-01
       resource_class: large
+    working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
     steps:
       - attach_workspace:
           at: /tmp/workspace
@@ -80,7 +83,6 @@ jobs:
       - run:
           name: Running tests
           command: make test
-          working_directory: ~/go/src/github.com/litmuschaos/chaos-runner
   trivy-check:
     machine: true
     environment:
@@ -144,33 +146,33 @@ jobs:
 
 workflows:
   version: 2
-  litmus-portal:
+  chaos-runner:
     jobs:
       - setup-env:
           filters:
             tags:
               only: /.*/
-      - docker-build:
-          requires:
-            - setup-env
-          filters:
-            tags:
-              only: /.*/
+#      - docker-build:
+#          requires:
+#            - setup-env
+#          filters:
+#            tags:
+#              only: /.*/
       - tests:
           requires:
             - setup-env
           filters:
             tags:
               only: /.*/
-      - trivy-check:
-          requires:
-            - docker-build
-          filters:
-            tags:
-              only: /.*/
+#      - trivy-check:
+#          requires:
+#            - docker-build
+#          filters:
+#            tags:
+#              only: /.*/
       - docker-push:
           requires:
-            - trivy-check
+#            - trivy-check
             - tests
           filters:
             branches:
@@ -179,8 +181,8 @@ workflows:
                 - /^v.*/
       - release:
           requires:
-            - trivy-check
-            - test
+#            - trivy-check
+            - tests
           filters:
             ## release jobs needs to be run for tagged releases alone & not for any branch commits
             branches:
