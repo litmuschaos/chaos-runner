@@ -86,5 +86,5 @@ dockerops:
 
 .PHONY: push
 push:
-	@docker buildx build --file build/Dockerfile  --progress plane ----progress plane --push --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .
+	@docker buildx build --file build/Dockerfile  --progress plane --push --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .
 
