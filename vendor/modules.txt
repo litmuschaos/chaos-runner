@@ -48,18 +48,18 @@ github.com/jpillora/go-ogle-analytics
 github.com/json-iterator/go
 # github.com/konsorten/go-windows-terminal-sequences v1.0.3
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/litmuschaos/chaos-operator v0.0.0-20201009063120-cbc5cfd24502
+# github.com/litmuschaos/chaos-operator v0.0.0-20201014142307-6afbb92e2972
 github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/scheme
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1
-# github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b
+# github.com/litmuschaos/elves v0.0.0-20201013133759-038284849633
 github.com/litmuschaos/elves/kubernetes/container
 github.com/litmuschaos/elves/kubernetes/job
 github.com/litmuschaos/elves/kubernetes/jobspec
 github.com/litmuschaos/elves/kubernetes/podtemplatespec
 github.com/litmuschaos/elves/kubernetes/volume/v1alpha1
-# github.com/litmuschaos/litmus-go v0.0.0-20201008062312-0b464451441d
+# github.com/litmuschaos/litmus-go v0.0.0-20201015093552-b88e93ffc452
 github.com/litmuschaos/litmus-go/pkg/utils/retry
 # github.com/mailru/easyjson v0.7.1
 github.com/mailru/easyjson/buffer
