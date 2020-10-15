@@ -2,7 +2,7 @@
 set -e
 
 # Push CI images
-function push_dev_image(){
+function push_multiarch-1.9.0_image(){
 
   echo "Pushing ${REPONAME}/${IMGNAME}:${IMGTAG} ..."
   docker buildx build --file build/Dockerfile --push --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:${IMGTAG} .    
@@ -21,9 +21,9 @@ function push_release_image(){
     echo "Pushing ${REPONAME}/${IMGNAME}:${CIRCLE_TAG} ..."
     docker tag ${IMAGEID} ${REPONAME}/${IMGNAME}:${CIRCLE_TAG}
     docker buildx build --file build/Dockerfile --push --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:${CIRCLE_TAG} .    
-    echo "Pushing ${REPONAME}/${IMGNAME}:dev ..."
-    docker tag ${IMAGEID} ${REPONAME}/${IMGNAME}:dev
-    docker buildx build --file build/Dockerfile --push --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:dev .    
+    echo "Pushing ${REPONAME}/${IMGNAME}:multiarch-1.9.0 ..."
+    docker tag ${IMAGEID} ${REPONAME}/${IMGNAME}:multiarch-1.9.0
+    docker buildx build --file build/Dockerfile --push --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:multiarch-1.9.0 .    
   fi;
 
 }
@@ -43,8 +43,8 @@ if [ ! -z "${DNAME}" ] && [ ! -z "${DPASS}" ];
 then
   docker login -u "${DNAME}" -p "${DPASS}";
   build_type=$(echo $1 | cut -d "=" -f 2)
-  if [ "${build_type}" == "dev" ]; then
-    push_dev_image;
+  if [ "${build_type}" == "multiarch-1.9.0" ]; then
+    push_multiarch-1.9.0_image;
   elif [ "${build_type}" == "release" ]; then
     push_release_image; 
   else

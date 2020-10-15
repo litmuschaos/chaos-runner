@@ -226,3 +226,18 @@ func (b *Builder) WithSecurityContext(sc corev1.SecurityContext) *Builder {
 	b.con.object.SecurityContext = &sc
 	return b
 }
+
+// WithResourceRequirements sets the resource requirements of the container
+func (b *Builder) WithResourceRequirements(rr corev1.ResourceRequirements) *Builder {
+
+	if reflect.DeepEqual(rr, corev1.ResourceRequirements{}) {
+		b.errors = append(
+			b.errors,
+			errors.New("failed to build container object: empty resource requirements"),
+		)
+		return b
+	}
+
+	b.con.object.Resources = rr
+	return b
+}

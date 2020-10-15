@@ -3,7 +3,7 @@
 
 REGISTRY ?= litmuschaos
 IMG_NAME ?= chaos-runner
-PACKAGE_VERSION ?= dev
+PACKAGE_VERSION ?= multiarch-1.9.0
 IS_DOCKER_INSTALLED = $(shell which docker >> /dev/null 2>&1; echo $$?)
 HOME = $(shell echo $$HOME)
 # list only our namespaced directories
@@ -71,7 +71,7 @@ test:
 	@echo "------------------"
 	@echo "Aquire YAML for performing tests"
 	@echo "------------------"
-	@mkdir -p ./build/_output/test;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/chaos_crds.yaml -P ./build/_output/test ;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/rbac.yaml -P ./build/_output/test; wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/operator.yaml -P ./build/_output/test
+	@mkdir -p ./build/_output/test;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/chaos_crds.yaml -P ./build/_output/test ;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/rbac.yaml -P ./build/_output/test;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/tests/manifest/pod_delete_rbac.yaml -P ./build/_output/test;wget -q -N https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/operator.yaml -P ./build/_output/test
 	@echo "------------------"
 	@echo "--> Run Go Test"
 	@echo "------------------"
@@ -86,4 +86,5 @@ dockerops:
 
 .PHONY: push
 push:
-	@docker buildx build --file build/Dockerfile  --progress plane ----progress plane --push --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .
+	@docker buildx build --file build/Dockerfile  --progress plane --push --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .
+

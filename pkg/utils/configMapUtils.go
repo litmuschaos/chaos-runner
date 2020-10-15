@@ -2,23 +2,23 @@ package utils
 
 import (
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-runner/pkg/log"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
 )
 
 //PatchConfigMaps patches configmaps in experimentDetails struct.
 func (expDetails *ExperimentDetails) PatchConfigMaps(clients ClientSets, engineDetails EngineDetails) error {
-	err := expDetails.SetConfigMaps(clients, engineDetails)
-	if err != nil {
+	if err := expDetails.SetConfigMaps(clients, engineDetails); err != nil {
 		return err
 	}
 
-	klog.V(0).Infof("Validating configmaps specified in the ChaosExperiment & ChaosEngine")
-	err = expDetails.ValidateConfigMaps(clients)
-	if err != nil {
+	log.Info("Validating configmaps specified in the ChaosExperiment & ChaosEngine")
+
+	if err := expDetails.ValidateConfigMaps(clients); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -55,13 +55,13 @@ func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) erro
 
 	for _, v := range expDetails.ConfigMaps {
 		if v.Name == "" || v.MountPath == "" {
-			return errors.New("Incomplete Information in ConfigMap, will skip execution")
+			return errors.Errorf("Incomplete Information in ConfigMap, will skip execution")
 		}
 		err := clients.ValidateConfigMap(v.Name, expDetails)
 		if err != nil {
-			return errors.Wrapf(err, "Unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
+			return errors.Errorf("Unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		}
-		klog.V(0).Infof("Successfully Validated ConfigMap: %v", v.Name)
+		log.Infof("Successfully Validated ConfigMap: %v", v.Name)
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) erro
 func getExperimentConfigmaps(clients ClientSets, expDetails *ExperimentDetails) ([]v1alpha1.ConfigMap, error) {
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to get ChaosExperiment Resource,  error: %v", err)
+		return nil, errors.Errorf("Unable to get ChaosExperiment Resource, error: %v", err)
 	}
 	experimentConfigMaps := chaosExperimentObj.Spec.Definition.ConfigMaps
 
@@ -80,7 +80,7 @@ func getEngineConfigmaps(clients ClientSets, engineDetails EngineDetails, expDet
 
 	chaosEngineObj, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to get ChaosEngine Resource,  error: %v", err)
+		return nil, errors.Errorf("Unable to get ChaosEngine Resource, error: %v", err)
 	}
 	experimentsList := chaosEngineObj.Spec.Experiments
 	for i := range experimentsList {
@@ -89,7 +89,7 @@ func getEngineConfigmaps(clients ClientSets, engineDetails EngineDetails, expDet
 			return engineConfigMaps, nil
 		}
 	}
-	return nil, errors.Wrapf(err, "No experiment found with %v name in ChaosEngine", expDetails.Name)
+	return nil, errors.Errorf("No experiment found with %v name in ChaosEngine", expDetails.Name)
 }
 
 // OverridingConfigMaps will override configmaps from ChaosEngine
