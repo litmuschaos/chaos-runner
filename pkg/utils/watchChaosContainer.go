@@ -11,13 +11,26 @@ import (
 
 // GetChaosPod gets the chaos experiment pod object launched by the runner
 func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod, error) {
-	chaosPodList, err := clients.KubeClient.CoreV1().Pods(expDetails.Namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
-	if err != nil || len(chaosPodList.Items) == 0 {
-		return nil, errors.Errorf("Unable to get the chaos pod, error: %v", err)
-	} else if len(chaosPodList.Items) > 1 {
-		// Cases where experiment pod is rescheduled by the job controller due to
-		// issues while the older pod is still not cleaned-up
-		return nil, errors.Errorf("Multiple pods exist with same jobname label")
+	var chaosPodList *corev1.PodList
+	var err error
+
+	delay := 5
+	err = retry.
+		Times(uint(expDetails.StatusCheckTimeout / delay)).
+		Wait(time.Duration(delay) * time.Second).
+		Try(func(attempt uint) error {
+			chaosPodList, err = clients.KubeClient.CoreV1().Pods(expDetails.Namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
+			if err != nil || len(chaosPodList.Items) == 0 {
+				return errors.Errorf("Unable to get the chaos pod, error: %v", err)
+			} else if len(chaosPodList.Items) > 1 {
+				// Cases where experiment pod is rescheduled by the job controller due to
+				// issues while the older pod is still not cleaned-up
+				return errors.Errorf("Multiple pods exist with same jobname label")
+			}
+			return nil
+		})
+	if err != nil {
+		return nil, err
 	}
 
 	// Note: We error out upon existence of multiple exp pods for the same experiment
