@@ -66,8 +66,10 @@ type VolumeOpts struct {
 
 // ClientSets is a collection of clientSets needed
 type ClientSets struct {
-	KubeClient   *kubernetes.Clientset
-	LitmusClient *clientV1alpha1.Clientset
+	KubeClient             *kubernetes.Clientset
+	LitmusClient           *clientV1alpha1.Clientset
+	KubeClientExperiment   *kubernetes.Clientset
+	LitmusClientExperiment *clientV1alpha1.Clientset
 }
 
 // Recorder is collection of resources needed to record events for chaos-runner
@@ -95,20 +97,33 @@ const (
 
 // GenerateClientSetFromKubeConfig will generation both ClientSets (k8s, and Litmus)
 func (clientSets *ClientSets) GenerateClientSetFromKubeConfig() error {
-	config, err := getKubeConfig()
+	configExperiment, configLitmus, err := getKubeConfig()
 	if err != nil {
 		return err
 	}
-	k8sClientSet, err := k8s.GenerateK8sClientSet(config)
+
+	k8sClientSetLitmus, err := k8s.GenerateK8sClientSet(configLitmus)
 	if err != nil {
 		return err
 	}
-	litmusClientSet, err := litmus.GenerateLitmusClientSet(config)
+	litmusClientSetLitmus, err := litmus.GenerateLitmusClientSet(configLitmus)
 	if err != nil {
 		return err
 	}
-	clientSets.KubeClient = k8sClientSet
-	clientSets.LitmusClient = litmusClientSet
+
+	k8sClientSetExperiment, err := k8s.GenerateK8sClientSet(configExperiment)
+	if err != nil {
+		return err
+	}
+	litmusClientSetExperiment, err := litmus.GenerateLitmusClientSet(configExperiment)
+	if err != nil {
+		return err
+	}
+
+	clientSets.KubeClient = k8sClientSetLitmus
+	clientSets.LitmusClient = litmusClientSetLitmus
+	clientSets.KubeClientExperiment = k8sClientSetExperiment
+	clientSets.LitmusClientExperiment = litmusClientSetExperiment
 
 	return nil
 }
@@ -116,19 +131,33 @@ func (clientSets *ClientSets) GenerateClientSetFromKubeConfig() error {
 // Generate
 
 // getKubeConfig setup the config for access cluster resource
-func getKubeConfig() (*rest.Config, error) {
+func getKubeConfig() (*rest.Config, *rest.Config, error) {
 	kubeconfig := flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	litmuskubeconfig := flag.String("litmuskubeconfig", "", "absolute path to the kubeconfig file")
 	flag.Parse()
 	// Use in-cluster config if kubeconfig path is specified
-	if *kubeconfig == "" {
-		config, err := rest.InClusterConfig()
+	if *litmuskubeconfig == "" {
+		configLitmus, err := rest.InClusterConfig()
 		if err != nil {
-			return config, err
+			return nil, configLitmus, err
 		}
 	}
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	configLitmus, err := clientcmd.BuildConfigFromFlags("", *litmuskubeconfig)
 	if err != nil {
-		return config, err
+		return nil, configLitmus, err
 	}
-	return config, err
+
+	// Use in-cluster config if kubeconfig path is specified
+	if *kubeconfig == "" {
+		configExperiment, err := rest.InClusterConfig()
+		if err != nil {
+			return configExperiment, configLitmus, err
+		}
+	}
+	configExperiment, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	if err != nil {
+		return configExperiment, configLitmus, err
+	}
+
+	return configExperiment, configLitmus, err
 }
