@@ -11,7 +11,7 @@ import (
 
 // GetChaosPod gets the chaos experiment pod object launched by the runner
 func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod, error) {
-	chaosPodList, err := clients.KubeClient.CoreV1().Pods(expDetails.Namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
+	chaosPodList, err := clients.KubeClientExperiment.CoreV1().Pods(expDetails.Namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
 	if err != nil || len(chaosPodList.Items) == 0 {
 		return nil, errors.Errorf("Unable to get the chaos pod, error: %v", err)
 	} else if len(chaosPodList.Items) > 1 {
