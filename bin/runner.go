@@ -39,10 +39,6 @@ func main() {
 	if err := utils.InitialPatchEngine(engineDetails, clients, experimentList); err != nil {
 		log.Errorf("Unable to patch Initial ExperimentStatus in ChaosEngine, error: %v", err)
 	}
-	recorder, err := utils.NewEventRecorder(clients, engineDetails)
-	if err != nil {
-		log.Errorf("Unable to initiate EventRecorder for Chaos-Runner, would not be able to add events, error: %v", err)
-	}
 
 	// Steps for each Experiment
 	for _, experiment := range experimentList {
@@ -55,14 +51,14 @@ func main() {
 		// derive the required field from the experiment & engine and set into experimentDetails struct
 		if err := experiment.SetValueFromChaosResources(&engineDetails, clients); err != nil {
 			log.Errorf("Unable to set values from Chaos Resources, error: %v", err)
-			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentNotFoundErrorReason)
+			experiment.ExperimentSkipped(utils.ExperimentNotFoundErrorReason, engineDetails, clients)
 			continue
 		}
 
 		// derive the envs from the chaos experiment and override their values from chaosengine if any
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
 			log.Errorf("Unable to patch ENV, error: %v", err)
-			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentEnvParseErrorReason)
+			experiment.ExperimentSkipped(utils.ExperimentEnvParseErrorReason, engineDetails, clients)
 			continue
 		}
 
@@ -70,25 +66,26 @@ func main() {
 
 		if err := experiment.PatchResources(engineDetails, clients); err != nil {
 			log.Errorf("Unable to patch Chaos Resources required for Chaos Experiment: %v, error: %v", experiment.Name, err)
-			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentDependencyCheckReason)
+			experiment.ExperimentSkipped(utils.ExperimentDependencyCheckReason, engineDetails, clients)
 			continue
 		}
 		// generating experiment dependency check event inside chaosengine
-		recorder.ExperimentDepedencyCheck(experiment.Name)
+		experiment.ExperimentDependencyCheck(engineDetails, clients)
 
 		// Creation of PodTemplateSpec, and Final Job
 		if err := utils.BuildingAndLaunchJob(&experiment, clients); err != nil {
 			log.Errorf("Unable to construct chaos experiment job, error: %v", err)
-			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentJobCreationErrorReason)
+			experiment.ExperimentSkipped(utils.ExperimentDependencyCheckReason, engineDetails, clients)
 			continue
 		}
-		recorder.ExperimentJobCreate(experiment.Name, experiment.JobName)
+
+		experiment.ExperimentJobCreate(engineDetails, clients)
 
 		log.Infof("Started Chaos Experiment Name: %v, with Job Name: %v", experiment.Name, experiment.JobName)
 		// Watching the chaos container till Completion
 		if err := engineDetails.WatchChaosContainerForCompletion(&experiment, clients); err != nil {
 			log.Errorf("Unable to Watch the chaos container, error: %v", err)
-			recorder.ExperimentSkipped(experiment.Name, utils.ExperimentChaosContainerWatchErrorReason)
+			experiment.ExperimentSkipped(utils.ExperimentChaosContainerWatchErrorReason, engineDetails, clients)
 			continue
 		}
 
@@ -106,6 +103,6 @@ func main() {
 		if err != nil {
 			log.Errorf("Unable to Delete ChaosExperiment Job, error: %v", err)
 		}
-		recorder.ExperimentJobCleanUp(&experiment, jobCleanUpPolicy)
+		experiment.ExperimentJobCleanUp(string(jobCleanUpPolicy), engineDetails, clients)
 	}
 }
