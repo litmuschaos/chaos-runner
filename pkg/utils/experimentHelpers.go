@@ -250,6 +250,9 @@ func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetai
 	if err := expDetails.SetImagePullSecretsFromEngine(engine.Name, clients); err != nil {
 		return err
 	}
+	if err := expDetails.SetTolerationsFromEngine(engine.Name, clients); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -318,6 +321,23 @@ func (expDetails *ExperimentDetails) SetExpNodeSelectorFromEngine(engineName str
 	for i := range expRefList {
 		if expRefList[i].Name == expDetails.Name {
 			expDetails.NodeSelector = expRefList[i].Spec.Components.NodeSelector
+		}
+	}
+	return nil
+}
+
+// SetTolerationsFromEngine will add the tolerations based on the key/operator/effect provided in the chaosEngine
+func (expDetails *ExperimentDetails) SetTolerationsFromEngine(engineName string, clients ClientSets) error {
+
+	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
+	if err != nil {
+		return errors.Errorf("Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+	}
+
+	expRefList := engineSpec.Spec.Experiments
+	for i := range expRefList {
+		if expRefList[i].Name == expDetails.Name {
+			expDetails.Tolerations = expRefList[i].Spec.Components.Tolerations
 		}
 	}
 	return nil
