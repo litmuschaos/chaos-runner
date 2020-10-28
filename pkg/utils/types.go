@@ -46,6 +46,7 @@ type ExperimentDetails struct {
 	SvcAccount         string
 	Annotations        map[string]string
 	NodeSelector       map[string]string
+	Tolerations        []corev1.Toleration
 	SecurityContext    v1alpha1.SecurityContext
 	HostPID            bool
 	// InstanceID is passed as env inside chaosengine

@@ -153,6 +153,10 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		podtemplate.WithNodeSelector(experiment.NodeSelector)
 	}
 
+	if experiment.Tolerations != nil {
+		podtemplate.WithTolerations(experiment.Tolerations...)
+	}
+
 	if _, err := podtemplate.Build(); err != nil {
 		return nil, err
 	}
