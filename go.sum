@@ -443,10 +443,14 @@ github.com/litmuschaos/chaos-operator v0.0.0-20201005102541-be0f9bb115ce h1:pB9b
 github.com/litmuschaos/chaos-operator v0.0.0-20201005102541-be0f9bb115ce/go.mod h1:J4NuADZBn6nUkhKNux3p3ghSUfxoB+itsO+rD8tOCNk=
 github.com/litmuschaos/chaos-operator v0.0.0-20201028141817-b9aacb0d9f56 h1:oqZc4BdOgxBSsbO1OuEPHzgZQEj1WW8gjZfzOJBC7Jo=
 github.com/litmuschaos/chaos-operator v0.0.0-20201028141817-b9aacb0d9f56/go.mod h1:sZzuh+tvWP0//72e6eYWqPLnIoDIBWDE2GE+NYeUwug=
+github.com/litmuschaos/chaos-operator v0.0.0-20201113182537-520679f26f3d h1:436UeDjvTJMyVouOd7RI0rpiPnZl29TuStyMsvGo7mg=
+github.com/litmuschaos/chaos-operator v0.0.0-20201113182537-520679f26f3d/go.mod h1:pUjqFKB/fp23h3uNht1zTUlgL+49S3rzscpRFXYf3qw=
 github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b h1:eYT2CfSf7FZu01DAgxgjrlSc7dX5IlwPRqD44RH47Kk=
 github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b/go.mod h1:DsbHGNUq/78NZozWVVI9Q6eBei4I+JjlkkD5aibJ3MQ=
 github.com/litmuschaos/elves v0.0.0-20201028122545-92367f016d48 h1:u63a2QpyXgVMfJf3u0ILoxTJA85TCO6UhX0+YT7C1as=
 github.com/litmuschaos/elves v0.0.0-20201028122545-92367f016d48/go.mod h1:DsbHGNUq/78NZozWVVI9Q6eBei4I+JjlkkD5aibJ3MQ=
+github.com/litmuschaos/elves v0.0.0-20201107015738-552d74669e3c h1:+hlppERdpCxMRW0QC+ckbz/mS6wH+fNVMlDMFGClk7U=
+github.com/litmuschaos/elves v0.0.0-20201107015738-552d74669e3c/go.mod h1:DsbHGNUq/78NZozWVVI9Q6eBei4I+JjlkkD5aibJ3MQ=
 github.com/litmuschaos/litmus-go v0.0.0-20201015093552-b88e93ffc452 h1:ZC/dhFHbzpibZAxLT9Pp2IPcAnEusIN6W6IMepkT9ck=
 github.com/litmuschaos/litmus-go v0.0.0-20201015093552-b88e93ffc452/go.mod h1:vS08ynv8o7+AjLwP6vhUjgcB5JM0zVq2AFWWW8P6q48=
 github.com/lpabon/godbc v0.1.1/go.mod h1:Jo9QV0cf3U6jZABgiJ2skINAXb9j8m51r07g4KI92ZA=

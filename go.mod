@@ -6,8 +6,10 @@ require (
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
 	//github.com/litmuschaos/chaos-operator v0.0.0-20201014142307-6afbb92e2972
 	//github.com/litmuschaos/elves v0.0.0-20201013133759-038284849633
-	github.com/litmuschaos/chaos-operator v0.0.0-20201028141817-b9aacb0d9f56
-	github.com/litmuschaos/elves v0.0.0-20201028122545-92367f016d48
+	//github.com/litmuschaos/chaos-operator v0.0.0-20201028141817-b9aacb0d9f56
+	//github.com/litmuschaos/elves v0.0.0-20201028122545-92367f016d48
+	github.com/litmuschaos/chaos-operator v0.0.0-20201113182537-520679f26f3d
+	github.com/litmuschaos/elves v0.0.0-20201107015738-552d74669e3c
 	github.com/litmuschaos/litmus-go v0.0.0-20201015093552-b88e93ffc452
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
