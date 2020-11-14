@@ -8,11 +8,9 @@ import (
 	volume "github.com/litmuschaos/elves/kubernetes/volume/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
-	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/tools/record"
 
 	"github.com/litmuschaos/chaos-runner/pkg/utils/k8s"
 	"github.com/litmuschaos/chaos-runner/pkg/utils/litmus"
@@ -48,6 +46,7 @@ type ExperimentDetails struct {
 	SvcAccount         string
 	Annotations        map[string]string
 	NodeSelector       map[string]string
+	Tolerations        []corev1.Toleration
 	SecurityContext    v1alpha1.SecurityContext
 	HostPID            bool
 	// InstanceID is passed as env inside chaosengine
@@ -70,10 +69,12 @@ type ClientSets struct {
 	LitmusClient *clientV1alpha1.Clientset
 }
 
-// Recorder is collection of resources needed to record events for chaos-runner
-type Recorder struct {
-	EventRecorder record.EventRecorder
-	EventResource runtime.Object
+// EventAttributes is for collecting all the events-related details
+type EventAttributes struct {
+	Reason  string
+	Message string
+	Type    string
+	Name    string
 }
 
 var (
@@ -112,8 +113,6 @@ func (clientSets *ClientSets) GenerateClientSetFromKubeConfig() error {
 
 	return nil
 }
-
-// Generate
 
 // getKubeConfig setup the config for access cluster resource
 func getKubeConfig() (*rest.Config, error) {
