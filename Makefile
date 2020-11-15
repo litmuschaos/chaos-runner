@@ -58,10 +58,10 @@ lint:
 
 .PHONY: build  
 build:
-	@echo "------------------"
+	@echo "-----------------------------------"
 	@echo "--> Building Chaos-runner binary..."
-	@echo "------------------"
-	@go build -o build/_output/bin/chaos-runner ./bin
+	@echo "-----------------------------------"
+	@./build/go-multiarch-build.sh ./bin
 
 .PHONY: gotasks
 gotasks: format lint build
@@ -82,8 +82,20 @@ dockerops:
 	@echo "------------------"
 	@echo "--> Build Chaos-runner image..." 
 	@echo "------------------"
-	sudo docker build . -f build/Dockerfile -t $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION)
+	@docker buildx build --file build/Dockerfile  --progress plane --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .    
+
+.PHONY: dockerops-amd64
+dockerops-amd64:
+	@echo "--------------------------------------------"
+	@echo "--> Build chaos-operator amd-64 docker image"
+	@echo "--------------------------------------------"
+	sudo docker build --file build/Dockerfile --tag $(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG) . --build-arg TARGETARCH=amd64
+	@echo "--------------------------------------------"
+	@echo "--> Push chaos-operator amd-64 docker image"
+	@echo "--------------------------------------------"	
+	sudo docker push $(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG)	
 
 .PHONY: push
 push:
-	sudo docker push $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION)
+	@docker buildx build --file build/Dockerfile  --progress plane --push --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .
+
