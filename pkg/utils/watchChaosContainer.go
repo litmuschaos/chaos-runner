@@ -14,7 +14,7 @@ func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod
 	var chaosPodList *corev1.PodList
 	var err error
 
-	delay := 5
+	delay := 2
 	err = retry.
 		Times(uint(expDetails.StatusCheckTimeout / delay)).
 		Wait(time.Duration(delay) * time.Second).
@@ -63,7 +63,7 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 		}
 
 	} else if pod.Status.Phase == corev1.PodPending {
-		delay := 5
+		delay := 2
 		err := retry.
 			Times(uint(experimentDetails.StatusCheckTimeout / delay)).
 			Wait(time.Duration(delay) * time.Second).
