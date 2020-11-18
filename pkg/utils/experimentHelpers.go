@@ -71,6 +71,8 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		"AUXILIARY_APPINFO": engineDetails.AuxiliaryAppInfo,
 		"CHAOS_UID":         engineDetails.UID,
 		"EXPERIMENT_NAME":   expDetails.Name,
+		"ANNOTATION_KEY":    engineDetails.AnnotationsKey,
+		"ANNOTATION_CHECK":  engineDetails.AnnotationCheck,
 	}
 	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
 	for key, value := range ENVList {
