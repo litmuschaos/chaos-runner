@@ -16,6 +16,8 @@ func GetOsEnv(engineDetails *EngineDetails) {
 	engineDetails.ClientUUID = os.Getenv("CLIENT_UUID")
 	engineDetails.Experiments = strings.Split(experimentList, ",")
 	engineDetails.AuxiliaryAppInfo = os.Getenv("AUXILIARY_APPINFO")
+	engineDetails.AnnotationKey = os.Getenv("ANNOTATION_KEY")
+	engineDetails.AnnotationCheck = os.Getenv("ANNOTATION_CHECK")
 
 	//TODO: Use engineDetails.AdminMode, to change behaviour of chaos-runner
 	// engineDetails.AdminMode = false
