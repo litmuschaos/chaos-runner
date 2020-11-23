@@ -87,13 +87,13 @@ dockerops:
 .PHONY: dockerops-amd64
 dockerops-amd64:
 	@echo "--------------------------------------------"
-	@echo "--> Build chaos-operator amd-64 docker image"
+	@echo "--> Build chaos-runner amd-64 docker image"
 	@echo "--------------------------------------------"
-	sudo docker build --file build/Dockerfile --tag $(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG) . --build-arg TARGETARCH=amd64
+	sudo docker build --file build/Dockerfile --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) . --build-arg TARGETARCH=amd64
 	@echo "--------------------------------------------"
-	@echo "--> Push chaos-operator amd-64 docker image"
+	@echo "--> Push chaos-runner amd-64 docker image"
 	@echo "--------------------------------------------"	
-	sudo docker push $(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG)	
+	sudo docker push $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION)	
 
 .PHONY: push
 push:

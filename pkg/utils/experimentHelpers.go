@@ -163,6 +163,8 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 
 		}
 	}
+	// set the job cleanup policy
+	expDetails.Env["JOB_CLEANUP_POLICY"] = string(engineSpec.Spec.JobCleanUpPolicy)
 	return nil
 }
 
