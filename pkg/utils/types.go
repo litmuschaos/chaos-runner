@@ -27,7 +27,7 @@ type EngineDetails struct {
 	AuxiliaryAppInfo string
 	UID              string
 	EngineNamespace  string
-	AnnotationKey   string
+	AnnotationKey    string
 	AnnotationCheck  string
 }
 
