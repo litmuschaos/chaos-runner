@@ -83,7 +83,7 @@ func getEnvFromMap(env map[string]string) []corev1.EnvVar {
 
 // BuildingAndLaunchJob builds Job, and then launch it.
 func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) error {
-	experiment.VolumeOpts.VolumeOperations(experiment.ConfigMaps, experiment.Secrets, experiment.HostFileVolumes)
+	experiment.VolumeOpts.VolumeOperations(experiment)
 
 	envVar := getEnvFromMap(experiment.Env)
 	//Build Container to add in the Pod
@@ -100,7 +100,7 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 	// Build JobSpec Template
 	jobspec, err := buildJobSpec(pod)
 	if err != nil {
-		return err
+		return errors.Errorf("Unable to build JobSpec for Chaos Experiment, error: %v", err)
 	}
 	//Build Job
 	job, err := experiment.buildJob(pod, jobspec)
@@ -117,10 +117,7 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 // launchJob spawn a kubernetes Job using the job Object received.
 func (experiment *ExperimentDetails) launchJob(job *batchv1.Job, clients ClientSets) error {
 	_, err := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Create(job)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // BuildPodTemplateSpec return a PodTempplateSpec
@@ -176,7 +173,6 @@ func buildJobSpec(pod *podtemplatespec.Builder) (*jobspec.Builder, error) {
 
 // BuildJob will build the JobObject for creation
 func (experiment *ExperimentDetails) buildJob(pod *podtemplatespec.Builder, jobspec *jobspec.Builder) (*batchv1.Job, error) {
-	//restartPolicy := corev1.RestartPolicyOnFailure
 	jobObj, err := job.NewBuilder().
 		WithJobSpecBuilder(jobspec).
 		WithAnnotations(experiment.Annotations).
@@ -184,10 +180,7 @@ func (experiment *ExperimentDetails) buildJob(pod *podtemplatespec.Builder, jobs
 		WithNamespace(experiment.Namespace).
 		WithLabels(experiment.ExpLabels).
 		Build()
-	if err != nil {
-		return jobObj, err
-	}
-	return jobObj, nil
+	return jobObj, err
 }
 
 // GetValueFromDownwardAPI returns the value from downwardApi

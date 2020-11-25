@@ -8,51 +8,38 @@ import (
 
 var (
 	// hostpathTypeFile represents the hostpath type
-    hostpathTypeFile = corev1.HostPathFile
+	hostpathTypeFile = corev1.HostPathFile
 )
 
-
-// CreateVolumeBuilders build Volume needed in execution of experiments
-func CreateVolumeBuilders(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret, hostFileVolumes []v1alpha1.HostFile) []*volume.Builder {
-	volumeBuilderList := []*volume.Builder{}
-
-	volumeBuilderForConfigMaps := BuildVolumeBuilderForConfigMaps(configMaps)
-	volumeBuilderList = append(volumeBuilderList, volumeBuilderForConfigMaps...)
-
-	volumeBuilderForSecrets := BuildVolumeBuilderForSecrets(secrets)
-	volumeBuilderList = append(volumeBuilderList, volumeBuilderForSecrets...)
-
-	volumeBuilderForHostFileVolumes := BuildVolumeBuilderForHostFileVolumes(hostFileVolumes)
-	volumeBuilderList = append(volumeBuilderList, volumeBuilderForHostFileVolumes...)
-
-	return volumeBuilderList
-}
-
-// CreateVolumeMounts mounts Volume needed in execution of experiments
-func CreateVolumeMounts(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret, hostFileVolumes []v1alpha1.HostFile) []corev1.VolumeMount {
-
-	var volumeMountsList []corev1.VolumeMount
-
-	volumeMountsListForConfigMaps := BuildVolumeMountsForConfigMaps(configMaps)
-	volumeMountsList = append(volumeMountsList, volumeMountsListForConfigMaps...)
-
-	volumeMountsListForSecrets := BuildVolumeMountsForSecrets(secrets)
-	volumeMountsList = append(volumeMountsList, volumeMountsListForSecrets...)
-
-	volumeMountsListForHostFileVolumes := BuildVolumeMountsForHostFileVolumes(hostFileVolumes)
-	volumeMountsList = append(volumeMountsList, volumeMountsListForHostFileVolumes...)
-
-	return volumeMountsList
-}
-
 // VolumeOperations filles up VolumeOpts strucuture
-func (volumeOpts *VolumeOpts) VolumeOperations(configMaps []v1alpha1.ConfigMap, secrets []v1alpha1.Secret, hostFileVolumes []v1alpha1.HostFile) {
-	volumeOpts.VolumeBuilders = CreateVolumeBuilders(configMaps, secrets, hostFileVolumes)
-	volumeOpts.VolumeMounts = CreateVolumeMounts(configMaps, secrets, hostFileVolumes)
+func (volumeOpts *VolumeOpts) VolumeOperations(experiment *ExperimentDetails) {
+	volumeOpts.NewVolumeBuilder().
+		BuildVolumeBuilderForConfigMaps(experiment.ConfigMaps).
+		BuildVolumeBuilderForSecrets(experiment.Secrets).
+		BuildVolumeBuilderForHostFileVolumes(experiment.HostFileVolumes)
+
+	volumeOpts.NewVolumeMounts().
+		BuildVolumeMountsForConfigMaps(experiment.ConfigMaps).
+		BuildVolumeMountsForSecrets(experiment.Secrets).
+		BuildVolumeMountsForHostFileVolumes(experiment.HostFileVolumes)
+}
+
+// NewVolumeMounts initialize the volume builder
+func (volumeOpts *VolumeOpts) NewVolumeMounts() *VolumeOpts {
+	volumeMountsList := []corev1.VolumeMount{}
+	volumeOpts.VolumeMounts = volumeMountsList
+	return volumeOpts
+}
+
+// NewVolumeBuilder initialize the volume builder
+func (volumeOpts *VolumeOpts) NewVolumeBuilder() *VolumeOpts {
+	volumeBuilderList := []*volume.Builder{}
+	volumeOpts.VolumeBuilders = volumeBuilderList
+	return volumeOpts
 }
 
 // BuildVolumeMountsForConfigMaps builds VolumeMounts for ConfigMaps
-func BuildVolumeMountsForConfigMaps(configMaps []v1alpha1.ConfigMap) []corev1.VolumeMount {
+func (volumeOpts *VolumeOpts) BuildVolumeMountsForConfigMaps(configMaps []v1alpha1.ConfigMap) *VolumeOpts {
 	var volumeMountsList []corev1.VolumeMount
 	for _, v := range configMaps {
 		var volumeMount corev1.VolumeMount
@@ -60,11 +47,13 @@ func BuildVolumeMountsForConfigMaps(configMaps []v1alpha1.ConfigMap) []corev1.Vo
 		volumeMount.MountPath = v.MountPath
 		volumeMountsList = append(volumeMountsList, volumeMount)
 	}
-	return volumeMountsList
+
+	volumeOpts.VolumeMounts = append(volumeOpts.VolumeMounts, volumeMountsList...)
+	return volumeOpts
 }
 
 // BuildVolumeMountsForSecrets builds VolumeMounts for Secrets
-func BuildVolumeMountsForSecrets(secrets []v1alpha1.Secret) []corev1.VolumeMount {
+func (volumeOpts *VolumeOpts) BuildVolumeMountsForSecrets(secrets []v1alpha1.Secret) *VolumeOpts {
 	var volumeMountsList []corev1.VolumeMount
 	for _, v := range secrets {
 		var volumeMount corev1.VolumeMount
@@ -72,24 +61,26 @@ func BuildVolumeMountsForSecrets(secrets []v1alpha1.Secret) []corev1.VolumeMount
 		volumeMount.MountPath = v.MountPath
 		volumeMountsList = append(volumeMountsList, volumeMount)
 	}
-	return volumeMountsList
+	volumeOpts.VolumeMounts = append(volumeOpts.VolumeMounts, volumeMountsList...)
+	return volumeOpts
 }
 
 // BuildVolumeMountsForHostFileVolumes  builds VolumeMounts for HostFileVolume
-func BuildVolumeMountsForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) []corev1.VolumeMount {
+func (volumeOpts *VolumeOpts) BuildVolumeMountsForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) *VolumeOpts {
 	var volumeMountsList []corev1.VolumeMount
 
-    for _, v := range hostFileVolumes {
+	for _, v := range hostFileVolumes {
 		var volumeMount corev1.VolumeMount
 		volumeMount.Name = v.Name
 		volumeMount.MountPath = v.MountPath
 		volumeMountsList = append(volumeMountsList, volumeMount)
-    }
-	return volumeMountsList
+	}
+	volumeOpts.VolumeMounts = append(volumeOpts.VolumeMounts, volumeMountsList...)
+	return volumeOpts
 }
 
 // BuildVolumeBuilderForConfigMaps builds VolumeBuilders for ConfigMaps
-func BuildVolumeBuilderForConfigMaps(configMaps []v1alpha1.ConfigMap) []*volume.Builder {
+func (volumeOpts *VolumeOpts) BuildVolumeBuilderForConfigMaps(configMaps []v1alpha1.ConfigMap) *VolumeOpts {
 	volumeBuilderList := []*volume.Builder{}
 	if configMaps == nil {
 		return nil
@@ -99,11 +90,12 @@ func BuildVolumeBuilderForConfigMaps(configMaps []v1alpha1.ConfigMap) []*volume.
 			WithConfigMap(v.Name)
 		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
 	}
-	return volumeBuilderList
+	volumeOpts.VolumeBuilders = append(volumeOpts.VolumeBuilders, volumeBuilderList...)
+	return volumeOpts
 }
 
 // BuildVolumeBuilderForSecrets builds VolumeBuilders for Secrets
-func BuildVolumeBuilderForSecrets(secrets []v1alpha1.Secret) []*volume.Builder {
+func (volumeOpts *VolumeOpts) BuildVolumeBuilderForSecrets(secrets []v1alpha1.Secret) *VolumeOpts {
 	volumeBuilderList := []*volume.Builder{}
 	if secrets == nil {
 		return nil
@@ -113,17 +105,18 @@ func BuildVolumeBuilderForSecrets(secrets []v1alpha1.Secret) []*volume.Builder {
 			WithSecret(v.Name)
 		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
 	}
-	return volumeBuilderList
+	volumeOpts.VolumeBuilders = append(volumeOpts.VolumeBuilders, volumeBuilderList...)
+	return volumeOpts
 }
 
 // BuildVolumeBuilderForHostFileVolumes builds VolumeBuilders for HostFileVolume
-func BuildVolumeBuilderForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) []*volume.Builder {
+func (volumeOpts *VolumeOpts) BuildVolumeBuilderForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) *VolumeOpts {
 	volumeBuilderList := []*volume.Builder{}
 	if hostFileVolumes == nil {
 		return nil
-    }
+	}
 
-    for _, v := range hostFileVolumes {
+	for _, v := range hostFileVolumes {
 		volumeBuilder := volume.NewBuilder().
 			WithName(v.Name).
 			WithHostPathAndType(
@@ -131,6 +124,7 @@ func BuildVolumeBuilderForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) [
 				&hostpathTypeFile,
 			)
 		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
-    }
-	return volumeBuilderList
+	}
+	volumeOpts.VolumeBuilders = append(volumeOpts.VolumeBuilders, volumeBuilderList...)
+	return volumeOpts
 }

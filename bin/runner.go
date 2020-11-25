@@ -24,18 +24,19 @@ func main() {
 	if err := clients.GenerateClientSetFromKubeConfig(); err != nil {
 		log.Fatalf("Unable to create ClientSets, error: %v", err)
 	}
-	// Fetching all the ENV's needed
-	utils.GetOsEnv(&engineDetails)
+	// Fetching all the ENVs passed from the chaos-operator
+	// create and initialize the experimentList
+	experimentList := engineDetails.GetOsEnv().CreateExperimentList()
 	log.InfoWithValues("Experiments details are as follows", logrus.Fields{
 		"Experiments List":     engineDetails.Experiments,
 		"Engine Name":          engineDetails.Name,
 		"appLabels":            engineDetails.AppLabel,
+		"appNs":                engineDetails.AppNs,
 		"appKind":              engineDetails.AppKind,
 		"Service Account Name": engineDetails.SvcAccount,
 		"Engine Namespace":     engineDetails.EngineNamespace,
 	})
 
-	experimentList := utils.CreateExperimentList(&engineDetails)
 	if err := utils.InitialPatchEngine(engineDetails, clients, experimentList); err != nil {
 		log.Errorf("Unable to patch Initial ExperimentStatus in ChaosEngine, error: %v", err)
 	}

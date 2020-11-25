@@ -110,8 +110,7 @@ func (engineDetails EngineDetails) WatchChaosContainerForCompletion(experiment *
 		if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
 			return errors.Errorf("Unable to patch ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, err)
 		}
-		time.Sleep(5 * time.Second)
-
+		time.Sleep(2 * time.Second)
 	}
 	return nil
 }

@@ -21,6 +21,7 @@ type EngineDetails struct {
 	Name             string
 	Experiments      []string
 	AppLabel         string
+	AppNs            string
 	SvcAccount       string
 	AppKind          string
 	ClientUUID       string
