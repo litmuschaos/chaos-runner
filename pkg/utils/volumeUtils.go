@@ -26,7 +26,7 @@ func (volumeOpts *VolumeOpts) VolumeOperations(experiment *ExperimentDetails) {
 
 // NewVolumeMounts initialize the volume builder
 func (volumeOpts *VolumeOpts) NewVolumeMounts() *VolumeOpts {
-	volumeMountsList := []corev1.VolumeMount{}
+	var volumeMountsList []corev1.VolumeMount
 	volumeOpts.VolumeMounts = volumeMountsList
 	return volumeOpts
 }
