@@ -165,6 +165,7 @@ func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients
 	}
 	// set the job cleanup policy
 	expDetails.Env["JOB_CLEANUP_POLICY"] = string(engineSpec.Spec.JobCleanUpPolicy)
+	expDetails.Env["LIB_IMAGE_PULL_POLICY"] = string(expDetails.ExpImagePullPolicy)
 	return nil
 }
 
