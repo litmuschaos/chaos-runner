@@ -9,8 +9,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SetValueFromChaosEngine set the value from the chaosengine
-func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetails, clients ClientSets) error {
+// SetInstanceAttributeValuesFromChaosEngine set the value from the chaosengine
+func (expDetails *ExperimentDetails) SetInstanceAttributeValuesFromChaosEngine(engine *EngineDetails, clients ClientSets) error {
 	chaosEngine, err := engine.GetChaosEngine(clients)
 	if err != nil {
 		return errors.Errorf("Unable to get chaosEngine in namespace: %s", engine.EngineNamespace)
@@ -21,9 +21,8 @@ func (expDetails *ExperimentDetails) SetValueFromChaosEngine(engine *EngineDetai
 		SetResourceRequirementsFromEngine(chaosEngine).
 		SetImagePullSecretsFromEngine(chaosEngine).
 		SetTolerationsFromEngine(chaosEngine).
-		SetExpImageFromEngine(chaosEngine)
-
-	engine.SetChaosUIDFromEngine(chaosEngine)
+		SetExpImageFromEngine(chaosEngine).
+		SetChaosUIDFromEngine(chaosEngine, engine)
 
 	return nil
 }
@@ -100,12 +99,13 @@ func (expDetails *ExperimentDetails) SetTolerationsFromEngine(engine *litmuschao
 }
 
 // SetChaosUIDFromEngine sets the chaosuid from the chaosengine
-func (engineDetails *EngineDetails) SetChaosUIDFromEngine(engine *litmuschaosv1alpha1.ChaosEngine) {
+func (expDetails *ExperimentDetails) SetChaosUIDFromEngine(engine *litmuschaosv1alpha1.ChaosEngine, engineDetails *EngineDetails) {
 	engineDetails.UID = string(engine.UID)
+	expDetails.ExpLabels["chaosUID"] = string(engine.UID)
 }
 
-// SetEnvFromEngine override the default envs with envs passed inside the chaosengine
-func (expDetails *ExperimentDetails) SetEnvFromEngine(engineName string, clients ClientSets) error {
+// SetOverrideEnvFromChaosEngine override the default envs with envs passed inside the chaosengine
+func (expDetails *ExperimentDetails) SetOverrideEnvFromChaosEngine(engineName string, clients ClientSets) error {
 
 	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
 	if err != nil {

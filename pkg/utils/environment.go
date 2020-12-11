@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"github.com/litmuschaos/chaos-runner/pkg/log"
-	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // GetOsEnv adds the ENV's to EngineDetails
@@ -29,12 +27,12 @@ func (engineDetails *EngineDetails) GetOsEnv() *EngineDetails {
 func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) error {
 	// Get the Default ENV's from ChaosExperiment
 	log.Info("Getting the ENV Variables")
-	if err := expDetails.SetDefaultEnv(clients); err != nil {
+	if err := expDetails.SetDefaultEnvFromChaosExperiment(clients); err != nil {
 		return err
 	}
 
 	// OverWriting the Defaults Varibles from the ChaosEngine ENV
-	if err := expDetails.SetEnvFromEngine(engineDetails.Name, clients); err != nil {
+	if err := expDetails.SetOverrideEnvFromChaosEngine(engineDetails.Name, clients); err != nil {
 		return err
 	}
 	// Store ENV in a map
@@ -50,25 +48,8 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		"ANNOTATION_KEY":    engineDetails.AnnotationKey,
 		"ANNOTATION_CHECK":  engineDetails.AnnotationCheck,
 	}
-	// Adding some addition ENV's from spec.AppInfo of ChaosEngine
+	// Adding some additional ENV's from spec.AppInfo of ChaosEngine// Adding some additional ENV's from spec.AppInfo of ChaosEngine
 	for key, value := range ENVList {
-		expDetails.Env[key] = value
-	}
-	return nil
-}
-
-// SetDefaultEnv sets the Env's in Experiment Structure
-func (expDetails *ExperimentDetails) SetDefaultEnv(clients ClientSets) error {
-	experimentEnv, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
-	if err != nil {
-		return errors.Errorf("Unable to get the %v ChaosExperiment in %v namespace, error: %v", expDetails.Name, expDetails.Namespace, err)
-	}
-
-	expDetails.Env = make(map[string]string)
-	envList := experimentEnv.Spec.Definition.ENVList
-	for i := range envList {
-		key := envList[i].Name
-		value := envList[i].Value
 		expDetails.Env[key] = value
 	}
 	return nil

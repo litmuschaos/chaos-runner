@@ -15,7 +15,7 @@ func (engineDetails *EngineDetails) CreateExperimentList() []ExperimentDetails {
 	return ExperimentDetailsList
 }
 
-// NewExperimentDetails create and initialize the experimentDetail
+// NewExperimentDetails create and initialize the experimentDetails
 func (engineDetails *EngineDetails) NewExperimentDetails(i int) ExperimentDetails {
 	var experimentDetails ExperimentDetails
 	experimentDetails.Env = make(map[string]string)
@@ -30,16 +30,30 @@ func (engineDetails *EngineDetails) NewExperimentDetails(i int) ExperimentDetail
 	return experimentDetails
 }
 
+// SetDefaultEnvFromChaosExperiment sets the Env's in Experiment Structure
+func (expDetails *ExperimentDetails) SetDefaultEnvFromChaosExperiment(clients ClientSets) error {
+	experimentEnv, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	if err != nil {
+		return errors.Errorf("Unable to get the %v ChaosExperiment in %v namespace, error: %v", expDetails.Name, expDetails.Namespace, err)
+	}
+
+	expDetails.Env = make(map[string]string)
+	envList := experimentEnv.Spec.Definition.ENVList
+	for i := range envList {
+		key := envList[i].Name
+		value := envList[i].Value
+		expDetails.Env[key] = value
+	}
+	return nil
+}
+
 // SetValueFromChaosResources fetches required values from various Chaos Resources
 func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *EngineDetails, clients ClientSets) error {
-	if err := expDetails.SetValueFromChaosEngine(engineDetails, clients); err != nil {
-		return errors.Errorf("Unable to set value from Chaos Engine, error: %v", err)
-	}
-	if err := expDetails.HandleChaosExperimentExistence(*engineDetails, clients); err != nil {
-		return errors.Errorf("Unable to get ChaosExperiment Name: %v, in namespace: %v, error: %v", expDetails.Name, expDetails.Namespace, err)
-	}
-	if err := expDetails.SetValueFromChaosExperiment(clients, engineDetails); err != nil {
+	if err := expDetails.SetDefaultAttributeValuesFromChaosExperiment(clients); err != nil {
 		return errors.Errorf("Unable to set value from Chaos Experiment, error: %v", err)
+	}
+	if err := expDetails.SetInstanceAttributeValuesFromChaosEngine(engineDetails, clients); err != nil {
+		return errors.Errorf("Unable to set value from Chaos Engine, error: %v", err)
 	}
 	return nil
 }
@@ -58,8 +72,8 @@ func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetail
 	return nil
 }
 
-//SetValueFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
-func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientSets, engine *EngineDetails) error {
+//SetDefaultAttributeValuesFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
+func (expDetails *ExperimentDetails) SetDefaultAttributeValuesFromChaosExperiment(clients ClientSets) error {
 
 	experimentSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
@@ -70,7 +84,7 @@ func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientS
 	expDetails.SetImage(experimentSpec).
 		SetImagePullPolicy(experimentSpec).
 		SetArgs(experimentSpec).
-		SetLabels(engine, experimentSpec).
+		SetLabels(experimentSpec).
 		SetSecurityContext(experimentSpec).
 		SetHostPID(experimentSpec)
 
@@ -78,9 +92,8 @@ func (expDetails *ExperimentDetails) SetValueFromChaosExperiment(clients ClientS
 }
 
 // SetLabels sets the Experiment Labels, in Experiment Structure
-func (expDetails *ExperimentDetails) SetLabels(engine *EngineDetails, experimentSpec *litmuschaosv1alpha1.ChaosExperiment) *ExperimentDetails {
+func (expDetails *ExperimentDetails) SetLabels(experimentSpec *litmuschaosv1alpha1.ChaosExperiment) *ExperimentDetails {
 	expDetails.ExpLabels = experimentSpec.Spec.Definition.Labels
-	expDetails.ExpLabels["chaosUID"] = engine.UID
 	return expDetails
 }
 

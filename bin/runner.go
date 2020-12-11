@@ -55,7 +55,10 @@ func main() {
 			experiment.ExperimentSkipped(utils.ExperimentNotFoundErrorReason, engineDetails, clients)
 			continue
 		}
-
+		// check the existance of chaosexperiment inside the cluster
+		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
+			log.Errorf("Unable to get ChaosExperiment Name: %v, in namespace: %v, error: %v", experiment.Name, experiment.Namespace, err)
+		}
 		// derive the envs from the chaos experiment and override their values from chaosengine if any
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
 			log.Errorf("Unable to patch ENV, error: %v", err)

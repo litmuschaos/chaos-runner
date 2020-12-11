@@ -34,7 +34,7 @@ func (expDetails *ExperimentDetails) PatchHostFileVolumes(clients ClientSets, en
 // SetHostFileVolumes sets the value of hostFileVolumes in Experiment Structure
 func (expDetails *ExperimentDetails) SetHostFileVolumes(clients ClientSets, engineDetails EngineDetails) error {
 
-	experimentHostFileVolumes, err := getExperimentHostFileVolumes(clients, expDetails)
+	experimentHostFileVolumes, err := getHostFileVolumesFromExperiment(clients, expDetails)
 	if err != nil {
 		return err
 	}
@@ -55,8 +55,8 @@ func (expDetails *ExperimentDetails) ValidateHostFileVolumes() error {
 	return nil
 }
 
-// getExperimentHostFileVolumes obtains the hostFileVolume details from experiment CR spec
-func getExperimentHostFileVolumes(clients ClientSets, expDetails *ExperimentDetails) ([]v1alpha1.HostFile, error) {
+// getHostFileVolumesFromExperiment obtains the hostFileVolume details from experiment CR spec
+func getHostFileVolumesFromExperiment(clients ClientSets, expDetails *ExperimentDetails) ([]v1alpha1.HostFile, error) {
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Errorf("Unable to get ChaosExperiment Resource, error: %v", err)

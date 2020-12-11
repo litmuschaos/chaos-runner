@@ -24,24 +24,24 @@ func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets, engineDeta
 	return nil
 }
 
-// ValidateSecret validates the secret in Chaos Namespace
-func (clientSets ClientSets) ValidateSecret(secretName, namespace string) error {
+// ValidatePresenceOfSecretResourceInCluster validates the secret in Chaos Namespace
+func (clientSets ClientSets) ValidatePresenceOfSecretResourceInCluster(secretName, namespace string) error {
 	_, err := clientSets.KubeClient.CoreV1().Secrets(namespace).Get(secretName, metav1.GetOptions{})
 	return err
 }
 
 // SetSecrets sets the value of secrets in Experiment Structure
 func (expDetails *ExperimentDetails) SetSecrets(clients ClientSets, engineDetails EngineDetails) error {
-	experimentSecrets, err := expDetails.getExperimentSecrets(clients)
+	experimentSecrets, err := expDetails.getSecretsFromChaosExperiment(clients)
 	if err != nil {
 		return err
 	}
-	engineSecrets, err := expDetails.getEngineSecrets(clients, engineDetails)
+	engineSecrets, err := expDetails.getSecretsFromChaosEngine(clients, engineDetails)
 	if err != nil {
 		return err
 	}
 	// Overriding the Secrets from the ChaosEngine
-	expDetails.OverridingSecrets(experimentSecrets, engineSecrets)
+	expDetails.getOverridingSecretsFromChaosEngine(experimentSecrets, engineSecrets)
 
 	return nil
 }
@@ -52,7 +52,7 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 		if v.Name == "" || v.MountPath == "" {
 			return errors.Errorf("Incomplete Information in Secret, will skip execution")
 		}
-		err := clients.ValidateSecret(v.Name, expDetails.Namespace)
+		err := clients.ValidatePresenceOfSecretResourceInCluster(v.Name, expDetails.Namespace)
 		if err != nil {
 			return errors.Errorf("Unable to get Secret with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		}
@@ -61,7 +61,7 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 	return nil
 }
 
-func (expDetails *ExperimentDetails) getExperimentSecrets(clients ClientSets) ([]v1alpha1.Secret, error) {
+func (expDetails *ExperimentDetails) getSecretsFromChaosExperiment(clients ClientSets) ([]v1alpha1.Secret, error) {
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Errorf("Unable to get ChaosExperiment Resource, error: %v", err)
@@ -71,7 +71,7 @@ func (expDetails *ExperimentDetails) getExperimentSecrets(clients ClientSets) ([
 	return experimentSecrets, nil
 }
 
-func (expDetails *ExperimentDetails) getEngineSecrets(clients ClientSets, engineDetails EngineDetails) ([]v1alpha1.Secret, error) {
+func (expDetails *ExperimentDetails) getSecretsFromChaosEngine(clients ClientSets, engineDetails EngineDetails) ([]v1alpha1.Secret, error) {
 	chaosEngineObj, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
 		return nil, errors.Errorf("Unable to get ChaosEngine Resource, error: %v", err)
@@ -86,8 +86,8 @@ func (expDetails *ExperimentDetails) getEngineSecrets(clients ClientSets, engine
 	return nil, errors.Errorf("No experiment found with %v name in ChaosEngine", expDetails.Name)
 }
 
-// OverridingSecrets will override secrets from ChaosEngine
-func (expDetails *ExperimentDetails) OverridingSecrets(experimentSecrets []v1alpha1.Secret, engineSecrets []v1alpha1.Secret) {
+// getOverridingSecretsFromChaosEngine will override secrets from ChaosEngine
+func (expDetails *ExperimentDetails) getOverridingSecretsFromChaosEngine(experimentSecrets []v1alpha1.Secret, engineSecrets []v1alpha1.Secret) {
 	for i := range engineSecrets {
 		flag := false
 		for j := range experimentSecrets {
