@@ -5,6 +5,7 @@ import (
 
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 	apiv1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientTypes "k8s.io/apimachinery/pkg/types"
 )
@@ -44,20 +45,22 @@ func (engineDetails EngineDetails) CreateEvents(eventAttributes *EventAttributes
 // else it will create a new event
 func (engineDetails EngineDetails) GenerateEvents(eventAttributes *EventAttributes, clients ClientSets) error {
 
-	var err error
-	event, _ := clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Get(eventAttributes.Reason+string(engineDetails.UID), metav1.GetOptions{})
-	if event.Name != eventAttributes.Name {
-
-		err = engineDetails.CreateEvents(eventAttributes, clients)
+	event, err := clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Get(eventAttributes.Name, metav1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			if err := engineDetails.CreateEvents(eventAttributes, clients); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	} else {
+		event.LastTimestamp = metav1.Time{Time: time.Now()}
+		event.Count = event.Count + 1
+		_, err = clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Update(event)
 		return err
 	}
-
-	event.LastTimestamp = metav1.Time{Time: time.Now()}
-	event.Count = event.Count + 1
-
-	_, err = clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Update(event)
-
-	return err
+	return nil
 }
 
 // ExperimentSkipped is an standard event spawned just after a ChaosExperiment is skipped

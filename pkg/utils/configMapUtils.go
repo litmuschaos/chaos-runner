@@ -13,51 +13,46 @@ func (expDetails *ExperimentDetails) PatchConfigMaps(clients ClientSets, engineD
 		return err
 	}
 
-	log.Info("Validating configmaps specified in the ChaosExperiment & ChaosEngine")
-
-	if err := expDetails.ValidateConfigMaps(clients); err != nil {
-		return err
+	if len(expDetails.ConfigMaps) != 0 {
+		log.Info("Validating configmaps specified in the ChaosExperiment & ChaosEngine")
+		if err := expDetails.ValidateConfigMaps(clients); err != nil {
+			return err
+		}
 	}
-
 	return nil
 }
 
-// ValidateConfigMap validates the configMap, before checking or creating them.
-func (clientSets ClientSets) ValidateConfigMap(configMapName string, experiment *ExperimentDetails) error {
-
-	_, err := clientSets.KubeClient.CoreV1().ConfigMaps(experiment.Namespace).Get(configMapName, metav1.GetOptions{})
-	if err != nil {
-		return err
-	}
-	return nil
-
+// ValidatePresenceOfConfigMapResourceInCluster validates the configMap, before checking or creating them.
+func (clientSets ClientSets) ValidatePresenceOfConfigMapResourceInCluster(configMapName, namespace string) error {
+	_, err := clientSets.KubeClient.CoreV1().ConfigMaps(namespace).Get(configMapName, metav1.GetOptions{})
+	return err
 }
 
 // SetConfigMaps sets the value of configMaps in Experiment Structure
 func (expDetails *ExperimentDetails) SetConfigMaps(clients ClientSets, engineDetails EngineDetails) error {
 
-	experimentConfigMaps, err := getExperimentConfigmaps(clients, expDetails)
+	experimentConfigMaps, err := expDetails.getConfigMapsFromChaosExperiment(clients)
 	if err != nil {
 		return err
 	}
-	engineConfigMaps, err := getEngineConfigmaps(clients, engineDetails, expDetails)
+	engineConfigMaps, err := expDetails.getConfigMapsFromChaosEngine(clients, engineDetails)
 	if err != nil {
 		return err
 	}
 	// Overriding the ConfigMaps from the ChaosEngine
-	OverridingConfigMaps(experimentConfigMaps, engineConfigMaps, expDetails)
+	expDetails.getOverridingConfigMapsFromChaosEngine(experimentConfigMaps, engineConfigMaps)
 
 	return nil
 }
 
-// ValidateConfigMaps checks for configMaps in the Application Namespace
+// ValidateConfigMaps checks for configMaps in the Chaos Namespace
 func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) error {
 
 	for _, v := range expDetails.ConfigMaps {
 		if v.Name == "" || v.MountPath == "" {
 			return errors.Errorf("Incomplete Information in ConfigMap, will skip execution")
 		}
-		err := clients.ValidateConfigMap(v.Name, expDetails)
+		err := clients.ValidatePresenceOfConfigMapResourceInCluster(v.Name, expDetails.Namespace)
 		if err != nil {
 			return errors.Errorf("Unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		}
@@ -66,17 +61,16 @@ func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) erro
 	return nil
 }
 
-func getExperimentConfigmaps(clients ClientSets, expDetails *ExperimentDetails) ([]v1alpha1.ConfigMap, error) {
+func (expDetails *ExperimentDetails) getConfigMapsFromChaosExperiment(clients ClientSets) ([]v1alpha1.ConfigMap, error) {
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Errorf("Unable to get ChaosExperiment Resource, error: %v", err)
 	}
 	experimentConfigMaps := chaosExperimentObj.Spec.Definition.ConfigMaps
-
 	return experimentConfigMaps, nil
 }
 
-func getEngineConfigmaps(clients ClientSets, engineDetails EngineDetails, expDetails *ExperimentDetails) ([]v1alpha1.ConfigMap, error) {
+func (expDetails *ExperimentDetails) getConfigMapsFromChaosEngine(clients ClientSets, engineDetails EngineDetails) ([]v1alpha1.ConfigMap, error) {
 
 	chaosEngineObj, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
@@ -92,8 +86,8 @@ func getEngineConfigmaps(clients ClientSets, engineDetails EngineDetails, expDet
 	return nil, errors.Errorf("No experiment found with %v name in ChaosEngine", expDetails.Name)
 }
 
-// OverridingConfigMaps will override configmaps from ChaosEngine
-func OverridingConfigMaps(experimentConfigMaps []v1alpha1.ConfigMap, engineConfigMaps []v1alpha1.ConfigMap, expDetails *ExperimentDetails) {
+// getOverridingConfigMapsFromChaosEngine will override configmaps from ChaosEngine
+func (expDetails *ExperimentDetails) getOverridingConfigMapsFromChaosEngine(experimentConfigMaps []v1alpha1.ConfigMap, engineConfigMaps []v1alpha1.ConfigMap) {
 
 	for i := range engineConfigMaps {
 		flag := false

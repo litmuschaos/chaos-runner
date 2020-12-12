@@ -15,49 +15,44 @@ func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets, engineDeta
 		return err
 	}
 
-	log.Infof("Validating secrets specified in the ChaosExperiment & ChaosEngine")
-	err = expDetails.ValidateSecrets(clients)
-	if err != nil {
-		return err
+	if len(expDetails.Secrets) != 0 {
+		log.Infof("Validating secrets specified in the ChaosExperiment & ChaosEngine")
+		if err = expDetails.ValidateSecrets(clients); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-// ValidateSecrets validates the secrets in application Namespace
-func (clientSets ClientSets) ValidateSecrets(secretName string, experiment *ExperimentDetails) error {
-
-	_, err := clientSets.KubeClient.CoreV1().Secrets(experiment.Namespace).Get(secretName, metav1.GetOptions{})
-	if err != nil {
-		return err
-	}
-	return nil
+// ValidatePresenceOfSecretResourceInCluster validates the secret in Chaos Namespace
+func (clientSets ClientSets) ValidatePresenceOfSecretResourceInCluster(secretName, namespace string) error {
+	_, err := clientSets.KubeClient.CoreV1().Secrets(namespace).Get(secretName, metav1.GetOptions{})
+	return err
 }
 
 // SetSecrets sets the value of secrets in Experiment Structure
 func (expDetails *ExperimentDetails) SetSecrets(clients ClientSets, engineDetails EngineDetails) error {
-	experimentSecrets, err := getExperimentSecrets(clients, expDetails)
+	experimentSecrets, err := expDetails.getSecretsFromChaosExperiment(clients)
 	if err != nil {
 		return err
 	}
-	engineSecrets, err := getEngineSecrets(clients, engineDetails, expDetails)
+	engineSecrets, err := expDetails.getSecretsFromChaosEngine(clients, engineDetails)
 	if err != nil {
 		return err
 	}
-
 	// Overriding the Secrets from the ChaosEngine
-	OverridingSecrets(experimentSecrets, engineSecrets, expDetails)
+	expDetails.getOverridingSecretsFromChaosEngine(experimentSecrets, engineSecrets)
 
 	return nil
 }
 
-// ValidateSecrets checks for secrets in the Applicaation Namespace
+// ValidateSecrets checks for secrets in the Chaos Namespace
 func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
-
 	for _, v := range expDetails.Secrets {
 		if v.Name == "" || v.MountPath == "" {
 			return errors.Errorf("Incomplete Information in Secret, will skip execution")
 		}
-		err := clients.ValidateSecrets(v.Name, expDetails)
+		err := clients.ValidatePresenceOfSecretResourceInCluster(v.Name, expDetails.Namespace)
 		if err != nil {
 			return errors.Errorf("Unable to get Secret with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		}
@@ -66,7 +61,7 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 	return nil
 }
 
-func getExperimentSecrets(clients ClientSets, expDetails *ExperimentDetails) ([]v1alpha1.Secret, error) {
+func (expDetails *ExperimentDetails) getSecretsFromChaosExperiment(clients ClientSets) ([]v1alpha1.Secret, error) {
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Errorf("Unable to get ChaosExperiment Resource, error: %v", err)
@@ -76,7 +71,7 @@ func getExperimentSecrets(clients ClientSets, expDetails *ExperimentDetails) ([]
 	return experimentSecrets, nil
 }
 
-func getEngineSecrets(clients ClientSets, engineDetails EngineDetails, expDetails *ExperimentDetails) ([]v1alpha1.Secret, error) {
+func (expDetails *ExperimentDetails) getSecretsFromChaosEngine(clients ClientSets, engineDetails EngineDetails) ([]v1alpha1.Secret, error) {
 	chaosEngineObj, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
 		return nil, errors.Errorf("Unable to get ChaosEngine Resource, error: %v", err)
@@ -91,9 +86,8 @@ func getEngineSecrets(clients ClientSets, engineDetails EngineDetails, expDetail
 	return nil, errors.Errorf("No experiment found with %v name in ChaosEngine", expDetails.Name)
 }
 
-// OverridingSecrets will override secrets from ChaosEngine
-func OverridingSecrets(experimentSecrets []v1alpha1.Secret, engineSecrets []v1alpha1.Secret, expDetails *ExperimentDetails) {
-
+// getOverridingSecretsFromChaosEngine will override secrets from ChaosEngine
+func (expDetails *ExperimentDetails) getOverridingSecretsFromChaosEngine(experimentSecrets []v1alpha1.Secret, engineSecrets []v1alpha1.Secret) {
 	for i := range engineSecrets {
 		flag := false
 		for j := range experimentSecrets {
