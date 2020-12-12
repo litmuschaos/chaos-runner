@@ -23,6 +23,16 @@ func (engineDetails *EngineDetails) GetOsEnv() *EngineDetails {
 	return engineDetails
 }
 
+// GetEngineUID get the chaosengine UID
+func (engineDetails *EngineDetails) GetEngineUID(clients ClientSets) *EngineDetails {
+	chaosEngine, err := engineDetails.GetChaosEngine(clients)
+	if err != nil {
+		log.Errorf("Unable to get chaosEngine in namespace: %s", engineDetails.EngineNamespace)
+	}
+	engineDetails.UID = string(chaosEngine.UID)
+	return engineDetails
+}
+
 //SetENV sets ENV values in experimentDetails struct.
 func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) error {
 	// Get the Default ENV's from ChaosExperiment
