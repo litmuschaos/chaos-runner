@@ -21,8 +21,7 @@ func (expDetails *ExperimentDetails) SetInstanceAttributeValuesFromChaosEngine(e
 		SetResourceRequirementsFromEngine(chaosEngine).
 		SetImagePullSecretsFromEngine(chaosEngine).
 		SetTolerationsFromEngine(chaosEngine).
-		SetExpImageFromEngine(chaosEngine).
-		SetChaosUIDFromEngine(chaosEngine, engine)
+		SetExpImageFromEngine(chaosEngine)
 
 	return nil
 }
@@ -96,12 +95,6 @@ func (expDetails *ExperimentDetails) SetTolerationsFromEngine(engine *litmuschao
 		}
 	}
 	return expDetails
-}
-
-// SetChaosUIDFromEngine sets the chaosuid from the chaosengine
-func (expDetails *ExperimentDetails) SetChaosUIDFromEngine(engine *litmuschaosv1alpha1.ChaosEngine, engineDetails *EngineDetails) {
-	engineDetails.UID = string(engine.UID)
-	expDetails.ExpLabels["chaosUID"] = string(engine.UID)
 }
 
 // SetOverrideEnvFromChaosEngine override the default envs with envs passed inside the chaosengine

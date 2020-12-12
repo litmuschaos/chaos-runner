@@ -49,7 +49,7 @@ func (expDetails *ExperimentDetails) SetDefaultEnvFromChaosExperiment(clients Cl
 
 // SetValueFromChaosResources fetches required values from various Chaos Resources
 func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *EngineDetails, clients ClientSets) error {
-	if err := expDetails.SetDefaultAttributeValuesFromChaosExperiment(clients); err != nil {
+	if err := expDetails.SetDefaultAttributeValuesFromChaosExperiment(clients, engineDetails); err != nil {
 		return errors.Errorf("Unable to set value from Chaos Experiment, error: %v", err)
 	}
 	if err := expDetails.SetInstanceAttributeValuesFromChaosEngine(engineDetails, clients); err != nil {
@@ -73,7 +73,7 @@ func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetail
 }
 
 //SetDefaultAttributeValuesFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
-func (expDetails *ExperimentDetails) SetDefaultAttributeValuesFromChaosExperiment(clients ClientSets) error {
+func (expDetails *ExperimentDetails) SetDefaultAttributeValuesFromChaosExperiment(clients ClientSets, engine *EngineDetails) error {
 
 	experimentSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
@@ -84,7 +84,7 @@ func (expDetails *ExperimentDetails) SetDefaultAttributeValuesFromChaosExperimen
 	expDetails.SetImage(experimentSpec).
 		SetImagePullPolicy(experimentSpec).
 		SetArgs(experimentSpec).
-		SetLabels(experimentSpec).
+		SetLabels(experimentSpec, engine).
 		SetSecurityContext(experimentSpec).
 		SetHostPID(experimentSpec)
 
@@ -92,8 +92,9 @@ func (expDetails *ExperimentDetails) SetDefaultAttributeValuesFromChaosExperimen
 }
 
 // SetLabels sets the Experiment Labels, in Experiment Structure
-func (expDetails *ExperimentDetails) SetLabels(experimentSpec *litmuschaosv1alpha1.ChaosExperiment) *ExperimentDetails {
+func (expDetails *ExperimentDetails) SetLabels(experimentSpec *litmuschaosv1alpha1.ChaosExperiment, engine *EngineDetails) *ExperimentDetails {
 	expDetails.ExpLabels = experimentSpec.Spec.Definition.Labels
+	expDetails.ExpLabels["chaosUID"] = engine.UID
 	return expDetails
 }
 

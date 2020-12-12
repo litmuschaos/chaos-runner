@@ -26,7 +26,7 @@ func main() {
 	}
 	// Fetching all the ENVs passed from the chaos-operator
 	// create and initialize the experimentList
-	experimentList := engineDetails.GetOsEnv().CreateExperimentList()
+	experimentList := engineDetails.GetOsEnv().GetEngineUID(clients).CreateExperimentList()
 	log.InfoWithValues("Experiments details are as follows", logrus.Fields{
 		"Experiments List":     engineDetails.Experiments,
 		"Engine Name":          engineDetails.Name,
@@ -48,16 +48,17 @@ func main() {
 		if engineDetails.ClientUUID != "" {
 			analytics.TriggerAnalytics(experiment.Name, engineDetails.ClientUUID)
 		}
-
+		// check the existance of chaosexperiment inside the cluster
+		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
+			log.Errorf("Unable to get ChaosExperiment Name: %v, in namespace: %v, error: %v", experiment.Name, experiment.Namespace, err)
+			experiment.ExperimentSkipped(utils.ExperimentNotFoundErrorReason, engineDetails, clients)
+			continue
+		}
 		// derive the required field from the experiment & engine and set into experimentDetails struct
 		if err := experiment.SetValueFromChaosResources(&engineDetails, clients); err != nil {
 			log.Errorf("Unable to set values from Chaos Resources, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentNotFoundErrorReason, engineDetails, clients)
 			continue
-		}
-		// check the existance of chaosexperiment inside the cluster
-		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
-			log.Errorf("Unable to get ChaosExperiment Name: %v, in namespace: %v, error: %v", experiment.Name, experiment.Namespace, err)
 		}
 		// derive the envs from the chaos experiment and override their values from chaosengine if any
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
