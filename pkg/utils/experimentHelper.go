@@ -3,6 +3,7 @@ package utils
 import (
 	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -18,7 +19,7 @@ func (engineDetails *EngineDetails) CreateExperimentList() []ExperimentDetails {
 // NewExperimentDetails create and initialize the experimentDetails
 func (engineDetails *EngineDetails) NewExperimentDetails(i int) ExperimentDetails {
 	var experimentDetails ExperimentDetails
-	experimentDetails.Env = make(map[string]string)
+	experimentDetails.envMap = make(map[string]v1.EnvVar)
 	experimentDetails.ExpLabels = make(map[string]string)
 
 	// set the initial values from the EngineDetails struct
@@ -37,13 +38,11 @@ func (expDetails *ExperimentDetails) SetDefaultEnvFromChaosExperiment(clients Cl
 		return errors.Errorf("Unable to get the %v ChaosExperiment in %v namespace, error: %v", expDetails.Name, expDetails.Namespace, err)
 	}
 
-	expDetails.Env = make(map[string]string)
 	envList := experimentEnv.Spec.Definition.ENVList
-	for i := range envList {
-		key := envList[i].Name
-		value := envList[i].Value
-		expDetails.Env[key] = value
+	for _, env := range envList {
+		expDetails.envMap[env.Name] = env
 	}
+
 	return nil
 }
 

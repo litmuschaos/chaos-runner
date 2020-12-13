@@ -4,6 +4,8 @@ import (
 	"os"
 	"strings"
 
+	v1 "k8s.io/api/core/v1"
+
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 )
 
@@ -60,7 +62,10 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 	}
 	// Adding some additional ENV's from spec.AppInfo of ChaosEngine// Adding some additional ENV's from spec.AppInfo of ChaosEngine
 	for key, value := range ENVList {
-		expDetails.Env[key] = value
+		expDetails.envMap[key] = v1.EnvVar{
+			Name:  key,
+			Value: value,
+		}
 	}
 	return nil
 }

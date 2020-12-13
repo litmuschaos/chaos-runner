@@ -4,9 +4,11 @@ import (
 	"reflect"
 	"strconv"
 
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
 // SetInstanceAttributeValuesFromChaosEngine set the value from the chaosengine
@@ -105,32 +107,41 @@ func (expDetails *ExperimentDetails) SetOverrideEnvFromChaosEngine(engineName st
 		return errors.Errorf("Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
 	}
 	expList := engineSpec.Spec.Experiments
-	for i := range expList {
-		if expList[i].Name == expDetails.Name {
-			keyValue := expList[i].Spec.Components.ENV
-			for j := range keyValue {
-				expDetails.Env[keyValue[j].Name] = keyValue[j].Value
+	for _, exp := range expList {
+		if exp.Name == expDetails.Name {
+			envVars := exp.Spec.Components.ENV
+			for _, env := range envVars {
+				expDetails.envMap[env.Name] = env
 				// extracting and storing instance id explicitly
 				// as we need this variable while generating chaos-result name
-				if keyValue[j].Name == "INSTANCE_ID" {
-					expDetails.InstanceID = keyValue[j].Value
+				if env.Name == "INSTANCE_ID" {
+					expDetails.InstanceID = env.Value
 				}
 			}
-			statusCheckTimeout := expList[i].Spec.Components.StatusCheckTimeouts
-			if !reflect.DeepEqual(statusCheckTimeout, litmuschaosv1alpha1.StatusCheckTimeout{}) {
 
-				expDetails.Env["STATUS_CHECK_DELAY"] = strconv.Itoa(statusCheckTimeout.Delay)
-				expDetails.Env["STATUS_CHECK_TIMEOUT"] = strconv.Itoa(statusCheckTimeout.Timeout)
-				expDetails.StatusCheckTimeout = statusCheckTimeout.Timeout
-			} else {
-				expDetails.Env["STATUS_CHECK_DELAY"] = "2"
-				expDetails.Env["STATUS_CHECK_TIMEOUT"] = "180"
-				expDetails.StatusCheckTimeout = 180
+			delay, timeout := 2, 180
+			if sc := exp.Spec.Components.StatusCheckTimeouts; !reflect.DeepEqual(sc, litmuschaosv1alpha1.StatusCheckTimeout{}) {
+				delay = sc.Delay
+				timeout = sc.Timeout
 			}
 
+			expDetails.envMap["STATUS_CHECK_DELAY"] = v1.EnvVar{
+				Name:  "STATUS_CHECK_DELAY",
+				Value: strconv.Itoa(delay),
+			}
+			expDetails.envMap["STATUS_CHECK_TIMEOUT"] = v1.EnvVar{
+				Name:  "STATUS_CHECK_TIMEOUT",
+				Value: strconv.Itoa(timeout),
+			}
+			expDetails.StatusCheckTimeout = timeout
 		}
 	}
+
 	// set the job cleanup policy
-	expDetails.Env["JOB_CLEANUP_POLICY"] = string(engineSpec.Spec.JobCleanUpPolicy)
+	expDetails.envMap["JOB_CLEANUP_POLICY"] = v1.EnvVar{
+		Name:  "JOB_CLEANUP_POLICY",
+		Value: string(engineSpec.Spec.JobCleanUpPolicy),
+	}
+
 	return nil
 }

@@ -59,9 +59,9 @@ func GetResultName(engineName, experimentName, instanceID string) string {
 }
 
 // GetChaosResult returns ChaosResult object.
-func (experimentDetails *ExperimentDetails) GetChaosResult(engineDetails EngineDetails, clients ClientSets) (*v1alpha1.ChaosResult, error) {
+func (expDetails *ExperimentDetails) GetChaosResult(engineDetails EngineDetails, clients ClientSets) (*v1alpha1.ChaosResult, error) {
 
-	resultName := GetResultName(engineDetails.Name, experimentDetails.Name, experimentDetails.InstanceID)
+	resultName := GetResultName(engineDetails.Name, expDetails.Name, expDetails.InstanceID)
 	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.EngineNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Errorf("Unable to get ChaosResult Name: %v in namespace: %v, error: %v", resultName, engineDetails.EngineNamespace, err)
