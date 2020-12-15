@@ -233,16 +233,21 @@ var _ = Describe("BDD on chaos-runner", func() {
 			Expect(string(runner.Status.Phase)).To(Or(Equal("Running"), Equal("Succeeded")))
 		})
 	})
-	var jobName string
+
 	When("Check if the Job is spawned by chaos-runner", func() {
 		It("Should create a Pod delete Job", func() {
+
+			var jobName string
 			jobs, _ := k8sClientSet.BatchV1().Jobs("litmus").List(metav1.ListOptions{})
-			for i := range jobs.Items {
-				matched, _ := regexp.MatchString("pod-delete-.*", jobs.Items[i].Name)
-				if matched == true {
-					jobName = jobs.Items[i].Name
+
+			for _, job := range jobs.Items {
+				matched, _ := regexp.MatchString("pod-delete-.*", job.Name)
+				if matched {
+					jobName = job.Name
+					break
 				}
 			}
+
 			Expect(jobName).To(
 				Not(BeEmpty()),
 				"Unable to get the job, might be something wrong with chaos-runner",

@@ -35,7 +35,7 @@ type EngineDetails struct {
 // ExperimentDetails is for collecting all the experiment-related details
 type ExperimentDetails struct {
 	Name               string
-	Env                map[string]string
+	envMap             map[string]corev1.EnvVar
 	ExpLabels          map[string]string
 	ExpImage           string
 	ExpImagePullPolicy corev1.PullPolicy

@@ -6,11 +6,10 @@ import (
 	"github.com/pkg/errors"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 
 	"github.com/litmuschaos/elves/kubernetes/container"
 	"github.com/litmuschaos/elves/kubernetes/job"
-	jobspec "github.com/litmuschaos/elves/kubernetes/jobspec"
+	"github.com/litmuschaos/elves/kubernetes/jobspec"
 	"github.com/litmuschaos/elves/kubernetes/podtemplatespec"
 )
 
@@ -26,14 +25,14 @@ type Builder struct {
 }
 
 // BuildContainerSpec builds a Container with following properties
-func buildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) (*container.Builder, error) {
+func buildContainerSpec(experiment *ExperimentDetails, envVars []corev1.EnvVar) (*container.Builder, error) {
 	containerSpec := container.NewBuilder().
 		WithName(experiment.JobName).
 		WithImage(experiment.ExpImage).
 		WithCommandNew([]string{"/bin/bash"}).
 		WithArgumentsNew(experiment.ExpArgs).
 		WithImagePullPolicy(experiment.ExpImagePullPolicy).
-		WithEnvsNew(envVar)
+		WithEnvsNew(envVars)
 
 	if !reflect.DeepEqual(experiment.SecurityContext.ContainerSecurityContext, corev1.SecurityContext{}) {
 
@@ -61,33 +60,33 @@ func buildContainerSpec(experiment *ExperimentDetails, envVar []corev1.EnvVar) (
 
 }
 
-func getEnvFromMap(env map[string]string) []corev1.EnvVar {
-	var envVar []corev1.EnvVar
-	for k, v := range env {
-		var perEnv corev1.EnvVar
-		perEnv.Name = k
-		perEnv.Value = v
-		envVar = append(envVar, perEnv)
+func getEnvFromMap(m map[string]corev1.EnvVar) []corev1.EnvVar {
+	var envVars []corev1.EnvVar
+	for _, v := range m {
+		envVars = append(envVars, v)
 	}
-	// Getting experiment pod name from downward API
-	experimentPodName := GetValueFromDownwardAPI("v1", "metadata.name")
 
-	// Add downward api for getting pod name
-	var downwardEnv corev1.EnvVar
-	downwardEnv.Name = "POD_NAME"
-	downwardEnv.ValueFrom = &experimentPodName
-	envVar = append(envVar, downwardEnv)
+	// Add env for getting pod name using downward API
+	envVars = append(envVars, corev1.EnvVar{
+		Name: "POD_NAME",
+		ValueFrom: &corev1.EnvVarSource{
+			FieldRef: &corev1.ObjectFieldSelector{
+				APIVersion: "v1",
+				FieldPath:  "metadata.name",
+			},
+		},
+	})
 
-	return envVar
+	return envVars
 }
 
 // BuildingAndLaunchJob builds Job, and then launch it.
 func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) error {
 	experiment.VolumeOpts.VolumeOperations(experiment)
 
-	envVar := getEnvFromMap(experiment.Env)
+	envVars := getEnvFromMap(experiment.envMap)
 	//Build Container to add in the Pod
-	containerForPod, err := buildContainerSpec(experiment, envVar)
+	containerForPod, err := buildContainerSpec(experiment, envVars)
 	if err != nil {
 		return errors.Errorf("Unable to build Container for Chaos Experiment, error: %v", err)
 	}
@@ -103,7 +102,7 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 		return errors.Errorf("Unable to build JobSpec for Chaos Experiment, error: %v", err)
 	}
 	//Build Job
-	job, err := experiment.buildJob(pod, jobspec)
+	job, err := experiment.buildJob(jobspec)
 	if err != nil {
 		return errors.Errorf("Unable to Build ChaosExperiment Job, error: %v", err)
 	}
@@ -115,8 +114,8 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 }
 
 // launchJob spawn a kubernetes Job using the job Object received.
-func (experiment *ExperimentDetails) launchJob(job *batchv1.Job, clients ClientSets) error {
-	_, err := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Create(job)
+func (expDetails *ExperimentDetails) launchJob(job *batchv1.Job, clients ClientSets) error {
+	_, err := clients.KubeClient.BatchV1().Jobs(expDetails.Namespace).Create(job)
 	return err
 }
 
@@ -172,24 +171,13 @@ func buildJobSpec(pod *podtemplatespec.Builder) (*jobspec.Builder, error) {
 }
 
 // BuildJob will build the JobObject for creation
-func (experiment *ExperimentDetails) buildJob(pod *podtemplatespec.Builder, jobspec *jobspec.Builder) (*batchv1.Job, error) {
+func (expDetails *ExperimentDetails) buildJob(jobspec *jobspec.Builder) (*batchv1.Job, error) {
 	jobObj, err := job.NewBuilder().
 		WithJobSpecBuilder(jobspec).
-		WithAnnotations(experiment.Annotations).
-		WithName(experiment.JobName).
-		WithNamespace(experiment.Namespace).
-		WithLabels(experiment.ExpLabels).
+		WithAnnotations(expDetails.Annotations).
+		WithName(expDetails.JobName).
+		WithNamespace(expDetails.Namespace).
+		WithLabels(expDetails.ExpLabels).
 		Build()
 	return jobObj, err
-}
-
-// GetValueFromDownwardAPI returns the value from downwardApi
-func GetValueFromDownwardAPI(apiVersion string, fieldPath string) v1.EnvVarSource {
-	downwardENV := v1.EnvVarSource{
-		FieldRef: &v1.ObjectFieldSelector{
-			APIVersion: apiVersion,
-			FieldPath:  fieldPath,
-		},
-	}
-	return downwardENV
 }
