@@ -41,6 +41,9 @@ func (volumeOpts *VolumeOpts) NewVolumeBuilder() *VolumeOpts {
 // BuildVolumeMountsForConfigMaps builds VolumeMounts for ConfigMaps
 func (volumeOpts *VolumeOpts) BuildVolumeMountsForConfigMaps(configMaps []v1alpha1.ConfigMap) *VolumeOpts {
 	var volumeMountsList []corev1.VolumeMount
+	if configMaps == nil {
+		return volumeOpts
+	}
 	for _, v := range configMaps {
 		var volumeMount corev1.VolumeMount
 		volumeMount.Name = v.Name
@@ -55,6 +58,9 @@ func (volumeOpts *VolumeOpts) BuildVolumeMountsForConfigMaps(configMaps []v1alph
 // BuildVolumeMountsForSecrets builds VolumeMounts for Secrets
 func (volumeOpts *VolumeOpts) BuildVolumeMountsForSecrets(secrets []v1alpha1.Secret) *VolumeOpts {
 	var volumeMountsList []corev1.VolumeMount
+	if secrets == nil {
+		return volumeOpts
+	}
 	for _, v := range secrets {
 		var volumeMount corev1.VolumeMount
 		volumeMount.Name = v.Name
@@ -68,7 +74,9 @@ func (volumeOpts *VolumeOpts) BuildVolumeMountsForSecrets(secrets []v1alpha1.Sec
 // BuildVolumeMountsForHostFileVolumes  builds VolumeMounts for HostFileVolume
 func (volumeOpts *VolumeOpts) BuildVolumeMountsForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) *VolumeOpts {
 	var volumeMountsList []corev1.VolumeMount
-
+	if hostFileVolumes == nil {
+		return volumeOpts
+	}
 	for _, v := range hostFileVolumes {
 		var volumeMount corev1.VolumeMount
 		volumeMount.Name = v.Name
@@ -83,7 +91,7 @@ func (volumeOpts *VolumeOpts) BuildVolumeMountsForHostFileVolumes(hostFileVolume
 func (volumeOpts *VolumeOpts) BuildVolumeBuilderForConfigMaps(configMaps []v1alpha1.ConfigMap) *VolumeOpts {
 	volumeBuilderList := []*volume.Builder{}
 	if configMaps == nil {
-		return nil
+		return volumeOpts
 	}
 	for _, v := range configMaps {
 		volumeBuilder := volume.NewBuilder().
@@ -98,7 +106,7 @@ func (volumeOpts *VolumeOpts) BuildVolumeBuilderForConfigMaps(configMaps []v1alp
 func (volumeOpts *VolumeOpts) BuildVolumeBuilderForSecrets(secrets []v1alpha1.Secret) *VolumeOpts {
 	volumeBuilderList := []*volume.Builder{}
 	if secrets == nil {
-		return nil
+		return volumeOpts
 	}
 	for _, v := range secrets {
 		volumeBuilder := volume.NewBuilder().
@@ -113,7 +121,7 @@ func (volumeOpts *VolumeOpts) BuildVolumeBuilderForSecrets(secrets []v1alpha1.Se
 func (volumeOpts *VolumeOpts) BuildVolumeBuilderForHostFileVolumes(hostFileVolumes []v1alpha1.HostFile) *VolumeOpts {
 	volumeBuilderList := []*volume.Builder{}
 	if hostFileVolumes == nil {
-		return nil
+		return volumeOpts
 	}
 
 	for _, v := range hostFileVolumes {
