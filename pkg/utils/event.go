@@ -57,6 +57,7 @@ func (engineDetails EngineDetails) GenerateEvents(eventAttributes *EventAttribut
 	} else {
 		event.LastTimestamp = metav1.Time{Time: time.Now()}
 		event.Count = event.Count + 1
+		event.Message = eventAttributes.Message
 		_, err = clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Update(event)
 		return err
 	}
