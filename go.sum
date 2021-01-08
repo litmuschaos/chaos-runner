@@ -452,6 +452,8 @@ github.com/litmuschaos/chaos-operator v0.0.0-20201005102541-be0f9bb115ce h1:pB9b
 github.com/litmuschaos/chaos-operator v0.0.0-20201005102541-be0f9bb115ce/go.mod h1:J4NuADZBn6nUkhKNux3p3ghSUfxoB+itsO+rD8tOCNk=
 github.com/litmuschaos/chaos-operator v0.0.0-20201210172142-57fddee6734e h1:ubIPSIWT4le0PZZ4MrALdgkiIVmGrz0YzYeWWvSC2a4=
 github.com/litmuschaos/chaos-operator v0.0.0-20201210172142-57fddee6734e/go.mod h1:Z2GpYjqXwFd8bx+kv58YEQFxynx1v9PMGCGTQFRVnFQ=
+github.com/litmuschaos/chaos-operator v0.0.0-20210108143008-188ee98457c8 h1:aEpAyowpCm1lgMoWLcO4Han0yp2WvLuRzKHVKxjvJr0=
+github.com/litmuschaos/chaos-operator v0.0.0-20210108143008-188ee98457c8/go.mod h1:Z2GpYjqXwFd8bx+kv58YEQFxynx1v9PMGCGTQFRVnFQ=
 github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b h1:eYT2CfSf7FZu01DAgxgjrlSc7dX5IlwPRqD44RH47Kk=
 github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b/go.mod h1:DsbHGNUq/78NZozWVVI9Q6eBei4I+JjlkkD5aibJ3MQ=
 github.com/litmuschaos/elves v0.0.0-20201107015738-552d74669e3c h1:+hlppERdpCxMRW0QC+ckbz/mS6wH+fNVMlDMFGClk7U=
