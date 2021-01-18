@@ -125,11 +125,15 @@ func (volumeOpts *VolumeOpts) BuildVolumeBuilderForHostFileVolumes(hostFileVolum
 	}
 
 	for _, v := range hostFileVolumes {
+		fileType := &hostpathTypeFile
+		if v.Type != "" {
+			fileType = &v.Type
+		}
 		volumeBuilder := volume.NewBuilder().
 			WithName(v.Name).
 			WithHostPathAndType(
 				v.NodePath,
-				&hostpathTypeFile,
+				fileType,
 			)
 		volumeBuilderList = append(volumeBuilderList, volumeBuilder)
 	}
