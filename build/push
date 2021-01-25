@@ -19,11 +19,12 @@ function push_release_image(){
     # When github is tagged with a release, then CircleCI will 
     # set the release tag in env CIRCLE_TAG
     echo "Pushing ${REPONAME}/${IMGNAME}:${CIRCLE_TAG} ..."
-    docker buildx build --file build/Dockerfile --push --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:${CIRCLE_TAG} .    
+    docker buildx build --file build/Dockerfile --progress plane --push --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:${CIRCLE_TAG} .    
     echo "Pushing ${REPONAME}/${IMGNAME}:ci ..."
-    docker buildx build --file build/Dockerfile --push --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:ci .    
+    docker buildx build --file build/Dockerfile --progress plane --push --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:ci .
+    echo "Pushing ${REPONAME}/${IMGNAME}:latest ..."
+    docker buildx build --file build/Dockerfile --progress plane --push --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:latest .    
   fi;
-
 }
 
 
