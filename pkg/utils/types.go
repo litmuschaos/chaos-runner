@@ -68,8 +68,8 @@ type VolumeOpts struct {
 
 // ClientSets is a collection of clientSets needed
 type ClientSets struct {
-	KubeClient   *kubernetes.Clientset
-	LitmusClient *clientV1alpha1.Clientset
+	KubeClient   kubernetes.Interface
+	LitmusClient clientV1alpha1.Interface
 }
 
 // EventAttributes is for collecting all the events-related details

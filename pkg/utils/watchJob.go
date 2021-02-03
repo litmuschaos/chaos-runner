@@ -69,7 +69,7 @@ func (expDetails *ExperimentDetails) GetChaosResult(engineDetails EngineDetails,
 	return expResult, nil
 }
 
-// UpdateEngineWithResult will update hte resutl in chaosEngine
+// UpdateEngineWithResult will update the result in chaosEngine
 // And will delete job if jobCleanUpPolicy is set to "delete"
 func (engineDetails EngineDetails) UpdateEngineWithResult(experiment *ExperimentDetails, clients ClientSets) error {
 	// Getting the Experiment Result Name
