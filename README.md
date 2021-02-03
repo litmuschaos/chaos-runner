@@ -2,6 +2,8 @@
 [![BCH compliance](https://bettercodehub.com/edge/badge/litmuschaos/chaos-runner?branch=master)](https://bettercodehub.com/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/litmuschaos/chaos-runner.svg)](https://hub.docker.com/r/litmuschaos/chaos-runner)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner?ref=badge_shield)
+[![codecov](https://codecov.io/gh/litmuschaos/chaos-runner/branch/master/graph/badge.svg)](https://codecov.io/gh/litmuschaos/chaos-runner)
+
 
 # CHAOS RUNNER
 
