@@ -25,7 +25,7 @@ func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod
 			} else if len(chaosPodList.Items) > 1 {
 				// Cases where experiment pod is rescheduled by the job controller due to
 				// issues while the older pod is still not cleaned-up
-				return errors.Errorf("Multiple pods exist with same jobname label")
+				return errors.Errorf("Multiple pods exist with same job-name label")
 			}
 			return nil
 		})
