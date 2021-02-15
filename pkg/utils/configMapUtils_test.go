@@ -96,7 +96,8 @@ func TestPatchConfigMaps(t *testing.T) {
 						},
 					},
 				},
-			}, chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			},
+			 chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
@@ -129,7 +130,7 @@ func TestPatchConfigMaps(t *testing.T) {
 			}
 			err = experiment.PatchConfigMaps(client, engineDetails)
 			if !mock.isErr && err != nil {
-				t.Fatalf("fail to patch the engine status, err: %v", err)
+				t.Fatalf("fail to patch the configmap, err: %v", err)
 			}
 			if mock.isErr && err == nil {
 				t.Fatalf("Test %q failed: expected error not to be nil", name)
