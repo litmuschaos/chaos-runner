@@ -48,7 +48,7 @@ github.com/jpillora/go-ogle-analytics
 github.com/json-iterator/go
 # github.com/konsorten/go-windows-terminal-sequences v1.0.3
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/litmuschaos/chaos-operator v0.0.0-20210118063240-0630179cdf6b
+# github.com/litmuschaos/chaos-operator v0.0.0-20210215073000-ac7adcd1b872
 github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned
 github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/fake
