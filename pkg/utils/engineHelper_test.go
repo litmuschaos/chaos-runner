@@ -15,14 +15,16 @@ import (
 
 func TestSetExpImageFromEngine(t *testing.T) {
 	fakeNewExperimentImage := "fake-new-experiment-image"
-	var experiment ExperimentDetails
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine *litmuschaosv1alpha1.ChaosEngine
@@ -71,14 +73,16 @@ func TestSetExpImageFromEngine(t *testing.T) {
 
 func TestSetExpAnnotationFromEngine(t *testing.T) {
 	fakeNewExperimentAnnotation := map[string]string{"my-fake-key": "myfake-val"}
-	var experiment ExperimentDetails
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine *litmuschaosv1alpha1.ChaosEngine
@@ -111,7 +115,7 @@ func TestSetExpAnnotationFromEngine(t *testing.T) {
 
 			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
 			if err != nil {
-				t.Fatalf("engine not created, err: %v", err)
+				t.Fatalf("engine not created for %v test, err: %v", err, name)
 			}
 			expDetails := experiment.SetExpAnnotationFromEngine(mock.chaosengine)
 
@@ -126,14 +130,16 @@ func TestSetExpAnnotationFromEngine(t *testing.T) {
 }
 
 func TestSetResourceRequirementsFromEngine(t *testing.T) {
-	var experiment ExperimentDetails
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine *litmuschaosv1alpha1.ChaosEngine
@@ -175,7 +181,7 @@ func TestSetResourceRequirementsFromEngine(t *testing.T) {
 
 			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
 			if err != nil {
-				t.Fatalf("engine not created, err: %v", err)
+				t.Fatalf("engine not created for %v test, err: %v", err, name)
 			}
 			expDetails := experiment.SetResourceRequirementsFromEngine(mock.chaosengine)
 			actualResult := expDetails.ResourceRequirements
@@ -188,14 +194,16 @@ func TestSetResourceRequirementsFromEngine(t *testing.T) {
 }
 func TestSetImagePullSecretsFromEngine(t *testing.T) {
 	fakeImagePullSecret := "Fake Image Pull Secret"
-	var experiment ExperimentDetails
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine *litmuschaosv1alpha1.ChaosEngine
@@ -232,7 +240,7 @@ func TestSetImagePullSecretsFromEngine(t *testing.T) {
 
 			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
 			if err != nil {
-				t.Fatalf("engine not created, err: %v", err)
+				t.Fatalf("engine not created for %v test, err: %v", err, name)
 			}
 			expDetails := experiment.SetImagePullSecretsFromEngine(mock.chaosengine)
 			actualResult := expDetails.ImagePullSecrets[0].Name
@@ -246,15 +254,17 @@ func TestSetImagePullSecretsFromEngine(t *testing.T) {
 
 func TestSetExpNodeSelectorFromEngine(t *testing.T) {
 	fakeNodeSelector := make(map[string]string)
-	var experiment ExperimentDetails
 	fakeNodeSelector["my-fake-key"] = "my-fake-val"
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine *litmuschaosv1alpha1.ChaosEngine
@@ -286,7 +296,7 @@ func TestSetExpNodeSelectorFromEngine(t *testing.T) {
 			client := CreateFakeClient(t)
 			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
 			if err != nil {
-				t.Fatalf("engine not created, err: %v", err)
+				t.Fatalf("engine not created for %v test, err: %v", err, name)
 			}
 			expDetails := experiment.SetExpNodeSelectorFromEngine(mock.chaosengine)
 			actualResult := expDetails.NodeSelector
@@ -299,14 +309,16 @@ func TestSetExpNodeSelectorFromEngine(t *testing.T) {
 }
 
 func TestSetTolerationsFromEngine(t *testing.T) {
-	var experiment ExperimentDetails
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine *litmuschaosv1alpha1.ChaosEngine
@@ -345,7 +357,7 @@ func TestSetTolerationsFromEngine(t *testing.T) {
 
 			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
 			if err != nil {
-				t.Fatalf("engine not created, err: %v", err)
+				t.Fatalf("engine not created for %v test, err: %v", err, name)
 			}
 			expDetails := experiment.SetTolerationsFromEngine(mock.chaosengine)
 			actualResult := expDetails.Tolerations

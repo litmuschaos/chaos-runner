@@ -13,14 +13,16 @@ import (
 func TestPatchHostFileVolumes(t *testing.T) {
 	fakehostpathname := "fake-hostpath-name"
 	fakeExperimentImage := "fake-experiment-image"
-	var experiment ExperimentDetails
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine     *litmuschaosv1alpha1.ChaosEngine
@@ -78,7 +80,7 @@ func TestPatchHostFileVolumes(t *testing.T) {
 
 			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
 			if err != nil {
-				t.Fatalf("experiment not created, err: %v", err)
+				t.Fatalf("experiment not created for %v test, err: %v", err, name)
 			}
 			err = experiment.PatchHostFileVolumes(client, engineDetails)
 			if !mock.isErr && err != nil {

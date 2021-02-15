@@ -13,14 +13,16 @@ import (
 func TestPatchConfigMaps(t *testing.T) {
 	fakeConfigMap := "fake configmap"
 	fakeExperimentImage := "fake-experiment-image"
-	var experiment ExperimentDetails
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine     *litmuschaosv1alpha1.ChaosEngine
@@ -97,7 +99,7 @@ func TestPatchConfigMaps(t *testing.T) {
 					},
 				},
 			},
-			 chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
@@ -118,15 +120,15 @@ func TestPatchConfigMaps(t *testing.T) {
 
 			_, err := client.KubeClient.CoreV1().ConfigMaps(experiment.Namespace).Create(&mock.configmap)
 			if err != nil {
-				t.Fatalf("configmap not created, err: %v", err)
+				t.Fatalf("configmap not created for %v test, err: %v", err, name)
 			}
 			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
 			if err != nil {
-				t.Fatalf("experiment not created, err: %v", err)
+				t.Fatalf("experiment not created for %v test, err: %v", err, name)
 			}
 			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
 			if err != nil {
-				t.Fatalf("engine not created, err: %v", err)
+				t.Fatalf("engine not created for %v test, err: %v", err, name)
 			}
 			err = experiment.PatchConfigMaps(client, engineDetails)
 			if !mock.isErr && err != nil {

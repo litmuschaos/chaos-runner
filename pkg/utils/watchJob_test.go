@@ -20,12 +20,14 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 	fakeAppLabel := "Fake Label"
 	fakeAppKind := "Fake Kind"
 	fakeAnnotationCheck := "Fake Annotation Check"
-	var expStatus ExperimentStatus
-	expStatus.Name = "Fake exp Name"
-	expStatus.Status = v1alpha1.ExperimentStatusRunning
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	expStatus := ExperimentStatus{
+		Name:   "Fake exp Name",
+		Status: v1alpha1.ExperimentStatusRunning,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine *litmuschaosv1alpha1.ChaosEngine
@@ -86,12 +88,12 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 
 			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
 			if err != nil {
-				t.Fatalf("engine not created, err: %v", err)
+				t.Fatalf("engine not created for %v test, err: %v", err, name)
 			}
 
 			err = expStatus.PatchChaosEngineStatus(engineDetails, client)
 			if !mock.isErr && err != nil {
-				t.Fatalf("fail to patch the engine status, err: %v", err)
+				t.Fatalf("fail to patch the engine status for %v test, err: %v", err, name)
 			}
 			if mock.isErr && err == nil {
 				t.Fatalf("Test %q failed: expected error not to be nil", name)
@@ -122,17 +124,20 @@ func TestUpdateEngineWithResult(t *testing.T) {
 	fakeAppLabel := "Fake Label"
 	fakeAppKind := "Fake Kind"
 	fakeAnnotationCheck := "Fake Annotation Check"
-	var expStatus ExperimentStatus
-	expStatus.Name = "Fake-Exp-Name"
-	expStatus.Status = v1alpha1.ExperimentStatusRunning
-	var experiment ExperimentDetails
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake-Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	expStatus := ExperimentStatus{
+		Name:   "Fake-Exp-Name",
+		Status: v1alpha1.ExperimentStatusRunning,
+	}
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine *litmuschaosv1alpha1.ChaosEngine
@@ -248,26 +253,26 @@ func TestUpdateEngineWithResult(t *testing.T) {
 
 			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
 			if err != nil {
-				t.Fatalf("engine not created, err: %v", err)
+				t.Fatalf("engine not created for %v test, err: %v", err, name)
 			}
 			_, err = client.KubeClient.CoreV1().Pods(engineDetails.EngineNamespace).Create(&mock.chaospod)
 			if err != nil {
-				fmt.Printf("fail to create chaos pod, err: %v", err)
+				fmt.Printf("fail to create chaos pod for %v test, err: %v", err, name)
 			}
 			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosResults(mock.chaosresult.Namespace).Create(mock.chaosresult)
 			if err != nil {
-				t.Fatalf("chaosresult not created, err: %v", err)
+				t.Fatalf("chaosresult not created for %v test, err: %v", err, name)
 			}
 			err = engineDetails.UpdateEngineWithResult(&experiment, client)
 			if !mock.isErr && err != nil {
-				t.Fatalf("fail to update chaos engine with result, err: %v", err)
+				t.Fatalf("fail to update chaos engine with result for %v test, err: %v", err, name)
 			}
 			if mock.isErr && err == nil {
 				t.Fatalf("Test %q failed: expected error not to be nil", name)
 			}
 			chaosEngine, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Get(engineDetails.Name, metav1.GetOptions{})
 			if err != nil {
-				t.Fatalf("fail to get chaos engine after status patch, err: %v", err)
+				t.Fatalf("fail to get chaosengine after status patch for %v test, err: %v", err, name)
 			}
 			if !mock.isErr {
 				actualResult := chaosEngine.Status.Experiments[0].Status
@@ -286,14 +291,16 @@ func TestUpdateEngineWithResult(t *testing.T) {
 
 func TestDeleteJobAccordingToJobCleanUpPolicy(t *testing.T) {
 	fakeServiceAcc := "Fake Service Account"
-	var experiment ExperimentDetails
-	experiment.Name = "Fake-Exp-Name"
-	experiment.Namespace = "Fake NameSpace"
-	experiment.JobName = "fake-job-name"
-	experiment.StatusCheckTimeout = 10
-	var engineDetails EngineDetails
-	engineDetails.Name = "Fake-Engine"
-	engineDetails.EngineNamespace = "Fake NameSpace"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+	}
+	engineDetails := EngineDetails{
+		Name:            "Fake Engine",
+		EngineNamespace: "Fake NameSpace",
+	}
 
 	tests := map[string]struct {
 		chaosengine *litmuschaosv1alpha1.ChaosEngine
@@ -382,23 +389,23 @@ func TestDeleteJobAccordingToJobCleanUpPolicy(t *testing.T) {
 
 			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
 			if err != nil {
-				t.Fatalf("engine not created, err: %v", err)
+				t.Fatalf("engine not created for %v test, err: %v", err, name)
 			}
 			_, err = client.KubeClient.BatchV1().Jobs(engineDetails.EngineNamespace).Create(&mock.expjob)
 			if err != nil {
-				t.Fatalf("fail to create exp job pod, err: %v", err)
+				t.Fatalf("fail to create exp job pod for %v test, err: %v", err, name)
 			}
 			cleanupPolicy, err := engineDetails.DeleteJobAccordingToJobCleanUpPolicy(&experiment, client)
 			if err != nil {
-				t.Fatalf("fail to create exp job, err: %v", err)
+				t.Fatalf("fail to create exp job for %v test, err: %v", err, name)
 			}
 
 			jobList, err := client.KubeClient.BatchV1().Jobs(engineDetails.EngineNamespace).List(metav1.ListOptions{LabelSelector: "job-name=" + experiment.JobName})
 			if !mock.isErr && err != nil && len(jobList.Items) != 0 {
-				t.Fatalf("experiment job is not deleted when the job cleanup policy is %v , err: %v", err, cleanupPolicy)
+				t.Fatalf("[%v] test failed experiment job is not deleted when the job cleanup policy is %v , err: %v", name, err, cleanupPolicy)
 			}
 			if mock.isErr && err != nil && len(jobList.Items) == 0 {
-				t.Fatalf("experiment job is not retained when the job cleanup policy is %v , err: %v", err, cleanupPolicy)
+				t.Fatalf("[%v] test failed experiment job is not retained when the job cleanup policy is %v , err: %v", name, err, cleanupPolicy)
 			}
 		})
 	}
