@@ -42,10 +42,9 @@ func TestCreateExperimentList(t *testing.T) {
 
 			for i := range ExpList {
 				if ExpList[i].Name != moke.engineDetails.Experiments[i] && !moke.isErr {
-					t.Fatalf("The expected experiment name is %v but got %v", ExpList[i].Name, moke.engineDetails.Experiments[i])
+					t.Fatalf("The expected experimentName is %v but got %v", ExpList[i].Name, moke.engineDetails.Experiments[i])
 				}
 			}
 		})
 	}
-
 }
