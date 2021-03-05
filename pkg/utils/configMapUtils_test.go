@@ -150,6 +150,102 @@ func TestPatchConfigMaps(t *testing.T) {
 	}
 }
 
+func TestValidateConfigMaps(t *testing.T) {
+	fakeConfigMapName := "fake configmap"
+	fakeNamespace := "fake-namespace"
+
+	tests := map[string]struct {
+		configmap  v1.ConfigMap
+		experiment ExperimentDetails
+		isErr      bool
+	}{
+		"Test Positive-1": {
+			configmap: v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      fakeConfigMapName,
+					Namespace: fakeNamespace,
+				},
+				Data: map[string]string{
+					"my-fake-key": "myfake-val",
+				}},
+			experiment: ExperimentDetails{
+				Name:               "Fake-Exp-Name",
+				Namespace:          fakeNamespace,
+				JobName:            "fake-job-name",
+				StatusCheckTimeout: 10,
+				ConfigMaps: []litmuschaosv1alpha1.ConfigMap{
+					{
+						Name:      fakeConfigMapName,
+						MountPath: "fake mountpath",
+					},
+				},
+			},
+			isErr: false,
+		},
+		"Test Negative-1": {
+			configmap: v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      fakeConfigMapName,
+					Namespace: fakeNamespace,
+				},
+				Data: map[string]string{
+					"my-fake-key": "myfake-val",
+				}},
+			experiment: ExperimentDetails{
+				Name:               "Fake-Exp-Name",
+				Namespace:          fakeNamespace,
+				JobName:            "fake-job-name",
+				StatusCheckTimeout: 10,
+				ConfigMaps: []litmuschaosv1alpha1.ConfigMap{
+					{
+						Name: fakeConfigMapName,
+					},
+				},
+			},
+			isErr: true,
+		},
+		"Test Negative-2": {
+			configmap: v1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      fakeConfigMapName,
+					Namespace: fakeNamespace,
+				},
+				Data: map[string]string{
+					"my-fake-key": "myfake-val",
+				}},
+			experiment: ExperimentDetails{
+				Name:               "Fake-Exp-Name",
+				Namespace:          fakeNamespace,
+				JobName:            "fake-job-name",
+				StatusCheckTimeout: 10,
+				ConfigMaps: []litmuschaosv1alpha1.ConfigMap{
+					{
+						MountPath: "fake mountpath",
+					},
+				},
+			},
+			isErr: true,
+		},
+	}
+
+	for name, mock := range tests {
+		t.Run(name, func(t *testing.T) {
+			client := CreateFakeClient(t)
+
+			_, err := client.KubeClient.CoreV1().ConfigMaps(fakeNamespace).Create(&mock.configmap)
+			if err != nil {
+				t.Fatalf("configmap not created for %v test, err: %v", name, err)
+			}
+
+			err = mock.experiment.ValidateConfigMaps(client)
+			if (!mock.isErr && err != nil) || (mock.isErr && err == nil) {
+				t.Fatalf("Validation for presence of configmap failed for %v test, err: %v", name, err)
+			}
+
+		})
+	}
+}
+
 func TestValidatePresenceOfConfigMapResourceInCluster(t *testing.T) {
 	fakeConfigMap := "fake configmap"
 	fakeExperimentImage := "fake-experiment-image"
@@ -323,6 +419,13 @@ func TestSetConfigMaps(t *testing.T) {
 				t.Fatalf("%v Test Failed, err: %v", name, err)
 			}
 
+			actualResult := experiment.ConfigMaps
+			expectedResult := mock.chaosengine.Spec.Experiments[0].Spec.Components.ConfigMaps
+
+			if !reflect.DeepEqual(expectedResult, actualResult) && !mock.isErr {
+				t.Fatalf("%v Test Failed the expectedResult '%v' is not equal to actual result '%v'", name, expectedResult, actualResult)
+			}
+
 		})
 	}
 }
@@ -443,7 +546,7 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 }
 
 func TestGetOverridingConfigMapsFromChaosEngine(t *testing.T) {
-	fakeExperimentImage := "fake-experiment-image"
+	fakeConfigMapName := "fake-configmap"
 	tests := map[string]struct {
 		experiment       ExperimentDetails
 		engineConfigMaps []v1alpha1.ConfigMap
@@ -460,10 +563,23 @@ func TestGetOverridingConfigMapsFromChaosEngine(t *testing.T) {
 
 			engineConfigMaps: []v1alpha1.ConfigMap{
 				{
-					Name:      fakeExperimentImage,
+					Name:      fakeConfigMapName,
 					MountPath: "fake-mount-path",
 				},
 			},
+			isErr: false,
+		},
+		"Test Negative-1": {
+
+			experiment: ExperimentDetails{
+				Name:               "Fake-Exp-Name",
+				Namespace:          "Fake NameSpace",
+				JobName:            "fake-job-name",
+				StatusCheckTimeout: 10,
+			},
+
+			engineConfigMaps: []v1alpha1.ConfigMap{},
+			isErr:            false,
 		},
 	}
 
@@ -479,8 +595,9 @@ func TestGetOverridingConfigMapsFromChaosEngine(t *testing.T) {
 			expectedResult := mock.experiment.ConfigMaps
 			if !reflect.DeepEqual(expectedResult, actualResult) {
 				t.Fatalf("Test %q failed: expected configmap is %v but the we get is '%v' from the experiment", name, expectedResult, actualResult)
+			} else if !reflect.DeepEqual(expectedResult, actualResult) && mock.isErr {
+				t.Fatalf("Test %q failed: expected configmap is %v and the we get is '%v' from the experiment", name, expectedResult, actualResult)
 			}
-
 		})
 	}
 }
