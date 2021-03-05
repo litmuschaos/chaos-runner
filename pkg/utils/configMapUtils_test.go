@@ -443,38 +443,40 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 }
 
 func TestGetOverridingConfigMapsFromChaosEngine(t *testing.T) {
-	experimentConfigMaps := []v1alpha1.ConfigMap{}
 	fakeExperimentImage := "fake-experiment-image"
-	engineConfigMaps := []v1alpha1.ConfigMap{
-		{
-			Name:      fakeExperimentImage,
-			MountPath: "fake-mount-path",
+	tests := map[string]struct {
+		experiment       ExperimentDetails
+		engineConfigMaps []v1alpha1.ConfigMap
+		isErr            bool
+	}{
+		"Test Positive-1": {
+
+			experiment: ExperimentDetails{
+				Name:               "Fake-Exp-Name",
+				Namespace:          "Fake NameSpace",
+				JobName:            "fake-job-name",
+				StatusCheckTimeout: 10,
+			},
+
+			engineConfigMaps: []v1alpha1.ConfigMap{
+				{
+					Name:      fakeExperimentImage,
+					MountPath: "fake-mount-path",
+				},
+			},
 		},
 	}
-	experiment := ExperimentDetails{
-		Name:               "Fake-Exp-Name",
-		Namespace:          "Fake NameSpace",
-		JobName:            "fake-job-name",
-		StatusCheckTimeout: 10,
-	}
 
-	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
-	}{
-		"Test Positive-1": {},
-	}
-
-	for name := range tests {
+	for name, mock := range tests {
 		t.Run(name, func(t *testing.T) {
 			var err error
-			experiment.getOverridingConfigMapsFromChaosEngine(experimentConfigMaps, engineConfigMaps)
+			mock.experiment.getOverridingConfigMapsFromChaosEngine(mock.engineConfigMaps, mock.engineConfigMaps)
 			if err != nil {
 				t.Fatalf("%v Test Failed, err: %v", name, err)
 			}
 
-			actualResult := engineConfigMaps
-			expectedResult := experiment.ConfigMaps
+			actualResult := mock.engineConfigMaps
+			expectedResult := mock.experiment.ConfigMaps
 			if !reflect.DeepEqual(expectedResult, actualResult) {
 				t.Fatalf("Test %q failed: expected configmap is %v but the we get is '%v' from the experiment", name, expectedResult, actualResult)
 			}
