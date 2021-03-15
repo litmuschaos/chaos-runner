@@ -111,12 +111,7 @@ func TestSetExpAnnotationFromEngine(t *testing.T) {
 
 	for name, mock := range tests {
 		t.Run(name, func(t *testing.T) {
-			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
-			if err != nil {
-				t.Fatalf("engine not created for %v test, err: %v", name, err)
-			}
 			expDetails := experiment.SetExpAnnotationFromEngine(mock.chaosengine)
 
 			actualResult := expDetails.Annotations
@@ -177,12 +172,7 @@ func TestSetResourceRequirementsFromEngine(t *testing.T) {
 
 	for name, mock := range tests {
 		t.Run(name, func(t *testing.T) {
-			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
-			if err != nil {
-				t.Fatalf("engine not created for %v test, err: %v", name, err)
-			}
 			expDetails := experiment.SetResourceRequirementsFromEngine(mock.chaosengine)
 			actualResult := expDetails.ResourceRequirements
 			expectedResult := mock.chaosengine.Spec.Experiments[0].Spec.Components.Resources
@@ -236,12 +226,7 @@ func TestSetImagePullSecretsFromEngine(t *testing.T) {
 
 	for name, mock := range tests {
 		t.Run(name, func(t *testing.T) {
-			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
-			if err != nil {
-				t.Fatalf("engine not created for %v test, err: %v", name, err)
-			}
 			expDetails := experiment.SetImagePullSecretsFromEngine(mock.chaosengine)
 			actualResult := expDetails.ImagePullSecrets[0].Name
 			expectedResult := fakeImagePullSecret
@@ -293,11 +278,6 @@ func TestSetExpNodeSelectorFromEngine(t *testing.T) {
 
 	for name, mock := range tests {
 		t.Run(name, func(t *testing.T) {
-			client := CreateFakeClient(t)
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
-			if err != nil {
-				t.Fatalf("engine not created for %v test, err: %v", name, err)
-			}
 			expDetails := experiment.SetExpNodeSelectorFromEngine(mock.chaosengine)
 			actualResult := expDetails.NodeSelector
 			expectedResult := fakeNodeSelector
@@ -353,12 +333,7 @@ func TestSetTolerationsFromEngine(t *testing.T) {
 
 	for name, mock := range tests {
 		t.Run(name, func(t *testing.T) {
-			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
-			if err != nil {
-				t.Fatalf("engine not created for %v test, err: %v", name, err)
-			}
 			expDetails := experiment.SetTolerationsFromEngine(mock.chaosengine)
 			actualResult := expDetails.Tolerations
 			expectedResult := mock.chaosengine.Spec.Experiments[0].Spec.Components.Tolerations

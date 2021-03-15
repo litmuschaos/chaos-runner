@@ -248,7 +248,6 @@ func TestValidateConfigMaps(t *testing.T) {
 
 func TestValidatePresenceOfConfigMapResourceInCluster(t *testing.T) {
 	fakeConfigMap := "fake configmap"
-	fakeExperimentImage := "fake-experiment-image"
 	experiment := ExperimentDetails{
 		Name:               "Fake-Exp-Name",
 		Namespace:          "Fake NameSpace",
@@ -257,9 +256,8 @@ func TestValidatePresenceOfConfigMapResourceInCluster(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		configmap       v1.ConfigMap
-		isErr           bool
+		configmap v1.ConfigMap
+		isErr     bool
 	}{
 		"Test Positive-1": {
 			configmap: v1.ConfigMap{
@@ -273,17 +271,6 @@ func TestValidatePresenceOfConfigMapResourceInCluster(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      experiment.Name,
-					Namespace: experiment.Namespace,
-				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
-						Image: fakeExperimentImage,
-					},
-				},
-			},
 			isErr: true,
 		},
 	}
@@ -296,12 +283,6 @@ func TestValidatePresenceOfConfigMapResourceInCluster(t *testing.T) {
 				_, err := client.KubeClient.CoreV1().ConfigMaps(experiment.Namespace).Create(&mock.configmap)
 				if err != nil {
 					t.Fatalf("configmap not created for %v test, err: %v", name, err)
-				}
-			}
-			if mock.isErr {
-				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
-				if err != nil {
-					t.Fatalf("experiment not created for %v test, err: %v", name, err)
 				}
 			}
 
@@ -431,7 +412,6 @@ func TestSetConfigMaps(t *testing.T) {
 }
 
 func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
-	fakeConfigMap := "fake configmap"
 	fakeExperimentImage := "fake-experiment-image"
 	experiment := ExperimentDetails{
 		Name:               "Fake-Exp-Name",
@@ -439,40 +419,12 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
 	}
-	engineDetails := EngineDetails{
-		Name:            "Fake Engine",
-		EngineNamespace: "Fake NameSpace",
-	}
 
 	tests := map[string]struct {
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      engineDetails.Name,
-					Namespace: engineDetails.EngineNamespace,
-				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
-						{
-							Name: experiment.Name,
-							Spec: v1alpha1.ExperimentAttributes{
-								Components: v1alpha1.ExperimentComponents{
-									ConfigMaps: []v1alpha1.ConfigMap{
-										{
-											Name:      fakeConfigMap,
-											MountPath: "fake mountpath",
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
 			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
@@ -487,29 +439,6 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      engineDetails.Name,
-					Namespace: engineDetails.EngineNamespace,
-				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
-						{
-							Name: experiment.Name,
-							Spec: v1alpha1.ExperimentAttributes{
-								Components: v1alpha1.ExperimentComponents{
-									ConfigMaps: []v1alpha1.ConfigMap{
-										{
-											Name:      fakeConfigMap,
-											MountPath: "fake mountpath",
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
 			isErr: true,
 		},
 	}
@@ -523,11 +452,6 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 				if err != nil {
 					t.Fatalf("experiment not created for %v test, err: %v", name, err)
 				}
-			}
-
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
-			if err != nil {
-				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
 
 			experimentConfigMaps, err := experiment.getConfigMapsFromChaosExperiment(client)

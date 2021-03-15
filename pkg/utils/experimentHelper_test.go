@@ -61,7 +61,6 @@ func TestNewExperimentDetails(t *testing.T) {
 
 	tests := map[string]struct {
 		engineDetails EngineDetails
-		isErr         bool
 	}{
 		"Test Positive-1": {
 			engineDetails: EngineDetails{
@@ -99,7 +98,6 @@ func TestSetDefaultEnvFromChaosExperiment(t *testing.T) {
 
 	tests := map[string]struct {
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 		isErr           bool
 	}{
 		"Test Positive-1": {
@@ -194,7 +192,6 @@ func TestSetDefaultAttributeValuesFromChaosExperiment(t *testing.T) {
 
 	tests := map[string]struct {
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 		isErr           bool
 	}{
 		"Test Positive-1": {
@@ -440,7 +437,6 @@ func TestSetLabels(t *testing.T) {
 
 	tests := map[string]struct {
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
 			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
@@ -496,7 +492,6 @@ func TestSetImage(t *testing.T) {
 
 	tests := map[string]struct {
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
 			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
@@ -550,7 +545,6 @@ func TestSetImagePullPolicy(t *testing.T) {
 
 	tests := map[string]struct {
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
 			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
@@ -605,7 +599,6 @@ func TestSetArgs(t *testing.T) {
 
 	tests := map[string]struct {
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
 			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
@@ -661,7 +654,6 @@ func TestSetSecurityContext(t *testing.T) {
 
 	tests := map[string]struct {
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
 			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
@@ -719,7 +711,6 @@ func TestHostPID(t *testing.T) {
 
 	tests := map[string]struct {
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
 			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{

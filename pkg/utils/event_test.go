@@ -9,9 +9,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientTypes "k8s.io/apimachinery/pkg/types"
-
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
 func TestCreateEvents(t *testing.T) {
@@ -27,44 +24,15 @@ func TestCreateEvents(t *testing.T) {
 		Type:    "fake-type",
 		Name:    "fake-name",
 	}
-
-	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
-		isErr       bool
-	}{
-		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      engineDetails.Name,
-					Namespace: engineDetails.EngineNamespace,
-				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
-						{
-							Name: engineDetails.Name,
-							Spec: v1alpha1.ExperimentAttributes{
-								Components: v1alpha1.ExperimentComponents{},
-							},
-						},
-					},
-				},
-			},
-		},
+	client := CreateFakeClient(t)
+	err := engineDetails.CreateEvents(&eventAtr, client)
+	if err != nil {
+		t.Fatalf("TestCreateEvents failed unable to get event, err: %v", err)
 	}
 
-	for name := range tests {
-		t.Run(name, func(t *testing.T) {
-			client := CreateFakeClient(t)
-			err := engineDetails.CreateEvents(&eventAtr, client)
-			if err != nil {
-				t.Fatalf("%v failed unable to get event, err: %v", name, err)
-			}
-			events, err := client.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).List(metav1.ListOptions{})
-			if err != nil || len(events.Items) == 0 {
-				t.Fatalf("%v failed to get events, err: %v", name, err)
-			}
-
-		})
+	events, err := client.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).List(metav1.ListOptions{})
+	if err != nil || len(events.Items) == 0 {
+		t.Fatalf("TestCreateEvents failed to get events, err: %v", err)
 	}
 }
 
@@ -83,27 +51,10 @@ func TestGenerateEvents(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
-		events      v1.Event
-		isErr       bool
+		events v1.Event
+		isErr  bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      engineDetails.Name,
-					Namespace: engineDetails.EngineNamespace,
-				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
-						{
-							Name: engineDetails.Name,
-							Spec: v1alpha1.ExperimentAttributes{
-								Components: v1alpha1.ExperimentComponents{},
-							},
-						},
-					},
-				},
-			},
 			isErr: false,
 		},
 		"Test Positive-2": {
@@ -150,7 +101,6 @@ func TestGenerateEvents(t *testing.T) {
 			if err != nil || len(events.Items) == 0 {
 				t.Fatalf("%v fail to get events, err: %v", name, err)
 			}
-
 		})
 	}
 }
@@ -176,27 +126,10 @@ func TestExperimentSkipped(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
-		events      v1.Event
-		isErr       bool
+		events v1.Event
+		isErr  bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      engineDetails.Name,
-					Namespace: engineDetails.EngineNamespace,
-				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
-						{
-							Name: engineDetails.Name,
-							Spec: v1alpha1.ExperimentAttributes{
-								Components: v1alpha1.ExperimentComponents{},
-							},
-						},
-					},
-				},
-			},
 			isErr: false,
 		},
 		"Test Positive-2": {
@@ -270,27 +203,10 @@ func TestExperimentDependencyCheck(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
-		events      v1.Event
-		isErr       bool
+		events v1.Event
+		isErr  bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      engineDetails.Name,
-					Namespace: engineDetails.EngineNamespace,
-				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
-						{
-							Name: engineDetails.Name,
-							Spec: v1alpha1.ExperimentAttributes{
-								Components: v1alpha1.ExperimentComponents{},
-							},
-						},
-					},
-				},
-			},
 			isErr: false,
 		},
 		"Test Positive-2": {
@@ -364,27 +280,10 @@ func TestExperimentJobCreate(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
-		events      v1.Event
-		isErr       bool
+		events v1.Event
+		isErr  bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      engineDetails.Name,
-					Namespace: engineDetails.EngineNamespace,
-				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
-						{
-							Name: engineDetails.Name,
-							Spec: v1alpha1.ExperimentAttributes{
-								Components: v1alpha1.ExperimentComponents{},
-							},
-						},
-					},
-				},
-			},
 			isErr: false,
 		},
 		"Test Positive-2": {
@@ -459,27 +358,10 @@ func TestExperimentJobCleanUp(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
-		events      v1.Event
-		isErr       bool
+		events v1.Event
+		isErr  bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      engineDetails.Name,
-					Namespace: engineDetails.EngineNamespace,
-				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
-						{
-							Name: engineDetails.Name,
-							Spec: v1alpha1.ExperimentAttributes{
-								Components: v1alpha1.ExperimentComponents{},
-							},
-						},
-					},
-				},
-			},
 			isErr: false,
 		},
 		"Test Positive-2": {
