@@ -48,6 +48,7 @@ func (expDetails *ExperimentDetails) SetDefaultEnvFromChaosExperiment(clients Cl
 
 // SetValueFromChaosResources fetches required values from various Chaos Resources
 func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *EngineDetails, clients ClientSets) error {
+
 	if err := expDetails.SetDefaultAttributeValuesFromChaosExperiment(clients, engineDetails); err != nil {
 		return errors.Errorf("Unable to set value from Chaos Experiment, error: %v", err)
 	}
