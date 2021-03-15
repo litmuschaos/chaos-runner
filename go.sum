@@ -452,8 +452,8 @@ github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de/go.mod h1:zAbeS9
 github.com/lithammer/dedent v1.1.0/go.mod h1:jrXYCQtgg0nJiN+StA2KgR7w6CiQNv9Fd/Z9BP0jIOc=
 github.com/litmuschaos/chaos-operator v0.0.0-20201005102541-be0f9bb115ce h1:pB9ba9swCB3tUYngzP3RMlLPuEAGYxmfTL/G0e3zs04=
 github.com/litmuschaos/chaos-operator v0.0.0-20201005102541-be0f9bb115ce/go.mod h1:J4NuADZBn6nUkhKNux3p3ghSUfxoB+itsO+rD8tOCNk=
-github.com/litmuschaos/chaos-operator v0.0.0-20210215073000-ac7adcd1b872 h1:EpXKurP+GWGZ8w2pTzsQjG+Fmy2tMwM/UyNfBIsGgmE=
-github.com/litmuschaos/chaos-operator v0.0.0-20210215073000-ac7adcd1b872/go.mod h1:Z2GpYjqXwFd8bx+kv58YEQFxynx1v9PMGCGTQFRVnFQ=
+github.com/litmuschaos/chaos-operator v0.0.0-20210312154932-c2d4b2ff7b19 h1:k3qTu0NiBd5PMwA9O0EZ6J0vZjeFS6UqP4IZ1ISd0vQ=
+github.com/litmuschaos/chaos-operator v0.0.0-20210312154932-c2d4b2ff7b19/go.mod h1:Z2GpYjqXwFd8bx+kv58YEQFxynx1v9PMGCGTQFRVnFQ=
 github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b h1:eYT2CfSf7FZu01DAgxgjrlSc7dX5IlwPRqD44RH47Kk=
 github.com/litmuschaos/elves v0.0.0-20200930100735-5efe29d0ad5b/go.mod h1:DsbHGNUq/78NZozWVVI9Q6eBei4I+JjlkkD5aibJ3MQ=
 github.com/litmuschaos/elves v0.0.0-20201107015738-552d74669e3c h1:+hlppERdpCxMRW0QC+ckbz/mS6wH+fNVMlDMFGClk7U=

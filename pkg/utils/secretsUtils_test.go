@@ -11,8 +11,8 @@ import (
 	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
-func TestPatchConfigMaps(t *testing.T) {
-	fakeConfigMap := "fake configmap"
+func TestPatchSecrets(t *testing.T) {
+	fakeSecretName := "fake secret"
 	fakeExperimentImage := "fake-experiment-image"
 	experiment := ExperimentDetails{
 		Name:               "Fake-Exp-Name",
@@ -28,7 +28,7 @@ func TestPatchConfigMaps(t *testing.T) {
 	tests := map[string]struct {
 		chaosengine     *litmuschaosv1alpha1.ChaosEngine
 		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		configmap       v1.ConfigMap
+		secret          v1.Secret
 		isErr           bool
 	}{
 		"Test Positive-1": {
@@ -43,9 +43,9 @@ func TestPatchConfigMaps(t *testing.T) {
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
 								Components: v1alpha1.ExperimentComponents{
-									ConfigMaps: []v1alpha1.ConfigMap{
+									Secrets: []v1alpha1.Secret{
 										{
-											Name:      fakeConfigMap,
+											Name:      fakeSecretName,
 											MountPath: "fake mountpath",
 										},
 									},
@@ -66,12 +66,12 @@ func TestPatchConfigMaps(t *testing.T) {
 					},
 				},
 			},
-			configmap: v1.ConfigMap{
+			secret: v1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      fakeConfigMap,
+					Name:      fakeSecretName,
 					Namespace: experiment.Namespace,
 				},
-				Data: map[string]string{
+				StringData: map[string]string{
 					"my-fake-key": "myfake-val",
 				}},
 			isErr: false,
@@ -88,9 +88,9 @@ func TestPatchConfigMaps(t *testing.T) {
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
 								Components: v1alpha1.ExperimentComponents{
-									ConfigMaps: []v1alpha1.ConfigMap{
+									Secrets: []v1alpha1.Secret{
 										{
-											Name:      fakeConfigMap,
+											Name:      fakeSecretName,
 											MountPath: "fake mountpath",
 										},
 									},
@@ -119,9 +119,9 @@ func TestPatchConfigMaps(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.KubeClient.CoreV1().ConfigMaps(experiment.Namespace).Create(&mock.configmap)
+			_, err := client.KubeClient.CoreV1().Secrets(experiment.Namespace).Create(&mock.secret)
 			if err != nil {
-				t.Fatalf("configmap not created for %v test, err: %v", name, err)
+				t.Fatalf("secret not created for %v test, err: %v", name, err)
 			}
 			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
 			if err != nil {
@@ -131,172 +131,27 @@ func TestPatchConfigMaps(t *testing.T) {
 			if err != nil {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
-			err = experiment.PatchConfigMaps(client, engineDetails)
+			err = experiment.PatchSecrets(client, engineDetails)
 			if !mock.isErr && err != nil {
-				t.Fatalf("fail to patch the configmap, err: %v", err)
+				t.Fatalf("fail to patch the secret, err: %v", err)
 			}
 			if mock.isErr && err == nil {
 				t.Fatalf("Test %q failed: expected error not to be nil", name)
 			}
 
 			if !mock.isErr {
-				actualResult := len(experiment.ConfigMaps)
+				actualResult := len(experiment.Secrets)
 				expectedResult := 1
 				if actualResult != expectedResult {
-					t.Fatalf("Test %q failed: expected length of configmap is %v but the actual lenght is %v", name, expectedResult, actualResult)
+					t.Fatalf("Test %q failed: expected length of secret is %v but the actual lenght is %v", name, expectedResult, actualResult)
 				}
 			}
 		})
 	}
 }
 
-func TestValidateConfigMaps(t *testing.T) {
-	fakeConfigMapName := "fake configmap"
-	fakeNamespace := "fake-namespace"
-
-	tests := map[string]struct {
-		configmap  v1.ConfigMap
-		experiment ExperimentDetails
-		isErr      bool
-	}{
-		"Test Positive-1": {
-			configmap: v1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      fakeConfigMapName,
-					Namespace: fakeNamespace,
-				},
-				Data: map[string]string{
-					"my-fake-key": "myfake-val",
-				}},
-			experiment: ExperimentDetails{
-				Name:               "Fake-Exp-Name",
-				Namespace:          fakeNamespace,
-				JobName:            "fake-job-name",
-				StatusCheckTimeout: 10,
-				ConfigMaps: []litmuschaosv1alpha1.ConfigMap{
-					{
-						Name:      fakeConfigMapName,
-						MountPath: "fake mountpath",
-					},
-				},
-			},
-			isErr: false,
-		},
-		"Test Negative-1": {
-			configmap: v1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      fakeConfigMapName,
-					Namespace: fakeNamespace,
-				},
-				Data: map[string]string{
-					"my-fake-key": "myfake-val",
-				}},
-			experiment: ExperimentDetails{
-				Name:               "Fake-Exp-Name",
-				Namespace:          fakeNamespace,
-				JobName:            "fake-job-name",
-				StatusCheckTimeout: 10,
-				ConfigMaps: []litmuschaosv1alpha1.ConfigMap{
-					{
-						Name: fakeConfigMapName,
-					},
-				},
-			},
-			isErr: true,
-		},
-		"Test Negative-2": {
-			configmap: v1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      fakeConfigMapName,
-					Namespace: fakeNamespace,
-				},
-				Data: map[string]string{
-					"my-fake-key": "myfake-val",
-				}},
-			experiment: ExperimentDetails{
-				Name:               "Fake-Exp-Name",
-				Namespace:          fakeNamespace,
-				JobName:            "fake-job-name",
-				StatusCheckTimeout: 10,
-				ConfigMaps: []litmuschaosv1alpha1.ConfigMap{
-					{
-						MountPath: "fake mountpath",
-					},
-				},
-			},
-			isErr: true,
-		},
-	}
-
-	for name, mock := range tests {
-		t.Run(name, func(t *testing.T) {
-			client := CreateFakeClient(t)
-
-			_, err := client.KubeClient.CoreV1().ConfigMaps(fakeNamespace).Create(&mock.configmap)
-			if err != nil {
-				t.Fatalf("configmap not created for %v test, err: %v", name, err)
-			}
-
-			err = mock.experiment.ValidateConfigMaps(client)
-			if (!mock.isErr && err != nil) || (mock.isErr && err == nil) {
-				t.Fatalf("Validation for presence of configmap failed for %v test, err: %v", name, err)
-			}
-
-		})
-	}
-}
-
-func TestValidatePresenceOfConfigMapResourceInCluster(t *testing.T) {
-	fakeConfigMap := "fake configmap"
-	experiment := ExperimentDetails{
-		Name:               "Fake-Exp-Name",
-		Namespace:          "Fake NameSpace",
-		JobName:            "fake-job-name",
-		StatusCheckTimeout: 10,
-	}
-
-	tests := map[string]struct {
-		configmap v1.ConfigMap
-		isErr     bool
-	}{
-		"Test Positive-1": {
-			configmap: v1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      fakeConfigMap,
-					Namespace: experiment.Namespace,
-				},
-				Data: map[string]string{
-					"my-fake-key": "myfake-val",
-				}},
-			isErr: false,
-		},
-		"Test Negative-1": {
-			isErr: true,
-		},
-	}
-
-	for name, mock := range tests {
-		t.Run(name, func(t *testing.T) {
-			client := CreateFakeClient(t)
-
-			if !mock.isErr {
-				_, err := client.KubeClient.CoreV1().ConfigMaps(experiment.Namespace).Create(&mock.configmap)
-				if err != nil {
-					t.Fatalf("configmap not created for %v test, err: %v", name, err)
-				}
-			}
-
-			err := client.ValidatePresenceOfConfigMapResourceInCluster(fakeConfigMap, experiment.Namespace)
-			if (!mock.isErr && err != nil) || (mock.isErr && err == nil) {
-				t.Fatalf("Validation for presence of configmap failed for %v test, err: %v", name, err)
-			}
-
-		})
-	}
-}
-
-func TestSetConfigMaps(t *testing.T) {
-	fakeConfigMap := "fake configmap"
+func TestSetSecrets(t *testing.T) {
+	fakeSecretName := "fake secret"
 	fakeExperimentImage := "fake-experiment-image"
 	experiment := ExperimentDetails{
 		Name:               "Fake-Exp-Name",
@@ -326,9 +181,9 @@ func TestSetConfigMaps(t *testing.T) {
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
 								Components: v1alpha1.ExperimentComponents{
-									ConfigMaps: []v1alpha1.ConfigMap{
+									Secrets: []v1alpha1.Secret{
 										{
-											Name:      fakeConfigMap,
+											Name:      fakeSecretName,
 											MountPath: "fake mountpath",
 										},
 									},
@@ -363,9 +218,9 @@ func TestSetConfigMaps(t *testing.T) {
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
 								Components: v1alpha1.ExperimentComponents{
-									ConfigMaps: []v1alpha1.ConfigMap{
+									Secrets: []v1alpha1.Secret{
 										{
-											Name:      fakeConfigMap,
+											Name:      fakeSecretName,
 											MountPath: "fake mountpath",
 										},
 									},
@@ -395,13 +250,13 @@ func TestSetConfigMaps(t *testing.T) {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
 
-			err = experiment.SetConfigMaps(client, engineDetails)
+			err = experiment.SetSecrets(client, engineDetails)
 			if (!mock.isErr && err != nil) || (mock.isErr && err == nil) {
 				t.Fatalf("%v Test Failed, err: %v", name, err)
 			}
 
-			actualResult := experiment.ConfigMaps
-			expectedResult := mock.chaosengine.Spec.Experiments[0].Spec.Components.ConfigMaps
+			actualResult := experiment.Secrets
+			expectedResult := mock.chaosengine.Spec.Experiments[0].Spec.Components.Secrets
 
 			if !reflect.DeepEqual(expectedResult, actualResult) && !mock.isErr {
 				t.Fatalf("%v Test Failed the expectedResult '%v' is not equal to actual result '%v'", name, expectedResult, actualResult)
@@ -411,7 +266,104 @@ func TestSetConfigMaps(t *testing.T) {
 	}
 }
 
-func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
+func TestValidateSecrets(t *testing.T) {
+	fakeSecretName := "fake secret"
+	fakeNamespace := "fake-namespace"
+
+	tests := map[string]struct {
+		secret     v1.Secret
+		experiment ExperimentDetails
+		isErr      bool
+	}{
+		"Test Positive-1": {
+			secret: v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      fakeSecretName,
+					Namespace: fakeNamespace,
+				},
+				StringData: map[string]string{
+					"my-fake-key": "myfake-val",
+				}},
+			experiment: ExperimentDetails{
+				Name:               "Fake-Exp-Name",
+				Namespace:          fakeNamespace,
+				JobName:            "fake-job-name",
+				StatusCheckTimeout: 10,
+				Secrets: []litmuschaosv1alpha1.Secret{
+					{
+						Name:      fakeSecretName,
+						MountPath: "fake mountpath",
+					},
+				},
+			},
+			isErr: false,
+		},
+		"Test Negative-1": {
+			secret: v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      fakeSecretName,
+					Namespace: fakeNamespace,
+				},
+				StringData: map[string]string{
+					"my-fake-key": "myfake-val",
+				}},
+			experiment: ExperimentDetails{
+				Name:               "Fake-Exp-Name",
+				Namespace:          fakeNamespace,
+				JobName:            "fake-job-name",
+				StatusCheckTimeout: 10,
+				Secrets: []litmuschaosv1alpha1.Secret{
+					{
+						Name: fakeSecretName,
+					},
+				},
+			},
+			isErr: true,
+		},
+		"Test Negative-2": {
+			secret: v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      fakeSecretName,
+					Namespace: fakeNamespace,
+				},
+				StringData: map[string]string{
+					"my-fake-key": "myfake-val",
+				}},
+			experiment: ExperimentDetails{
+				Name:               "Fake-Exp-Name",
+				Namespace:          fakeNamespace,
+				JobName:            "fake-job-name",
+				StatusCheckTimeout: 10,
+				Secrets: []litmuschaosv1alpha1.Secret{
+					{
+						MountPath: "fake mountpath",
+					},
+				},
+			},
+			isErr: true,
+		},
+	}
+
+	for name, mock := range tests {
+		t.Run(name, func(t *testing.T) {
+			client := CreateFakeClient(t)
+
+			_, err := client.KubeClient.CoreV1().Secrets(fakeNamespace).Create(&mock.secret)
+			if err != nil {
+				t.Fatalf("secret not created for %v test, err: %v", name, err)
+			}
+
+			err = mock.experiment.ValidateSecrets(client)
+			if (!mock.isErr && err != nil) || (mock.isErr && err == nil) {
+				t.Fatalf("Validation for presence of secret failed for %v test, err: %v", name, err)
+			}
+
+		})
+	}
+}
+
+func TestGetSecretsFromChaosExperiment(t *testing.T) {
+	fakeSecretName := "fake secret"
 	fakeExperimentImage := "fake-experiment-image"
 	experiment := ExperimentDetails{
 		Name:               "Fake-Exp-Name",
@@ -433,12 +385,29 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
 					Definition: litmuschaosv1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
+						Secrets: []litmuschaosv1alpha1.Secret{
+							{
+								Name:      fakeSecretName,
+								MountPath: "fake mountpath",
+							},
+						},
 					},
 				},
 			},
 			isErr: false,
 		},
 		"Test Negative-1": {
+			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      experiment.Name,
+					Namespace: experiment.Namespace,
+				},
+				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
+					Definition: litmuschaosv1alpha1.ExperimentDef{
+						Image: fakeExperimentImage,
+					},
+				},
+			},
 			isErr: true,
 		},
 	}
@@ -447,21 +416,18 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			if !mock.isErr {
-				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
-				if err != nil {
-					t.Fatalf("experiment not created for %v test, err: %v", name, err)
-				}
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			if err != nil {
+				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
 
-			experimentConfigMaps, err := experiment.getConfigMapsFromChaosExperiment(client)
-			if (!mock.isErr && err != nil) || (mock.isErr && err == nil) {
+			experimentSecrets, err := experiment.getSecretsFromChaosExperiment(client)
+			if err != nil && !mock.isErr {
 				t.Fatalf("%v Test Failed, err: %v", name, err)
 			}
-
 			if !mock.isErr {
-				if experimentConfigMaps != nil {
-					t.Fatalf("Test %q failed to get the config map from experiment: ", name)
+				if experimentSecrets[0].Name != fakeSecretName {
+					t.Fatalf("Test %q failed to get the secret from experiment: ", name)
 				}
 			}
 
@@ -469,12 +435,12 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 	}
 }
 
-func TestGetOverridingConfigMapsFromChaosEngine(t *testing.T) {
-	fakeConfigMapName := "fake-configmap"
+func TestGetOverridingSecretsFromChaosEngine(t *testing.T) {
+	fakeSecretName := "fake-experiment-image"
 	tests := map[string]struct {
-		experiment       ExperimentDetails
-		engineConfigMaps []v1alpha1.ConfigMap
-		isErr            bool
+		experiment    ExperimentDetails
+		engineSecrets []v1alpha1.Secret
+		isErr         bool
 	}{
 		"Test Positive-1": {
 
@@ -485,9 +451,9 @@ func TestGetOverridingConfigMapsFromChaosEngine(t *testing.T) {
 				StatusCheckTimeout: 10,
 			},
 
-			engineConfigMaps: []v1alpha1.ConfigMap{
+			engineSecrets: []v1alpha1.Secret{
 				{
-					Name:      fakeConfigMapName,
+					Name:      fakeSecretName,
 					MountPath: "fake-mount-path",
 				},
 			},
@@ -502,25 +468,25 @@ func TestGetOverridingConfigMapsFromChaosEngine(t *testing.T) {
 				StatusCheckTimeout: 10,
 			},
 
-			engineConfigMaps: []v1alpha1.ConfigMap{},
-			isErr:            false,
+			engineSecrets: []v1alpha1.Secret{},
+			isErr:         false,
 		},
 	}
 
 	for name, mock := range tests {
 		t.Run(name, func(t *testing.T) {
 			var err error
-			mock.experiment.getOverridingConfigMapsFromChaosEngine(mock.engineConfigMaps, mock.engineConfigMaps)
+			mock.experiment.getOverridingSecretsFromChaosEngine(mock.engineSecrets, mock.engineSecrets)
 			if err != nil {
 				t.Fatalf("%v Test Failed, err: %v", name, err)
 			}
 
-			actualResult := mock.engineConfigMaps
-			expectedResult := mock.experiment.ConfigMaps
-			if !reflect.DeepEqual(expectedResult, actualResult) {
-				t.Fatalf("Test %q failed: expected configmap is %v but the we get is '%v' from the experiment", name, expectedResult, actualResult)
+			actualResult := mock.engineSecrets
+			expectedResult := mock.experiment.Secrets
+			if !reflect.DeepEqual(expectedResult, actualResult) && !mock.isErr {
+				t.Fatalf("Test %q failed: expected secret is %v but the we get is '%v' from the experiment", name, expectedResult, actualResult)
 			} else if !reflect.DeepEqual(expectedResult, actualResult) && mock.isErr {
-				t.Fatalf("Test %q failed: expected configmap is %v and the we get is '%v' from the experiment", name, expectedResult, actualResult)
+				t.Fatalf("Test %q failed: expected secret is %v and the we get is '%v' from the experiment", name, expectedResult, actualResult)
 			}
 		})
 	}
