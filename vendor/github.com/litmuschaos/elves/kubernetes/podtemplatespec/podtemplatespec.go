@@ -100,7 +100,6 @@ func (b *Builder) WithAnnotationsNew(annotations map[string]string) *Builder {
 	return b
 }
 
-
 // WithNodeSelector merges the nodeselectors if present
 // with the provided arguments
 func (b *Builder) WithNodeSelector(nodeselectors map[string]string) *Builder {
@@ -435,16 +434,23 @@ func (b *Builder) WithHostPID(hostPID bool) *Builder {
 
 // WithImagePullSecrets sets the image pull secret for the container
 func (b *Builder) WithImagePullSecrets(secrets []corev1.LocalObjectReference) *Builder {
-    if len(secrets) == 0 {
-        b.errs = append(
-            b.errs,
-            errors.New(
-                "failed to build container object: missing imagepullsecrets",
-            ),
-        )
-        return b
-    }
+	if len(secrets) == 0 {
+		b.errs = append(
+			b.errs,
+			errors.New(
+				"failed to build container object: missing imagepullsecrets",
+			),
+		)
+		return b
+	}
 
-    b.podtemplatespec.Object.Spec.ImagePullSecrets = secrets
-    return b
+	b.podtemplatespec.Object.Spec.ImagePullSecrets = secrets
+	return b
+}
+
+// WithTerminationGracePeriodSeconds sets the termination grace period seconds to pod
+func (b *Builder) WithTerminationGracePeriodSeconds(gracePeriod int64) *Builder {
+
+	b.podtemplatespec.Object.Spec.TerminationGracePeriodSeconds = &gracePeriod
+	return b
 }

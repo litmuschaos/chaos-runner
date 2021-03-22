@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"strconv"
 	"strings"
 
 	v1 "k8s.io/api/core/v1"
@@ -49,17 +50,18 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 	}
 	// Store ENV in a map
 	ENVList := map[string]string{
-		"CHAOSENGINE":           engineDetails.Name,
-		"APP_LABEL":             engineDetails.AppLabel,
-		"CHAOS_NAMESPACE":       engineDetails.EngineNamespace,
-		"APP_NAMESPACE":         engineDetails.AppNs,
-		"APP_KIND":              engineDetails.AppKind,
-		"AUXILIARY_APPINFO":     engineDetails.AuxiliaryAppInfo,
-		"CHAOS_UID":             engineDetails.UID,
-		"EXPERIMENT_NAME":       expDetails.Name,
-		"ANNOTATION_KEY":        engineDetails.AnnotationKey,
-		"ANNOTATION_CHECK":      engineDetails.AnnotationCheck,
-		"LIB_IMAGE_PULL_POLICY": string(expDetails.ExpImagePullPolicy),
+		"CHAOSENGINE":                      engineDetails.Name,
+		"APP_LABEL":                        engineDetails.AppLabel,
+		"CHAOS_NAMESPACE":                  engineDetails.EngineNamespace,
+		"APP_NAMESPACE":                    engineDetails.AppNs,
+		"APP_KIND":                         engineDetails.AppKind,
+		"AUXILIARY_APPINFO":                engineDetails.AuxiliaryAppInfo,
+		"CHAOS_UID":                        engineDetails.UID,
+		"EXPERIMENT_NAME":                  expDetails.Name,
+		"ANNOTATION_KEY":                   engineDetails.AnnotationKey,
+		"ANNOTATION_CHECK":                 engineDetails.AnnotationCheck,
+		"LIB_IMAGE_PULL_POLICY":            string(expDetails.ExpImagePullPolicy),
+		"TERMINATION_GRACE_PERIOD_SECONDS": strconv.Itoa(int(expDetails.TerminationGracePeriodSeconds)),
 	}
 	// Adding some additional ENV's from spec.AppInfo of ChaosEngine// Adding some additional ENV's from spec.AppInfo of ChaosEngine
 	for key, value := range ENVList {
