@@ -4,8 +4,8 @@ go 1.13
 
 require (
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
-	github.com/litmuschaos/chaos-operator v0.0.0-20210312154932-c2d4b2ff7b19
-	github.com/litmuschaos/elves v0.0.0-20201107015738-552d74669e3c
+	github.com/litmuschaos/chaos-operator v0.0.0-20210325093226-50a357ad2256
+	github.com/litmuschaos/elves v0.0.0-20210325101625-5620f93aed51
 	github.com/litmuschaos/litmus-go v0.0.0-20201015093552-b88e93ffc452
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
