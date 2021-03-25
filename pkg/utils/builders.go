@@ -131,6 +131,10 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		WithAnnotations(experiment.Annotations).
 		WithContainerBuildersNew(containerForPod)
 
+	if experiment.TerminationGracePeriodSeconds != 0 {
+		podtemplate.WithTerminationGracePeriodSeconds(experiment.TerminationGracePeriodSeconds)
+	}
+
 	if !reflect.DeepEqual(experiment.SecurityContext.PodSecurityContext, corev1.PodSecurityContext{}) {
 
 		podtemplate.WithSecurityContext(experiment.SecurityContext.PodSecurityContext)

@@ -54,10 +54,11 @@ type ExperimentDetails struct {
 	HostPID            bool
 	// InstanceID is passed as env inside chaosengine
 	// It is separately specified here because this attribute is common for all experiment.
-	InstanceID           string
-	ResourceRequirements v1.ResourceRequirements
-	ImagePullSecrets     []corev1.LocalObjectReference
-	StatusCheckTimeout   int
+	InstanceID                    string
+	ResourceRequirements          v1.ResourceRequirements
+	ImagePullSecrets              []corev1.LocalObjectReference
+	StatusCheckTimeout            int
+	TerminationGracePeriodSeconds int64
 }
 
 //VolumeOpts is a strcuture for all volume related operations

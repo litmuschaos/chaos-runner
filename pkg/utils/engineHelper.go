@@ -23,7 +23,8 @@ func (expDetails *ExperimentDetails) SetInstanceAttributeValuesFromChaosEngine(e
 		SetResourceRequirementsFromEngine(chaosEngine).
 		SetImagePullSecretsFromEngine(chaosEngine).
 		SetTolerationsFromEngine(chaosEngine).
-		SetExpImageFromEngine(chaosEngine)
+		SetExpImageFromEngine(chaosEngine).
+		SetTerminationGracePeriodSecondsFromEngine(chaosEngine)
 
 	return nil
 }
@@ -85,6 +86,12 @@ func (expDetails *ExperimentDetails) SetExpNodeSelectorFromEngine(engine *litmus
 			expDetails.NodeSelector = expRefList[i].Spec.Components.NodeSelector
 		}
 	}
+	return expDetails
+}
+
+// SetTerminationGracePeriodSecondsFromEngine set the terminationGracePeriodSeconds for experiment pod provided in the chaosEngine
+func (expDetails *ExperimentDetails) SetTerminationGracePeriodSecondsFromEngine(engine *litmuschaosv1alpha1.ChaosEngine) *ExperimentDetails {
+	expDetails.TerminationGracePeriodSeconds = engine.Spec.TerminationGracePeriodSeconds
 	return expDetails
 }
 
