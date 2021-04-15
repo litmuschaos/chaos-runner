@@ -206,7 +206,6 @@ var _ = Describe("BDD on chaos-runner", func() {
 							Type:  "go",
 						},
 					},
-					Monitoring: true,
 					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: "pod-delete",
