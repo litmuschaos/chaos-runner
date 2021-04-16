@@ -25,7 +25,7 @@ func (engineDetails EngineDetails) GetChaosEngine(clients ClientSets) (*v1alpha1
 	expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 	if err != nil {
 
-		return nil, errors.Errorf("Unable to get ChaosEngine Name: %v, in namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
+		return nil, errors.Errorf("unable to get ChaosEngine Name: %v, in namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
 	}
 	return expEngine, nil
 }
@@ -39,7 +39,7 @@ func (expStatus *ExperimentStatus) PatchChaosEngineStatus(engineDetails EngineDe
 	}
 	experimentIndex := checkStatusListForExp(expEngine.Status.Experiments, expStatus.Name)
 	if experimentIndex == -1 {
-		return errors.Errorf("Unable to find the status for Experiment: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
+		return errors.Errorf("unable to find the status for Experiment: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
 	}
 	expEngine.Status.Experiments[experimentIndex] = v1alpha1.ExperimentStatuses(*expStatus)
 	if _, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine); err != nil {
@@ -64,7 +64,7 @@ func (expDetails *ExperimentDetails) GetChaosResult(engineDetails EngineDetails,
 	resultName := GetResultName(engineDetails.Name, expDetails.Name, expDetails.InstanceID)
 	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.EngineNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Errorf("Unable to get ChaosResult Name: %v in namespace: %v, error: %v", resultName, engineDetails.EngineNamespace, err)
+		return nil, errors.Errorf("unable to get ChaosResult Name: %v in namespace: %v, error: %v", resultName, engineDetails.EngineNamespace, err)
 	}
 	return expResult, nil
 }
@@ -81,7 +81,7 @@ func (engineDetails EngineDetails) UpdateEngineWithResult(experiment *Experiment
 	var currExpStatus ExperimentStatus
 	chaosPod, err := GetChaosPod(experiment, clients)
 	if err != nil {
-		return errors.Errorf("Unable to get the chaos pod, error: %v", err)
+		return errors.Errorf("unable to get the chaos pod, error: %v", err)
 	}
 	currExpStatus.CompletedExperimentStatus(chaosResult, engineDetails.Name, chaosPod.Name)
 	if err = currExpStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
@@ -107,7 +107,7 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 			PropagationPolicy: &deletePolicy,
 		})
 		if deleteJob != nil {
-			return "", errors.Errorf("Unable to delete ChaosExperiment Job Name: %v, in namespace: %v, error: %v", experiment.JobName, experiment.Namespace, err)
+			return "", errors.Errorf("unable to delete ChaosExperiment Job Name: %v, in namespace: %v, error: %v", experiment.JobName, experiment.Namespace, err)
 		}
 	}
 	return expEngine.Spec.JobCleanUpPolicy, nil

@@ -86,20 +86,20 @@ var _ = BeforeSuite(func() {
 	By("Installing Litmus CRDs")
 	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/chaos_crds.yaml").Run()
 	if err != nil {
-		klog.Infof("Unable to create Litmus CRD's, due to error: %v", err)
+		klog.Infof("unable to create Litmus CRD's, due to error: %v", err)
 	}
 
 	//Creating rbacs
 	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/rbac.yaml").Run()
 	if err != nil {
-		klog.Infof("Unable to create RBAC Permissions, due to error: %v", err)
+		klog.Infof("unable to create RBAC Permissions, due to error: %v", err)
 	}
 
 	//Creating Chaos-Operator
 	By("Installing Chaos-Operator")
 	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/operator.yaml").Run()
 	if err != nil {
-		klog.Infof("Unable to create Chaos-operator, due to error: %v", err)
+		klog.Infof("unable to create Chaos-operator, due to error: %v", err)
 	}
 
 	klog.Infof("Chaos-Operator installed Successfully")
@@ -117,12 +117,12 @@ var _ = BeforeSuite(func() {
 
 	err = exec.Command("kubectl", "apply", "-f", "https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/experiments.yaml", "-n", "litmus").Run()
 	if err != nil {
-		klog.Infof("Unable to create Pod-Delete Experiment, due to error: %v", err)
+		klog.Infof("unable to create Pod-Delete Experiment, due to error: %v", err)
 	}
 
 	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/pod_delete_rbac.yaml", "-n", "litmus").Run()
 	if err != nil {
-		klog.Infof("Unable to create pod-delete rbac, due to error: %v", err)
+		klog.Infof("unable to create pod-delete rbac, due to error: %v", err)
 	}
 })
 
@@ -249,7 +249,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 
 			Expect(jobName).To(
 				Not(BeEmpty()),
-				"Unable to get the job, might be something wrong with chaos-runner",
+				"unable to get the job, might be something wrong with chaos-runner",
 			)
 		})
 	})

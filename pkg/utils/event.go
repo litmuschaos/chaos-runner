@@ -71,7 +71,7 @@ func (expDetails ExperimentDetails) ExperimentSkipped(reason string, engineDetai
 	event.SetEventAttributes(reason, "Warning", msg)
 	event.Name = event.Reason + expDetails.Name + string(engineDetails.UID)
 	if err := engineDetails.GenerateEvents(&event, clients); err != nil {
-		log.Errorf("Unable to create event, err: %v", err)
+		log.Errorf("unable to create event, err: %v", err)
 	}
 }
 
@@ -83,7 +83,7 @@ func (expDetails ExperimentDetails) ExperimentDependencyCheck(engineDetails Engi
 	event.SetEventAttributes(ExperimentDependencyCheckReason, "Normal", msg)
 	event.Name = event.Reason + expDetails.Name + string(engineDetails.UID)
 	if err := engineDetails.GenerateEvents(&event, clients); err != nil {
-		log.Errorf("Unable to create event, err: %v", err)
+		log.Errorf("unable to create event, err: %v", err)
 	}
 }
 
@@ -94,7 +94,7 @@ func (expDetails ExperimentDetails) ExperimentJobCreate(engineDetails EngineDeta
 	event.SetEventAttributes(ExperimentJobCreateReason, "Normal", msg)
 	event.Name = event.Reason + expDetails.Name + string(engineDetails.UID)
 	if err := engineDetails.GenerateEvents(&event, clients); err != nil {
-		log.Errorf("Unable to create event, err: %v", err)
+		log.Errorf("unable to create event, err: %v", err)
 	}
 }
 
@@ -108,7 +108,7 @@ func (expDetails ExperimentDetails) ExperimentJobCleanUp(jobCleanUpPolicy string
 	event.SetEventAttributes(ExperimentJobCleanUpReason, "Normal", msg)
 	event.Name = event.Reason + expDetails.Name + string(engineDetails.UID)
 	if err := engineDetails.GenerateEvents(&event, clients); err != nil {
-		log.Errorf("Unable to create event, err: %v", err)
+		log.Errorf("unable to create event, err: %v", err)
 	}
 }
 

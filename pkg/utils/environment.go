@@ -10,8 +10,8 @@ import (
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 )
 
-// GetOsEnv adds the ENV's to EngineDetails
-func (engineDetails *EngineDetails) GetOsEnv() *EngineDetails {
+// SetEnv adds the ENV's to EngineDetails
+func (engineDetails *EngineDetails) SetEnv() *EngineDetails {
 	engineDetails.Experiments = strings.Split(os.Getenv("EXPERIMENT_LIST"), ",")
 	engineDetails.Name = os.Getenv("CHAOSENGINE")
 	engineDetails.AppLabel = os.Getenv("APP_LABEL")
@@ -26,14 +26,14 @@ func (engineDetails *EngineDetails) GetOsEnv() *EngineDetails {
 	return engineDetails
 }
 
-// GetEngineUID get the chaosengine UID
-func (engineDetails *EngineDetails) GetEngineUID(clients ClientSets) *EngineDetails {
+// SetEngineUID set the chaosengine UID
+func (engineDetails *EngineDetails) SetEngineUID(clients ClientSets) error {
 	chaosEngine, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
-		log.Errorf("Unable to get chaosEngine in namespace: %s", engineDetails.EngineNamespace)
+		return err
 	}
 	engineDetails.UID = string(chaosEngine.UID)
-	return engineDetails
+	return nil
 }
 
 //SetENV sets ENV values in experimentDetails struct.
