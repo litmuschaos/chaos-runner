@@ -25,105 +25,98 @@ import (
 	"time"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	chaosClient "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/typed/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-runner/pkg/log"
+	"github.com/litmuschaos/chaos-runner/pkg/utils"
+	"github.com/litmuschaos/chaos-runner/pkg/utils/k8s"
+	"github.com/litmuschaos/chaos-runner/pkg/utils/litmus"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/openebs/maya/pkg/util/retry"
+	"github.com/pkg/errors"
 	appv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	scheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/klog"
 )
 
 var (
-	kubeconfig      string
-	config          *restclient.Config
-	k8sClientSet    *kubernetes.Clientset
-	litmusClientSet *chaosClient.LitmuschaosV1alpha1Client
+	clients    utils.ClientSets
+	kubeconfig string
 )
 
-func init() {
-	flag.StringVar(&kubeconfig, "kubeconfig", os.Getenv("HOME")+"/.kube/config", "path to kubeconfig to invoke kubernetes API calls")
-}
 func TestChaos(t *testing.T) {
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "BDD test")
 }
+func init() {
+	flag.StringVar(&kubeconfig, "kubeconfig", os.Getenv("HOME")+"/.kube/config", "path to kubeconfig to invoke kubernetes API calls")
+}
 
 var _ = BeforeSuite(func() {
 
+	// Getting kubeconfig and generate clientSets
 	flag.Parse()
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	Expect(err).To(BeNil(), "failed to get config")
 
-	var err error
-	config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		Expect(err).To(BeNil(), "failed to get config")
-	}
+	k8sClientSet, err := k8s.GenerateK8sClientSet(config)
+	Expect(err).To(BeNil(), "failed to generate k8sClientSet")
 
-	k8sClientSet, err = kubernetes.NewForConfig(config)
+	litmusClientSet, err := litmus.GenerateLitmusClientSet(config)
+	Expect(err).To(BeNil(), "failed to generate litmusClientSet")
 
-	if err != nil {
-		Expect(err).To(BeNil(), "failed to get k8sClientSet")
-	}
-
-	litmusClientSet, err = chaosClient.NewForConfig(config)
-
-	if err != nil {
-		Expect(err).To(BeNil(), "failed to get litmusClientSet")
-	}
-
-	err = v1alpha1.AddToScheme(scheme.Scheme)
-	if err != nil {
-		klog.Infof("Error to add to Scheme: %v", err)
-	}
+	clients = utils.ClientSets{}
+	clients.KubeClient = k8sClientSet
+	clients.LitmusClient = litmusClientSet
 
 	//Creating crds
 	By("Installing Litmus CRDs")
-	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/chaos_crds.yaml").Run()
-	if err != nil {
-		klog.Infof("unable to create Litmus CRD's, due to error: %v", err)
-	}
+	err = exec.Command("kubectl", "apply", "-f", "https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/chaos_crds.yaml").Run()
+	Expect(err).To(BeNil(), "unable to create Litmus CRD's")
+	log.Info("CRDs created")
 
 	//Creating rbacs
-	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/rbac.yaml").Run()
-	if err != nil {
-		klog.Infof("unable to create RBAC Permissions, due to error: %v", err)
-	}
+	By("Installing RBAC")
+	err = exec.Command("kubectl", "apply", "-f", "https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/rbac.yaml").Run()
+	Expect(err).To(BeNil(), "unable to create RBAC Permissions")
+	log.Info("RBAC created")
 
 	//Creating Chaos-Operator
 	By("Installing Chaos-Operator")
-	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/operator.yaml").Run()
-	if err != nil {
-		klog.Infof("unable to create Chaos-operator, due to error: %v", err)
-	}
+	err = exec.Command("kubectl", "apply", "-f", "https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/operator.yaml").Run()
+	Expect(err).To(BeNil(), "unable to create Chaos-operator")
 
-	klog.Infof("Chaos-Operator installed Successfully")
+	log.Info("Chaos-Operator created")
 
-	//Wait for the creation of chaos-operator
-	time.Sleep(40 * time.Second)
+	err = retry.
+		Times(uint(180 / 2)).
+		Wait(time.Duration(2) * time.Second).
+		Try(func(attempt uint) error {
+			podSpec, err := clients.KubeClient.CoreV1().Pods("litmus").List(metav1.ListOptions{LabelSelector: "name=chaos-operator"})
+			if err != nil || len(podSpec.Items) == 0 {
+				return errors.Errorf("Unable to list chaos-operator, err: %v", err)
+			}
+			for _, v := range podSpec.Items {
+				if v.Status.Phase != "Running" {
+					return errors.Errorf("chaos-operator is not in running state, phase: %v", v.Status.Phase)
+				}
+			}
+			return nil
+		})
 
-	//Check for the status of the chaos-operator
-	operator, _ := k8sClientSet.CoreV1().Pods("litmus").List(metav1.ListOptions{LabelSelector: "name=chaos-operator"})
-	for _, v := range operator.Items {
+	Expect(err).To(BeNil(), "the chaos-operator is not in running state")
+	log.Info("Chaos-Operator is in running state")
 
-		Expect(string(v.Status.Phase)).To(Equal("Running"))
-		break
-	}
+	By("Installing Pod Delete Experiment")
+	err = exec.Command("kubectl", "apply", "-f", "https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/pod-delete/experiment.yaml", "-n", "litmus").Run()
+	Expect(err).To(BeNil(), "unable to create Pod-Delete Experiment")
+	log.Info("pod-delete ChaosExperiment created")
 
-	err = exec.Command("kubectl", "apply", "-f", "https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/experiments.yaml", "-n", "litmus").Run()
-	if err != nil {
-		klog.Infof("unable to create Pod-Delete Experiment, due to error: %v", err)
-	}
-
-	err = exec.Command("kubectl", "apply", "-f", "../build/_output/test/pod_delete_rbac.yaml", "-n", "litmus").Run()
-	if err != nil {
-		klog.Infof("unable to create pod-delete rbac, due to error: %v", err)
-	}
+	err = exec.Command("kubectl", "apply", "-f", "https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/tests/manifest/pod_delete_rbac.yaml", "-n", "litmus").Run()
+	Expect(err).To(BeNil(), "unable to create pod-delete rbac")
+	log.Info("pod-delete-sa created")
 })
 
 //BDD Tests to check secondary resources
@@ -175,11 +168,12 @@ var _ = Describe("BDD on chaos-runner", func() {
 				},
 			}
 			By("Creating nginx deployment")
-			_, err := k8sClientSet.AppsV1().Deployments("litmus").Create(deployment)
+			_, err := clients.KubeClient.AppsV1().Deployments("litmus").Create(deployment)
 			Expect(err).To(
 				BeNil(),
 				"while creating nginx deployment in namespace litmus",
 			)
+			log.Info("nginx deployment created")
 		})
 	})
 	When("Creating ChaosEngine to trigger chaos-runner", func() {
@@ -218,18 +212,31 @@ var _ = Describe("BDD on chaos-runner", func() {
 			}
 
 			By("Creating ChaosEngine Resource")
-			_, err := litmusClientSet.ChaosEngines("litmus").Create(chaosEngine)
+			_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines("litmus").Create(chaosEngine)
 			Expect(err).To(
 				BeNil(),
 				"while building ChaosEngine engine-nginx in namespace litmus",
 			)
+			log.Info("chaos engine created")
 
-			time.Sleep(30 * time.Second)
+			err = retry.
+				Times(uint(180 / 2)).
+				Wait(time.Duration(2) * time.Second).
+				Try(func(attempt uint) error {
+					pod, err := clients.KubeClient.CoreV1().Pods("litmus").Get("engine-nginx-runner", metav1.GetOptions{})
+					if err != nil {
+						return errors.Errorf("unable to get chaos-runner pod, err: %v", err)
+					}
+					if pod.Status.Phase != v1.PodRunning && pod.Status.Phase != v1.PodSucceeded {
+						return errors.Errorf("chaos runner is not in running state, phase: %v", pod.Status.Phase)
+					}
+					return nil
+				})
 
-			//Fetching engine-nginx-runner pod
-			runner, err := k8sClientSet.CoreV1().Pods("litmus").Get("engine-nginx-runner", metav1.GetOptions{})
-			Expect(err).To(BeNil())
-			Expect(string(runner.Status.Phase)).To(Or(Equal("Running"), Equal("Succeeded")))
+			if err != nil {
+				log.Errorf("The chaos-runner is not in running state, err: %v", err)
+			}
+			log.Info("runner pod created")
 		})
 	})
 
@@ -237,7 +244,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 		It("Should create a Pod delete Job", func() {
 
 			var jobName string
-			jobs, _ := k8sClientSet.BatchV1().Jobs("litmus").List(metav1.ListOptions{})
+			jobs, _ := clients.KubeClient.BatchV1().Jobs("litmus").List(metav1.ListOptions{})
 
 			for _, job := range jobs.Items {
 				matched, _ := regexp.MatchString("pod-delete-.*", job.Name)
@@ -259,9 +266,10 @@ var _ = Describe("BDD on chaos-runner", func() {
 //Deleting all unused resources
 var _ = AfterSuite(func() {
 	By("Deleting all CRDs")
-	crdDeletion := exec.Command("kubectl", "delete", "-f", "../build/_output/test/chaos_crds.yaml").Run()
+	crdDeletion := exec.Command("kubectl", "delete", "-f", "https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/chaos_crds.yaml").Run()
 	Expect(crdDeletion).To(BeNil())
 	By("Deleting RBAC Permissions")
-	rbacDeletion := exec.Command("kubectl", "delete", "-f", "../build/_output/test/rbac.yaml").Run()
+	rbacDeletion := exec.Command("kubectl", "delete", "-f", "https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/rbac.yaml").Run()
 	Expect(rbacDeletion).To(BeNil())
+	log.Info("deleted CRD and RBAC")
 })

@@ -25,7 +25,7 @@ func (engineDetails EngineDetails) GetChaosEngine(clients ClientSets) (*v1alpha1
 	expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(engineDetails.Name, metav1.GetOptions{})
 	if err != nil {
 
-		return nil, errors.Errorf("unable to get ChaosEngine Name: %v, in namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
+		return nil, errors.Errorf("unable to get ChaosEngine name: %v, in namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
 	}
 	return expEngine, nil
 }
@@ -64,7 +64,7 @@ func (expDetails *ExperimentDetails) GetChaosResult(engineDetails EngineDetails,
 	resultName := GetResultName(engineDetails.Name, expDetails.Name, expDetails.InstanceID)
 	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.EngineNamespace).Get(resultName, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Errorf("unable to get ChaosResult Name: %v in namespace: %v, error: %v", resultName, engineDetails.EngineNamespace, err)
+		return nil, errors.Errorf("unable to get ChaosResult name: %v in namespace: %v, error: %v", resultName, engineDetails.EngineNamespace, err)
 	}
 	return expResult, nil
 }
@@ -107,7 +107,7 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 			PropagationPolicy: &deletePolicy,
 		})
 		if deleteJob != nil {
-			return "", errors.Errorf("unable to delete ChaosExperiment Job Name: %v, in namespace: %v, error: %v", experiment.JobName, experiment.Namespace, err)
+			return "", errors.Errorf("unable to delete ChaosExperiment Job name: %v, in namespace: %v, error: %v", experiment.JobName, experiment.Namespace, err)
 		}
 	}
 	return expEngine.Spec.JobCleanUpPolicy, nil

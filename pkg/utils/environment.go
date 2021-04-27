@@ -10,8 +10,8 @@ import (
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 )
 
-// SetEnv adds the ENV's to EngineDetails
-func (engineDetails *EngineDetails) SetEnv() *EngineDetails {
+// SetEngineDetails adds the ENV's to EngineDetails
+func (engineDetails *EngineDetails) SetEngineDetails() *EngineDetails {
 	engineDetails.Experiments = strings.Split(os.Getenv("EXPERIMENT_LIST"), ",")
 	engineDetails.Name = os.Getenv("CHAOSENGINE")
 	engineDetails.AppLabel = os.Getenv("APP_LABEL")

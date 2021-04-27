@@ -27,8 +27,8 @@ func main() {
 	}
 	// Fetching all the ENVs passed from the chaos-operator
 	// create and initialize the experimentList
-	if err := engineDetails.SetEnv().SetEngineUID(clients); err != nil {
-		log.Errorf("unable to get ChaosEngineUID, err: %v", err)
+	if err := engineDetails.SetEngineDetails().SetEngineUID(clients); err != nil {
+		log.Errorf("unable to get ChaosEngineUID, error: %v", err)
 		return
 	}
 	experimentList := engineDetails.CreateExperimentList()
@@ -56,7 +56,7 @@ func main() {
 		}
 		// check the existance of chaosexperiment inside the cluster
 		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
-			log.Errorf("unable to get ChaosExperiment Name: %v, in namespace: %v, error: %v", experiment.Name, experiment.Namespace, err)
+			log.Errorf("unable to get ChaosExperiment name: %v, in namespace: %v, error: %v", experiment.Name, experiment.Namespace, err)
 			experiment.ExperimentSkipped(utils.ExperimentNotFoundErrorReason, engineDetails, clients)
 			continue
 		}
