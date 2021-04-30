@@ -11,7 +11,7 @@ import (
 func GenerateLitmusClientSet(config *rest.Config) (*clientV1alpha1.Clientset, error) {
 	litmusClientSet, err := clientV1alpha1.NewForConfig(config)
 	if err != nil {
-		return nil, errors.Errorf("Unable to create LitmusClientSet, error: %v", err)
+		return nil, errors.Errorf("unable to create LitmusClientSet, error: %v", err)
 	}
 	return litmusClientSet, nil
 }

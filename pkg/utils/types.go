@@ -6,7 +6,6 @@ import (
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	clientV1alpha1 "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned"
 	volume "github.com/litmuschaos/elves/kubernetes/volume/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -35,10 +34,10 @@ type EngineDetails struct {
 // ExperimentDetails is for collecting all the experiment-related details
 type ExperimentDetails struct {
 	Name               string
-	envMap             map[string]corev1.EnvVar
+	envMap             map[string]v1.EnvVar
 	ExpLabels          map[string]string
 	ExpImage           string
-	ExpImagePullPolicy corev1.PullPolicy
+	ExpImagePullPolicy v1.PullPolicy
 	ExpArgs            []string
 	JobName            string
 	Namespace          string
@@ -49,21 +48,21 @@ type ExperimentDetails struct {
 	SvcAccount         string
 	Annotations        map[string]string
 	NodeSelector       map[string]string
-	Tolerations        []corev1.Toleration
+	Tolerations        []v1.Toleration
 	SecurityContext    v1alpha1.SecurityContext
 	HostPID            bool
 	// InstanceID is passed as env inside chaosengine
 	// It is separately specified here because this attribute is common for all experiment.
 	InstanceID                    string
 	ResourceRequirements          v1.ResourceRequirements
-	ImagePullSecrets              []corev1.LocalObjectReference
+	ImagePullSecrets              []v1.LocalObjectReference
 	StatusCheckTimeout            int
 	TerminationGracePeriodSeconds int64
 }
 
 //VolumeOpts is a strcuture for all volume related operations
 type VolumeOpts struct {
-	VolumeMounts   []corev1.VolumeMount
+	VolumeMounts   []v1.VolumeMount
 	VolumeBuilders []*volume.Builder
 }
 
@@ -83,7 +82,7 @@ type EventAttributes struct {
 
 var (
 	// DefaultExpImagePullPolicy contains the defaults value (Always) of imagePullPolicy for exp container
-	DefaultExpImagePullPolicy corev1.PullPolicy = "Always"
+	DefaultExpImagePullPolicy v1.PullPolicy = "Always"
 )
 
 const (
@@ -123,15 +122,5 @@ func getKubeConfig() (*rest.Config, error) {
 	kubeconfig := flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
 	flag.Parse()
 	// Use in-cluster config if kubeconfig path is specified
-	if *kubeconfig == "" {
-		config, err := rest.InClusterConfig()
-		if err != nil {
-			return config, err
-		}
-	}
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		return config, err
-	}
-	return config, err
+	return clientcmd.BuildConfigFromFlags("", *kubeconfig)
 }

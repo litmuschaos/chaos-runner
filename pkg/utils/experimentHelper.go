@@ -35,7 +35,7 @@ func (engineDetails *EngineDetails) NewExperimentDetails(i int) ExperimentDetail
 func (expDetails *ExperimentDetails) SetDefaultEnvFromChaosExperiment(clients ClientSets) error {
 	experimentEnv, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		return errors.Errorf("Unable to get the %v ChaosExperiment in %v namespace, error: %v", expDetails.Name, expDetails.Namespace, err)
+		return errors.Errorf("unable to get the %v ChaosExperiment in %v namespace, error: %v", expDetails.Name, expDetails.Namespace, err)
 	}
 
 	envList := experimentEnv.Spec.Definition.ENVList
@@ -50,10 +50,10 @@ func (expDetails *ExperimentDetails) SetDefaultEnvFromChaosExperiment(clients Cl
 func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *EngineDetails, clients ClientSets) error {
 
 	if err := expDetails.SetDefaultAttributeValuesFromChaosExperiment(clients, engineDetails); err != nil {
-		return errors.Errorf("Unable to set value from Chaos Experiment, error: %v", err)
+		return errors.Errorf("unable to set value from Chaos Experiment, error: %v", err)
 	}
 	if err := expDetails.SetInstanceAttributeValuesFromChaosEngine(engineDetails, clients); err != nil {
-		return errors.Errorf("Unable to set value from Chaos Engine, error: %v", err)
+		return errors.Errorf("unable to set value from Chaos Engine, error: %v", err)
 	}
 	return nil
 }
@@ -64,9 +64,9 @@ func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetail
 	_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		if err := engineDetails.ExperimentNotFoundPatchEngine(expDetails, clients); err != nil {
-			return errors.Errorf("Unable to patch Chaos Engine Name: %v, namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
+			return errors.Errorf("unable to patch Chaos Engine Name: %v, namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
 		}
-		return errors.Errorf("Unable to list Chaos Experiment Name: %v,in Namespace: %v, error: %v", expDetails.Name, expDetails.Namespace, err)
+		return errors.Errorf("unable to list Chaos Experiment Name: %v,in Namespace: %v, error: %v", expDetails.Name, expDetails.Namespace, err)
 	}
 
 	return nil
@@ -77,7 +77,7 @@ func (expDetails *ExperimentDetails) SetDefaultAttributeValuesFromChaosExperimen
 
 	experimentSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		return errors.Errorf("Unable to get %v ChaosExperiment instance in namespace: %v", expDetails.Name, expDetails.Namespace)
+		return errors.Errorf("unable to get %v ChaosExperiment instance in namespace: %v", expDetails.Name, expDetails.Namespace)
 	}
 
 	// fetch all the values from chaosexperiment and set into expDetails struct
