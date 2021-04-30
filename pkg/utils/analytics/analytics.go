@@ -24,11 +24,11 @@ const (
 func TriggerAnalytics(experimentName string, uuid string) {
 	client, err := ga.NewClient(clientID)
 	if err != nil {
-		log.Errorf("Unable to create GA client, error: %v", err)
+		log.Errorf("unable to create GA client, error: %v", err)
 	}
 	client.ClientID(uuid)
 	err = client.Send(ga.NewEvent(category, action).Label(experimentName))
 	if err != nil {
-		log.Errorf("Unable to send GA event, error: %v", err)
+		log.Errorf("unable to send GA event, error: %v", err)
 	}
 }

@@ -54,7 +54,7 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 		}
 		err := clients.ValidatePresenceOfSecretResourceInCluster(v.Name, expDetails.Namespace)
 		if err != nil {
-			return errors.Errorf("Unable to get Secret with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
+			return errors.Errorf("unable to get Secret with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
 		}
 		log.Infof("Successfully Validated Secret: %v", v.Name)
 	}
@@ -64,7 +64,7 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 func (expDetails *ExperimentDetails) getSecretsFromChaosExperiment(clients ClientSets) ([]v1alpha1.Secret, error) {
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Errorf("Unable to get ChaosExperiment Resource, error: %v", err)
+		return nil, errors.Errorf("unable to get ChaosExperiment Resource, error: %v", err)
 	}
 	experimentSecrets := chaosExperimentObj.Spec.Definition.Secrets
 
@@ -74,7 +74,7 @@ func (expDetails *ExperimentDetails) getSecretsFromChaosExperiment(clients Clien
 func (expDetails *ExperimentDetails) getSecretsFromChaosEngine(clients ClientSets, engineDetails EngineDetails) ([]v1alpha1.Secret, error) {
 	chaosEngineObj, err := engineDetails.GetChaosEngine(clients)
 	if err != nil {
-		return nil, errors.Errorf("Unable to get ChaosEngine Resource, error: %v", err)
+		return nil, errors.Errorf("unable to get ChaosEngine Resource, error: %v", err)
 	}
 	experimentsList := chaosEngineObj.Spec.Experiments
 	for i := range experimentsList {

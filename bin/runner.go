@@ -22,11 +22,16 @@ func main() {
 	clients := utils.ClientSets{}
 	// Getting kubeConfig and Generate ClientSets
 	if err := clients.GenerateClientSetFromKubeConfig(); err != nil {
-		log.Fatalf("Unable to create ClientSets, error: %v", err)
+		log.Errorf("unable to create ClientSets, error: %v", err)
+		return
 	}
 	// Fetching all the ENVs passed from the chaos-operator
 	// create and initialize the experimentList
-	experimentList := engineDetails.GetOsEnv().GetEngineUID(clients).CreateExperimentList()
+	if err := engineDetails.SetEngineDetails().SetEngineUID(clients); err != nil {
+		log.Errorf("unable to get ChaosEngineUID, error: %v", err)
+		return
+	}
+	experimentList := engineDetails.CreateExperimentList()
 	log.InfoWithValues("Experiments details are as follows", logrus.Fields{
 		"Experiments List":     engineDetails.Experiments,
 		"Engine Name":          engineDetails.Name,
@@ -38,7 +43,8 @@ func main() {
 	})
 
 	if err := utils.InitialPatchEngine(engineDetails, clients, experimentList); err != nil {
-		log.Errorf("Unable to patch Initial ExperimentStatus in ChaosEngine, error: %v", err)
+		log.Errorf("unable to patch Initial ExperimentStatus in ChaosEngine, error: %v", err)
+		return
 	}
 
 	// Steps for each Experiment
@@ -50,19 +56,19 @@ func main() {
 		}
 		// check the existance of chaosexperiment inside the cluster
 		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
-			log.Errorf("Unable to get ChaosExperiment Name: %v, in namespace: %v, error: %v", experiment.Name, experiment.Namespace, err)
+			log.Errorf("unable to get ChaosExperiment name: %v, in namespace: %v, error: %v", experiment.Name, experiment.Namespace, err)
 			experiment.ExperimentSkipped(utils.ExperimentNotFoundErrorReason, engineDetails, clients)
 			continue
 		}
 		// derive the required field from the experiment & engine and set into experimentDetails struct
 		if err := experiment.SetValueFromChaosResources(&engineDetails, clients); err != nil {
-			log.Errorf("Unable to set values from Chaos Resources, error: %v", err)
+			log.Errorf("unable to set values from Chaos Resources, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentNotFoundErrorReason, engineDetails, clients)
 			continue
 		}
 		// derive the envs from the chaos experiment and override their values from chaosengine if any
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
-			log.Errorf("Unable to patch ENV, error: %v", err)
+			log.Errorf("unable to patch ENV, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentEnvParseErrorReason, engineDetails, clients)
 			continue
 		}
@@ -70,7 +76,7 @@ func main() {
 		log.Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
 
 		if err := experiment.PatchResources(engineDetails, clients); err != nil {
-			log.Errorf("Unable to patch Chaos Resources required for Chaos Experiment: %v, error: %v", experiment.Name, err)
+			log.Errorf("unable to patch Chaos Resources required for Chaos Experiment: %v, error: %v", experiment.Name, err)
 			experiment.ExperimentSkipped(utils.ExperimentDependencyCheckReason, engineDetails, clients)
 			continue
 		}
@@ -79,7 +85,7 @@ func main() {
 
 		// Creation of PodTemplateSpec, and Final Job
 		if err := utils.BuildingAndLaunchJob(&experiment, clients); err != nil {
-			log.Errorf("Unable to construct chaos experiment job, error: %v", err)
+			log.Errorf("unable to construct chaos experiment job, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentDependencyCheckReason, engineDetails, clients)
 			continue
 		}
@@ -89,7 +95,7 @@ func main() {
 		log.Infof("Started Chaos Experiment Name: %v, with Job Name: %v", experiment.Name, experiment.JobName)
 		// Watching the chaos container till Completion
 		if err := engineDetails.WatchChaosContainerForCompletion(&experiment, clients); err != nil {
-			log.Errorf("Unable to Watch the chaos container, error: %v", err)
+			log.Errorf("unable to Watch the chaos container, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentChaosContainerWatchErrorReason, engineDetails, clients)
 			continue
 		}
@@ -98,7 +104,7 @@ func main() {
 
 		// Will Update the chaosEngine Status
 		if err := engineDetails.UpdateEngineWithResult(&experiment, clients); err != nil {
-			log.Errorf("Unable to Update ChaosEngine Status, error: %v", err)
+			log.Errorf("unable to Update ChaosEngine Status, error: %v", err)
 		}
 
 		log.Infof("Chaos Engine has been updated with result, Experiment Name: %v", experiment.Name)
@@ -106,7 +112,7 @@ func main() {
 		// Delete / retain the Job, using the jobCleanUpPolicy
 		jobCleanUpPolicy, err := engineDetails.DeleteJobAccordingToJobCleanUpPolicy(&experiment, clients)
 		if err != nil {
-			log.Errorf("Unable to Delete ChaosExperiment Job, error: %v", err)
+			log.Errorf("unable to Delete ChaosExperiment Job, error: %v", err)
 		}
 		experiment.ExperimentJobCleanUp(string(jobCleanUpPolicy), engineDetails, clients)
 	}

@@ -15,7 +15,7 @@ import (
 func (expDetails *ExperimentDetails) SetInstanceAttributeValuesFromChaosEngine(engine *EngineDetails, clients ClientSets) error {
 	chaosEngine, err := engine.GetChaosEngine(clients)
 	if err != nil {
-		return errors.Errorf("Unable to get chaosEngine in namespace: %s", engine.EngineNamespace)
+		return errors.Errorf("unable to get chaosEngine in namespace: %s", engine.EngineNamespace)
 	}
 	// fetch all the values from chaosengine and set into expDetails struct
 	expDetails.SetExpAnnotationFromEngine(chaosEngine).
@@ -111,7 +111,7 @@ func (expDetails *ExperimentDetails) SetOverrideEnvFromChaosEngine(engineName st
 
 	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Errorf("Unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+		return errors.Errorf("unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
 	}
 	expList := engineSpec.Spec.Experiments
 	for _, exp := range expList {
