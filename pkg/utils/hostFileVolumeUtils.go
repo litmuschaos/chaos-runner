@@ -59,7 +59,7 @@ func (expDetails *ExperimentDetails) ValidateHostFileVolumes() error {
 func getHostFileVolumesFromExperiment(clients ClientSets, expDetails *ExperimentDetails) ([]v1alpha1.HostFile, error) {
 	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Errorf("Unable to get ChaosExperiment Resource, error: %v", err)
+		return nil, errors.Errorf("unable to get ChaosExperiment Resource, error: %v", err)
 	}
 	expHostFileVolumes := chaosExperimentObj.Spec.Definition.HostFileVolumes
 

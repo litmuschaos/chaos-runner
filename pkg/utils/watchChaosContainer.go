@@ -21,7 +21,7 @@ func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod
 		Try(func(attempt uint) error {
 			chaosPodList, err = clients.KubeClient.CoreV1().Pods(expDetails.Namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
 			if err != nil || len(chaosPodList.Items) == 0 {
-				return errors.Errorf("Unable to get the chaos pod, error: %v", err)
+				return errors.Errorf("unable to get the chaos pod, error: %v", err)
 			} else if len(chaosPodList.Items) > 1 {
 				// Cases where experiment pod is rescheduled by the job controller due to
 				// issues while the older pod is still not cleaned-up
@@ -46,7 +46,7 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 
 	pod, err := GetChaosPod(experimentDetails, clients)
 	if err != nil {
-		return false, errors.Errorf("Unable to get the chaos pod, error: %v", err)
+		return false, errors.Errorf("unable to get the chaos pod, error: %v", err)
 	}
 	if pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodSucceeded {
 		for _, container := range pod.Status.ContainerStatuses {
@@ -70,7 +70,7 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 			Try(func(attempt uint) error {
 				pod, err := GetChaosPod(experimentDetails, clients)
 				if err != nil {
-					return errors.Errorf("Unable to get the chaos pod, error: %v", err)
+					return errors.Errorf("unable to get the chaos pod, error: %v", err)
 				}
 				if pod.Status.Phase == corev1.PodPending {
 					return errors.Errorf("chaos pod is in %v state", corev1.PodPending)
@@ -103,12 +103,12 @@ func (engineDetails EngineDetails) WatchChaosContainerForCompletion(experiment *
 		var expStatus ExperimentStatus
 		chaosPod, err := GetChaosPod(experiment, clients)
 		if err != nil {
-			return errors.Errorf("Unable to get the chaos pod, error: %v", err)
+			return errors.Errorf("unable to get the chaos pod, error: %v", err)
 		}
 
 		expStatus.AwaitedExperimentStatus(experiment.Name, engineDetails.Name, chaosPod.Name)
 		if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
-			return errors.Errorf("Unable to patch ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, err)
+			return errors.Errorf("unable to patch ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, err)
 		}
 		time.Sleep(2 * time.Second)
 	}
