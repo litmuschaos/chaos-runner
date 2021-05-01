@@ -263,6 +263,11 @@ var _ = Describe("BDD on chaos-runner", func() {
 
 })
 
+
+// This is a workaround to prevent a condition where operator expects presence of chaosresult to update target revert status
+// Also, this minikube is a transient cluster brought up in the pipeline VM, so we cna skip the cleanup
+/*
+
 //Deleting all unused resources
 var _ = AfterSuite(func() {
 	By("Deleting all CRDs")
@@ -273,3 +278,5 @@ var _ = AfterSuite(func() {
 	Expect(rbacDeletion).To(BeNil())
 	log.Info("deleted CRD and RBAC")
 })
+
+*/
