@@ -63,7 +63,10 @@ jobs:
       - run: make build
       - run: |
           docker buildx build --file build/Dockerfile --platform linux/arm64,linux/amd64 --tag ${REPONAME}/${IMGNAME}:${IMGTAG} .    
-      - run: make test
+      - run: 
+          command: make test
+          no_output_timeout: 20m
+        
 
   trivy-check:
     machine: true
