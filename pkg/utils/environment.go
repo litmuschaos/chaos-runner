@@ -38,17 +38,6 @@ func (engineDetails *EngineDetails) SetEngineUID(clients ClientSets) error {
 
 //SetENV sets ENV values in experimentDetails struct.
 func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) error {
-	// Get the Default ENV's from ChaosExperiment
-	log.Info("Getting the ENV Variables")
-	if err := expDetails.SetDefaultEnvFromChaosExperiment(clients); err != nil {
-		return err
-	}
-
-	// OverWriting the Defaults Varibles from the ChaosEngine ENV
-	if err := expDetails.SetOverrideEnvFromChaosEngine(engineDetails.Name, clients); err != nil {
-		return err
-	}
-
 	// Setting envs from engine fields other than env
 	expDetails.setEnv("CHAOSENGINE", engineDetails.Name).
 		setEnv("APP_LABEL", engineDetails.AppLabel).
@@ -62,6 +51,17 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		setEnv("ANNOTATION_CHECK", engineDetails.AnnotationCheck).
 		setEnv("LIB_IMAGE_PULL_POLICY", string(expDetails.ExpImagePullPolicy)).
 		setEnv("TERMINATION_GRACE_PERIOD_SECONDS", strconv.Itoa(int(expDetails.TerminationGracePeriodSeconds)))
+
+	// Get the Default ENV's from ChaosExperiment
+	log.Info("Getting the ENV Variables")
+	if err := expDetails.SetDefaultEnvFromChaosExperiment(clients); err != nil {
+		return err
+	}
+
+	// OverWriting the Defaults Varibles from the ChaosEngine ENV
+	if err := expDetails.SetOverrideEnvFromChaosEngine(engineDetails.Name, clients); err != nil {
+		return err
+	}
 	return nil
 }
 
