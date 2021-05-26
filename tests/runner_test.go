@@ -29,9 +29,9 @@ import (
 	"github.com/litmuschaos/chaos-runner/pkg/utils"
 	"github.com/litmuschaos/chaos-runner/pkg/utils/k8s"
 	"github.com/litmuschaos/chaos-runner/pkg/utils/litmus"
+	"github.com/litmuschaos/litmus-go/pkg/utils/retry"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/openebs/maya/pkg/util/retry"
 	"github.com/pkg/errors"
 	appv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -262,7 +262,6 @@ var _ = Describe("BDD on chaos-runner", func() {
 	})
 
 })
-
 
 // This is a workaround to prevent a condition where operator expects presence of chaosresult to update target revert status
 // Also, this minikube is a transient cluster brought up in the pipeline VM, so we cna skip the cleanup
