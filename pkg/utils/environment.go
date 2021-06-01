@@ -38,6 +38,20 @@ func (engineDetails *EngineDetails) SetEngineUID(clients ClientSets) error {
 
 //SetENV sets ENV values in experimentDetails struct.
 func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) error {
+	// Setting envs from engine fields other than env
+	expDetails.setEnv("CHAOSENGINE", engineDetails.Name).
+		setEnv("APP_LABEL", engineDetails.AppLabel).
+		setEnv("CHAOS_NAMESPACE", engineDetails.EngineNamespace).
+		setEnv("APP_NAMESPACE", engineDetails.AppNs).
+		setEnv("APP_KIND", engineDetails.AppKind).
+		setEnv("AUXILIARY_APPINFO", engineDetails.AuxiliaryAppInfo).
+		setEnv("CHAOS_UID", engineDetails.UID).
+		setEnv("EXPERIMENT_NAME", expDetails.Name).
+		setEnv("ANNOTATION_KEY", engineDetails.AnnotationKey).
+		setEnv("ANNOTATION_CHECK", engineDetails.AnnotationCheck).
+		setEnv("LIB_IMAGE_PULL_POLICY", string(expDetails.ExpImagePullPolicy)).
+		setEnv("TERMINATION_GRACE_PERIOD_SECONDS", strconv.Itoa(int(expDetails.TerminationGracePeriodSeconds)))
+
 	// Get the Default ENV's from ChaosExperiment
 	log.Info("Getting the ENV Variables")
 	if err := expDetails.SetDefaultEnvFromChaosExperiment(clients); err != nil {
@@ -48,27 +62,18 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 	if err := expDetails.SetOverrideEnvFromChaosEngine(engineDetails.Name, clients); err != nil {
 		return err
 	}
-	// Store ENV in a map
-	ENVList := map[string]string{
-		"CHAOSENGINE":                      engineDetails.Name,
-		"APP_LABEL":                        engineDetails.AppLabel,
-		"CHAOS_NAMESPACE":                  engineDetails.EngineNamespace,
-		"APP_NAMESPACE":                    engineDetails.AppNs,
-		"APP_KIND":                         engineDetails.AppKind,
-		"AUXILIARY_APPINFO":                engineDetails.AuxiliaryAppInfo,
-		"CHAOS_UID":                        engineDetails.UID,
-		"EXPERIMENT_NAME":                  expDetails.Name,
-		"ANNOTATION_KEY":                   engineDetails.AnnotationKey,
-		"ANNOTATION_CHECK":                 engineDetails.AnnotationCheck,
-		"LIB_IMAGE_PULL_POLICY":            string(expDetails.ExpImagePullPolicy),
-		"TERMINATION_GRACE_PERIOD_SECONDS": strconv.Itoa(int(expDetails.TerminationGracePeriodSeconds)),
-	}
-	// Adding some additional ENV's from spec.AppInfo of ChaosEngine// Adding some additional ENV's from spec.AppInfo of ChaosEngine
-	for key, value := range ENVList {
-		expDetails.envMap[key] = v1.EnvVar{
-			Name:  key,
-			Value: value,
-		}
-	}
 	return nil
+}
+
+// setEnv set the env inside experimentDetails struct
+func (expDetails *ExperimentDetails) setEnv(key, value string) *ExperimentDetails {
+
+	if value == "" {
+		return expDetails
+	}
+	expDetails.envMap[key] = v1.EnvVar{
+		Name:  key,
+		Value: value,
+	}
+	return expDetails
 }

@@ -109,7 +109,7 @@ func main() {
 
 		log.Infof("Chaos Engine has been updated with result, Experiment Name: %v", experiment.Name)
 
-		// Delete / retain the Job, using the jobCleanUpPolicy
+		// Delete/Retain the Job, based on the jobCleanUpPolicy
 		jobCleanUpPolicy, err := engineDetails.DeleteJobAccordingToJobCleanUpPolicy(&experiment, clients)
 		if err != nil {
 			log.Errorf("unable to Delete ChaosExperiment Job, error: %v", err)
