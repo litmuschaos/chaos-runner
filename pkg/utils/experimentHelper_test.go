@@ -5,9 +5,6 @@ import (
 	"testing"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	apiv1 "k8s.io/api/core/v1"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -93,21 +90,21 @@ func TestSetDefaultEnvFromChaosExperiment(t *testing.T) {
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 						ENVList: []v1.EnvVar{
 							{
@@ -125,13 +122,13 @@ func TestSetDefaultEnvFromChaosExperiment(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image:   fakeExperimentImage,
 						ENVList: []v1.EnvVar{},
 					},
@@ -173,7 +170,7 @@ func TestSetDefaultAttributeValuesFromChaosExperiment(t *testing.T) {
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 		ExpArgs:            []string{},
 		ConfigMaps:         []v1alpha1.ConfigMap{},
@@ -191,19 +188,19 @@ func TestSetDefaultAttributeValuesFromChaosExperiment(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image:           fakeExperimentImage,
-						ImagePullPolicy: apiv1.PullPolicy(fakeExperimentImagePullPolicy),
+						ImagePullPolicy: v1.PullPolicy(fakeExperimentImagePullPolicy),
 						Labels: map[string]string{
 							"fake-label-key": "fake-label-value",
 							"chaosUID":       "",
@@ -225,14 +222,14 @@ func TestSetDefaultAttributeValuesFromChaosExperiment(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
-						ImagePullPolicy: apiv1.PullPolicy(fakeExperimentImagePullPolicy),
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
+						ImagePullPolicy: v1.PullPolicy(fakeExperimentImagePullPolicy),
 						Labels: map[string]string{
 							"fake-label-key": "fake-label-value",
 							"chaosUID":       "",
@@ -282,7 +279,7 @@ func TestSetDefaultAttributeValuesFromChaosExperiment(t *testing.T) {
 
 func TestSetValueFromChaosResources(t *testing.T) {
 	fakeExperimentImage := "fake-exp-image"
-	fakeExperimentImagePullPolicy := apiv1.PullPolicy("fake-exp-image-pull-policy")
+	fakeExperimentImagePullPolicy := v1.PullPolicy("fake-exp-image-pull-policy")
 	fakeExperimentArgs := "fake-exp-args"
 	fakeHostPID := false
 	experiment := ExperimentDetails{
@@ -290,7 +287,7 @@ func TestSetValueFromChaosResources(t *testing.T) {
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 		ExpArgs:            []string{},
 		ConfigMaps:         []v1alpha1.ConfigMap{},
@@ -311,33 +308,33 @@ func TestSetValueFromChaosResources(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
+		chaosexperiment *v1alpha1.ChaosExperiment
+		chaosengine     *v1alpha1.ChaosEngine
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusInitialized,
-					Experiments: []litmuschaosv1alpha1.ExperimentStatuses{
+				Spec: v1alpha1.ChaosEngineSpec{},
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusInitialized,
+					Experiments: []v1alpha1.ExperimentStatuses{
 						{
 							Name: expStatus.Name,
 						},
 					},
 				},
 			},
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image:           fakeExperimentImage,
 						ImagePullPolicy: fakeExperimentImagePullPolicy,
 						Labels: map[string]string{
@@ -346,8 +343,8 @@ func TestSetValueFromChaosResources(t *testing.T) {
 						Args: []string{
 							fakeExperimentArgs,
 						},
-						SecurityContext: litmuschaosv1alpha1.SecurityContext{
-							PodSecurityContext: apiv1.PodSecurityContext{
+						SecurityContext: v1alpha1.SecurityContext{
+							PodSecurityContext: v1.PodSecurityContext{
 								RunAsUser: ptrint64(1000),
 							},
 						},
@@ -358,13 +355,13 @@ func TestSetValueFromChaosResources(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image:           fakeExperimentImage,
 						ImagePullPolicy: fakeExperimentImagePullPolicy,
 						Labels: map[string]string{
@@ -373,8 +370,8 @@ func TestSetValueFromChaosResources(t *testing.T) {
 						Args: []string{
 							fakeExperimentArgs,
 						},
-						SecurityContext: litmuschaosv1alpha1.SecurityContext{
-							PodSecurityContext: apiv1.PodSecurityContext{
+						SecurityContext: v1alpha1.SecurityContext{
+							PodSecurityContext: v1.PodSecurityContext{
 								RunAsUser: ptrint64(1000),
 							},
 						},
@@ -425,7 +422,7 @@ func TestSetLabels(t *testing.T) {
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 	}
 
@@ -436,16 +433,16 @@ func TestSetLabels(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Labels: map[string]string{
 							"fake-label-key": "fake-label-value",
 						},
@@ -486,21 +483,21 @@ func TestSetImage(t *testing.T) {
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 					},
 				},
@@ -533,27 +530,27 @@ func TestSetImage(t *testing.T) {
 
 func TestSetImagePullPolicy(t *testing.T) {
 	fakeExperimentImage := "fake-exp-image"
-	fakeExperimentImagePullPolicy := apiv1.PullPolicy("fake-exp-image-pull-policy")
+	fakeExperimentImagePullPolicy := v1.PullPolicy("fake-exp-image-pull-policy")
 	experiment := ExperimentDetails{
 		Name:               "Fake-Exp-Name",
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image:           fakeExperimentImage,
 						ImagePullPolicy: fakeExperimentImagePullPolicy,
 					},
@@ -592,22 +589,22 @@ func TestSetArgs(t *testing.T) {
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 		ExpArgs:            []string{},
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Args: []string{
 							fakeExperimentArgs,
 						},
@@ -646,25 +643,25 @@ func TestSetSecurityContext(t *testing.T) {
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 		ExpArgs:            []string{},
 		SecurityContext:    v1alpha1.SecurityContext{},
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
-						SecurityContext: litmuschaosv1alpha1.SecurityContext{
-							PodSecurityContext: apiv1.PodSecurityContext{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
+						SecurityContext: v1alpha1.SecurityContext{
+							PodSecurityContext: v1.PodSecurityContext{
 								RunAsUser: ptrint64(1000),
 							},
 						},
@@ -704,22 +701,22 @@ func TestHostPID(t *testing.T) {
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 		ExpArgs:            []string{},
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						HostPID: fakeHostPID,
 					},
 				},
@@ -757,7 +754,7 @@ func TestHandleChaosExperimentExistence(t *testing.T) {
 		Namespace:          "Fake NameSpace",
 		JobName:            "fake-job-name",
 		StatusCheckTimeout: 10,
-		envMap:             map[string]corev1.EnvVar{},
+		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 		ExpArgs:            []string{},
 	}
@@ -772,18 +769,18 @@ func TestHandleChaosExperimentExistence(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
+		chaosexperiment *v1alpha1.ChaosExperiment
+		chaosengine     *v1alpha1.ChaosEngine
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						HostPID: fakeHostPID,
 					},
 				},
@@ -791,15 +788,15 @@ func TestHandleChaosExperimentExistence(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusInitialized,
-					Experiments: []litmuschaosv1alpha1.ExperimentStatuses{
+				Spec: v1alpha1.ChaosEngineSpec{},
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusInitialized,
+					Experiments: []v1alpha1.ExperimentStatuses{
 						{
 							Name: expStatus.Name,
 						},

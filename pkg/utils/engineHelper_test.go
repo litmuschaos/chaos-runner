@@ -9,7 +9,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 )
 
@@ -27,16 +26,16 @@ func TestSetExpImageFromEngine(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -85,16 +84,16 @@ func TestSetExpAnnotationFromEngine(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -137,16 +136,16 @@ func TestSetResourceRequirementsFromEngine(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -196,16 +195,16 @@ func TestSetImagePullSecretsFromEngine(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -252,16 +251,16 @@ func TestSetExpNodeSelectorFromEngine(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -301,16 +300,16 @@ func TestSetTolerationsFromEngine(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -361,16 +360,16 @@ func TestInstanceAttributeValuesFromChaosEngine(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{

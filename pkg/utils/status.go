@@ -10,7 +10,7 @@ func (expStatus *ExperimentStatus) InitialExperimentStatus(expName, engineName s
 	expStatus.Name = expName
 	expStatus.Runner = engineName + "-runner"
 	expStatus.ExpPod = "Yet to be launched"
-	expStatus.Status = "Waiting for Job Creation"
+	expStatus.Status = v1alpha1.ExperimentStatusWaiting
 	expStatus.Verdict = "N/A"
 	expStatus.LastUpdateTime = metav1.Now()
 }
@@ -20,7 +20,7 @@ func (expStatus *ExperimentStatus) AwaitedExperimentStatus(expName, engineName, 
 	expStatus.Name = expName
 	expStatus.Runner = engineName + "-runner"
 	expStatus.ExpPod = experimentPodName
-	expStatus.Status = "Running"
+	expStatus.Status = v1alpha1.ExperimentStatusRunning
 	expStatus.Verdict = "Awaited"
 	expStatus.LastUpdateTime = metav1.Now()
 }
@@ -31,9 +31,9 @@ func (expStatus *ExperimentStatus) CompletedExperimentStatus(chaosResult *v1alph
 	expStatus.Name = chaosResult.Spec.ExperimentName
 	expStatus.Runner = engineName + "-runner"
 	expStatus.ExpPod = experimentPodName
-	expStatus.Status = "Completed"
+	expStatus.Status = v1alpha1.ExperimentStatusCompleted
 	expStatus.LastUpdateTime = metav1.Now()
-	expStatus.Verdict = chaosResult.Status.ExperimentStatus.Verdict
+	expStatus.Verdict = string(chaosResult.Status.ExperimentStatus.Verdict)
 }
 
 // NotFoundExperimentStatus initilize experiment struct using the following values.
@@ -41,7 +41,17 @@ func (expStatus *ExperimentStatus) NotFoundExperimentStatus(expName, engineName 
 	expStatus.Name = expName
 	expStatus.Runner = engineName + "-runner"
 	expStatus.ExpPod = "N/A"
-	expStatus.Status = "ChaosExperiment Not Found"
+	expStatus.Status = v1alpha1.ExperimentStatusNotFound
+	expStatus.Verdict = "Fail"
+	expStatus.LastUpdateTime = metav1.Now()
+}
+
+// SkippedExperimentStatus fills up  ExperimentStatus Structure with skipped value
+func (expStatus *ExperimentStatus) SkippedExperimentStatus(expName, engineName string) {
+	expStatus.Name = expName
+	expStatus.Runner = engineName + "-runner"
+	expStatus.ExpPod = "N/A"
+	expStatus.Status = v1alpha1.ExperimentSkipped
 	expStatus.Verdict = "Fail"
 	expStatus.LastUpdateTime = metav1.Now()
 }
