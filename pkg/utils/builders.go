@@ -18,12 +18,6 @@ type PodTemplateSpec struct {
 	Object *corev1.PodTemplateSpec
 }
 
-// Builder struct for getting the error as well with the template
-type Builder struct {
-	podtemplatespec *PodTemplateSpec
-	errs            []error
-}
-
 // BuildContainerSpec builds a Container with following properties
 func buildContainerSpec(experiment *ExperimentDetails, envVars []corev1.EnvVar) (*container.Builder, error) {
 	containerSpec := container.NewBuilder().

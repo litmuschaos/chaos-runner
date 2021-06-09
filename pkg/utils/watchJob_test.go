@@ -11,7 +11,6 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	litmusFakeClientset "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/fake"
 )
 
@@ -30,27 +29,27 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 		isErr       bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
+				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
 					AnnotationCheck:     fakeAnnotationCheck,
-					Appinfo: litmuschaosv1alpha1.ApplicationParams{
+					Appinfo: v1alpha1.ApplicationParams{
 						Applabel: fakeAppLabel,
 						Appns:    engineDetails.EngineNamespace,
 						AppKind:  fakeAppKind,
 					},
 				},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusCompleted,
-					Experiments: []litmuschaosv1alpha1.ExperimentStatuses{
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusCompleted,
+					Experiments: []v1alpha1.ExperimentStatuses{
 						{
 							Name: expStatus.Name,
 						},
@@ -60,22 +59,22 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
+				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
 					AnnotationCheck:     fakeAnnotationCheck,
-					Appinfo: litmuschaosv1alpha1.ApplicationParams{
+					Appinfo: v1alpha1.ApplicationParams{
 						Applabel: fakeAppLabel,
 						Appns:    engineDetails.EngineNamespace,
 						AppKind:  fakeAppKind,
 					},
 				},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusCompleted,
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusCompleted,
 				},
 			},
 			isErr: true,
@@ -140,30 +139,30 @@ func TestUpdateEngineWithResult(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
-		chaosresult *litmuschaosv1alpha1.ChaosResult
+		chaosengine *v1alpha1.ChaosEngine
+		chaosresult *v1alpha1.ChaosResult
 		chaospod    v1.Pod
 		isErr       bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
+				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
 					AnnotationCheck:     fakeAnnotationCheck,
-					Appinfo: litmuschaosv1alpha1.ApplicationParams{
+					Appinfo: v1alpha1.ApplicationParams{
 						Applabel: fakeAppLabel,
 						Appns:    engineDetails.EngineNamespace,
 						AppKind:  fakeAppKind,
 					},
 					JobCleanUpPolicy: "retain",
 				},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusCompleted,
-					Experiments: []litmuschaosv1alpha1.ExperimentStatuses{
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusCompleted,
+					Experiments: []v1alpha1.ExperimentStatuses{
 						{
 							Name:   expStatus.Name,
 							Status: expStatus.Status,
@@ -180,16 +179,16 @@ func TestUpdateEngineWithResult(t *testing.T) {
 					},
 				},
 			},
-			chaosresult: &litmuschaosv1alpha1.ChaosResult{
+			chaosresult: &v1alpha1.ChaosResult{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name + "-" + expStatus.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosResultSpec{
+				Spec: v1alpha1.ChaosResultSpec{
 					EngineName:     engineDetails.Name,
 					ExperimentName: expStatus.Name,
 				},
-				Status: litmuschaosv1alpha1.ChaosResultStatus{
+				Status: v1alpha1.ChaosResultStatus{
 					ExperimentStatus: v1alpha1.TestStatus{
 						Phase:   "Completed",
 						Verdict: "Pass",
@@ -199,23 +198,23 @@ func TestUpdateEngineWithResult(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
+				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
 					AnnotationCheck:     fakeAnnotationCheck,
-					Appinfo: litmuschaosv1alpha1.ApplicationParams{
+					Appinfo: v1alpha1.ApplicationParams{
 						Applabel: fakeAppLabel,
 						Appns:    engineDetails.EngineNamespace,
 						AppKind:  fakeAppKind,
 					},
 					JobCleanUpPolicy: "retain",
 				},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusCompleted,
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusCompleted,
 				},
 			},
 			chaospod: v1.Pod{
@@ -227,16 +226,16 @@ func TestUpdateEngineWithResult(t *testing.T) {
 					},
 				},
 			},
-			chaosresult: &litmuschaosv1alpha1.ChaosResult{
+			chaosresult: &v1alpha1.ChaosResult{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name + "-" + expStatus.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosResultSpec{
+				Spec: v1alpha1.ChaosResultSpec{
 					EngineName:     engineDetails.Name,
 					ExperimentName: expStatus.Name,
 				},
-				Status: litmuschaosv1alpha1.ChaosResultStatus{
+				Status: v1alpha1.ChaosResultStatus{
 					ExperimentStatus: v1alpha1.TestStatus{
 						Phase:   "Completed",
 						Verdict: "Pass",
@@ -303,23 +302,23 @@ func TestDeleteJobAccordingToJobCleanUpPolicy(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 		expjob      batchv1.Job
 		isErr       bool
 		retain      bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
+				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
 					JobCleanUpPolicy:    v1alpha1.CleanUpPolicyDelete,
 				},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusCompleted,
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusCompleted,
 				},
 			},
 			expjob: batchv1.Job{
@@ -334,17 +333,17 @@ func TestDeleteJobAccordingToJobCleanUpPolicy(t *testing.T) {
 			isErr: true,
 		},
 		"Test Positive-2": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
+				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
 					JobCleanUpPolicy:    v1alpha1.CleanUpPolicyRetain,
 				},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusCompleted,
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusCompleted,
 				},
 			},
 			expjob: batchv1.Job{
@@ -359,16 +358,16 @@ func TestDeleteJobAccordingToJobCleanUpPolicy(t *testing.T) {
 			isErr: true,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
+				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
 				},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusCompleted,
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusCompleted,
 				},
 			},
 			expjob: batchv1.Job{

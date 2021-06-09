@@ -8,7 +8,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
 func TestPatchConfigMaps(t *testing.T) {
@@ -26,19 +25,19 @@ func TestPatchConfigMaps(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosengine     *v1alpha1.ChaosEngine
+		chaosexperiment *v1alpha1.ChaosExperiment
 		configmap       v1.ConfigMap
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -55,13 +54,13 @@ func TestPatchConfigMaps(t *testing.T) {
 					},
 				},
 			},
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 					},
 				},
@@ -77,13 +76,13 @@ func TestPatchConfigMaps(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -100,13 +99,13 @@ func TestPatchConfigMaps(t *testing.T) {
 					},
 				},
 			},
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 					},
 				},
@@ -173,7 +172,7 @@ func TestValidateConfigMaps(t *testing.T) {
 				Namespace:          fakeNamespace,
 				JobName:            "fake-job-name",
 				StatusCheckTimeout: 10,
-				ConfigMaps: []litmuschaosv1alpha1.ConfigMap{
+				ConfigMaps: []v1alpha1.ConfigMap{
 					{
 						Name:      fakeConfigMapName,
 						MountPath: "fake mountpath",
@@ -196,7 +195,7 @@ func TestValidateConfigMaps(t *testing.T) {
 				Namespace:          fakeNamespace,
 				JobName:            "fake-job-name",
 				StatusCheckTimeout: 10,
-				ConfigMaps: []litmuschaosv1alpha1.ConfigMap{
+				ConfigMaps: []v1alpha1.ConfigMap{
 					{
 						Name: fakeConfigMapName,
 					},
@@ -218,7 +217,7 @@ func TestValidateConfigMaps(t *testing.T) {
 				Namespace:          fakeNamespace,
 				JobName:            "fake-job-name",
 				StatusCheckTimeout: 10,
-				ConfigMaps: []litmuschaosv1alpha1.ConfigMap{
+				ConfigMaps: []v1alpha1.ConfigMap{
 					{
 						MountPath: "fake mountpath",
 					},
@@ -310,18 +309,18 @@ func TestSetConfigMaps(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
+		chaosexperiment *v1alpha1.ChaosExperiment
+		chaosengine     *v1alpha1.ChaosEngine
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -338,13 +337,13 @@ func TestSetConfigMaps(t *testing.T) {
 					},
 				},
 			},
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 					},
 				},
@@ -352,13 +351,13 @@ func TestSetConfigMaps(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -421,17 +420,17 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 					},
 				},
