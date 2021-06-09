@@ -64,12 +64,14 @@ func main() {
 		if err := experiment.SetValueFromChaosResources(&engineDetails, clients); err != nil {
 			log.Errorf("unable to set values from Chaos Resources, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentNotFoundErrorReason, engineDetails, clients)
+			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)
 			continue
 		}
 		// derive the envs from the chaos experiment and override their values from chaosengine if any
 		if err := experiment.SetENV(engineDetails, clients); err != nil {
 			log.Errorf("unable to patch ENV, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentEnvParseErrorReason, engineDetails, clients)
+			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)
 			continue
 		}
 
@@ -78,6 +80,7 @@ func main() {
 		if err := experiment.PatchResources(engineDetails, clients); err != nil {
 			log.Errorf("unable to patch Chaos Resources required for Chaos Experiment: %v, error: %v", experiment.Name, err)
 			experiment.ExperimentSkipped(utils.ExperimentDependencyCheckReason, engineDetails, clients)
+			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)
 			continue
 		}
 		// generating experiment dependency check event inside chaosengine
@@ -87,6 +90,7 @@ func main() {
 		if err := utils.BuildingAndLaunchJob(&experiment, clients); err != nil {
 			log.Errorf("unable to construct chaos experiment job, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentDependencyCheckReason, engineDetails, clients)
+			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)
 			continue
 		}
 
@@ -97,6 +101,7 @@ func main() {
 		if err := engineDetails.WatchChaosContainerForCompletion(&experiment, clients); err != nil {
 			log.Errorf("unable to Watch the chaos container, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentChaosContainerWatchErrorReason, engineDetails, clients)
+			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)
 			continue
 		}
 

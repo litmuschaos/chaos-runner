@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-runner/pkg/log"
 	"github.com/pkg/errors"
 )
 
@@ -28,4 +29,13 @@ func InitialPatchEngine(engineDetails EngineDetails, clients ClientSets, experim
 		return errors.Errorf("unable to update ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, err)
 	}
 	return nil
+}
+
+// ExperimentSkippedPatchEngine patches the chaosEngine with skipped status
+func (engineDetails EngineDetails) ExperimentSkippedPatchEngine(experiment *ExperimentDetails, clients ClientSets) {
+	var expStatus ExperimentStatus
+	expStatus.SkippedExperimentStatus(experiment.Name, engineDetails.Name)
+	if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
+		log.Errorf("unable to Patch ChaosEngine with Status, error: %v", err)
+	}
 }
