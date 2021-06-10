@@ -105,10 +105,10 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 	case v1alpha1.CleanUpPolicyDelete:
 		log.Infof("deleting the job as jobCleanPolicy is set to %s", expEngine.Spec.JobCleanUpPolicy)
 		deletePolicy := metav1.DeletePropagationForeground
-		if deleteJob := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Delete(experiment.JobName, &metav1.DeleteOptions{
+		if deleteJobErr := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Delete(experiment.JobName, &metav1.DeleteOptions{
 			PropagationPolicy: &deletePolicy,
-		}); deleteJob != nil {
-			return "", errors.Errorf("unable to delete ChaosExperiment Job name: %v, in namespace: %v, error: %v", experiment.JobName, experiment.Namespace, err)
+		}); deleteJobErr != nil {
+			return "", errors.Errorf("unable to delete ChaosExperiment Job name: %v, in namespace: %v, error: %v", experiment.JobName, experiment.Namespace, deleteJobErr)
 		}
 		log.Infof("%v job is deleted successfully", experiment.JobName)
 	case v1alpha1.CleanUpPolicyRetain, "":
