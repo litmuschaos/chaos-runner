@@ -26,7 +26,7 @@ func InitialPatchEngine(engineDetails EngineDetails, clients ClientSets, experim
 	}
 	_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine)
 	if updateErr != nil {
-		return errors.Errorf("unable to update ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, err)
+		return errors.Errorf("unable to update ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, updateErr)
 	}
 	return nil
 }
