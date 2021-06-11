@@ -54,7 +54,7 @@ func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) erro
 		}
 		err := clients.ValidatePresenceOfConfigMapResourceInCluster(v.Name, expDetails.Namespace)
 		if err != nil {
-			return errors.Errorf("unable to get ConfigMap with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
+			return errors.Errorf("unable to get ConfigMap with Name: %v, in namespace: %v, error: %v", v.Name, expDetails.Namespace, err)
 		}
 		log.Infof("Successfully Validated ConfigMap: %v", v.Name)
 	}
