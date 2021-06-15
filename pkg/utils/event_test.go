@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	apiv1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientTypes "k8s.io/apimachinery/pkg/types"
@@ -63,7 +62,7 @@ func TestGenerateEvents(t *testing.T) {
 					Name:      eventAtr.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Source: apiv1.EventSource{
+				Source: v1.EventSource{
 					Component: engineDetails.Name + "-runner",
 				},
 				Message:        eventAtr.Message,
@@ -72,7 +71,7 @@ func TestGenerateEvents(t *testing.T) {
 				Count:          1,
 				FirstTimestamp: metav1.Time{Time: time.Now()},
 				LastTimestamp:  metav1.Time{Time: time.Now()},
-				InvolvedObject: apiv1.ObjectReference{
+				InvolvedObject: v1.ObjectReference{
 					APIVersion: "litmuschaos.io/v1alpha1",
 					Kind:       "ChaosEngine",
 					Name:       engineDetails.Name,
@@ -138,7 +137,7 @@ func TestExperimentSkipped(t *testing.T) {
 					Name:      eventAtr.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Source: apiv1.EventSource{
+				Source: v1.EventSource{
 					Component: engineDetails.Name + "-runner",
 				},
 				Message:        eventAtr.Message,
@@ -147,7 +146,7 @@ func TestExperimentSkipped(t *testing.T) {
 				Count:          1,
 				FirstTimestamp: metav1.Time{Time: time.Now()},
 				LastTimestamp:  metav1.Time{Time: time.Now()},
-				InvolvedObject: apiv1.ObjectReference{
+				InvolvedObject: v1.ObjectReference{
 					APIVersion: "litmuschaos.io/v1alpha1",
 					Kind:       "ChaosEngine",
 					Name:       engineDetails.Name,
@@ -215,7 +214,7 @@ func TestExperimentDependencyCheck(t *testing.T) {
 					Name:      eventAtr.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Source: apiv1.EventSource{
+				Source: v1.EventSource{
 					Component: engineDetails.Name + "-runner",
 				},
 				Message:        eventAtr.Message,
@@ -224,7 +223,7 @@ func TestExperimentDependencyCheck(t *testing.T) {
 				Count:          1,
 				FirstTimestamp: metav1.Time{Time: time.Now()},
 				LastTimestamp:  metav1.Time{Time: time.Now()},
-				InvolvedObject: apiv1.ObjectReference{
+				InvolvedObject: v1.ObjectReference{
 					APIVersion: "litmuschaos.io/v1alpha1",
 					Kind:       "ChaosEngine",
 					Name:       engineDetails.Name,
@@ -292,7 +291,7 @@ func TestExperimentJobCreate(t *testing.T) {
 					Name:      eventAtr.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Source: apiv1.EventSource{
+				Source: v1.EventSource{
 					Component: engineDetails.Name + "-runner",
 				},
 				Message:        eventAtr.Message,
@@ -301,7 +300,7 @@ func TestExperimentJobCreate(t *testing.T) {
 				Count:          1,
 				FirstTimestamp: metav1.Time{Time: time.Now()},
 				LastTimestamp:  metav1.Time{Time: time.Now()},
-				InvolvedObject: apiv1.ObjectReference{
+				InvolvedObject: v1.ObjectReference{
 					APIVersion: "litmuschaos.io/v1alpha1",
 					Kind:       "ChaosEngine",
 					Name:       engineDetails.Name,
@@ -370,7 +369,7 @@ func TestExperimentJobCleanUp(t *testing.T) {
 					Name:      eventAtr.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Source: apiv1.EventSource{
+				Source: v1.EventSource{
 					Component: engineDetails.Name + "-runner",
 				},
 				Message:        eventAtr.Message,
@@ -379,7 +378,7 @@ func TestExperimentJobCleanUp(t *testing.T) {
 				Count:          1,
 				FirstTimestamp: metav1.Time{Time: time.Now()},
 				LastTimestamp:  metav1.Time{Time: time.Now()},
-				InvolvedObject: apiv1.ObjectReference{
+				InvolvedObject: v1.ObjectReference{
 					APIVersion: "litmuschaos.io/v1alpha1",
 					Kind:       "ChaosEngine",
 					Name:       engineDetails.Name,

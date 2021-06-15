@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -278,18 +277,18 @@ func TestWatchChaosContainerForCompletion(t *testing.T) {
 		EngineNamespace: fakeNamespace,
 	}
 	tests := map[string]struct {
-		chaosengine *litmuschaosv1alpha1.ChaosEngine
+		chaosengine *v1alpha1.ChaosEngine
 		chaospod    v1.Pod
 		isErr       bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -298,9 +297,9 @@ func TestWatchChaosContainerForCompletion(t *testing.T) {
 						},
 					},
 				},
-				Status: litmuschaosv1alpha1.ChaosEngineStatus{
-					EngineStatus: litmuschaosv1alpha1.EngineStatusCompleted,
-					Experiments: []litmuschaosv1alpha1.ExperimentStatuses{
+				Status: v1alpha1.ChaosEngineStatus{
+					EngineStatus: v1alpha1.EngineStatusCompleted,
+					Experiments: []v1alpha1.ExperimentStatuses{
 						{
 							Name: experiment.Name,
 						},
@@ -345,13 +344,13 @@ func TestWatchChaosContainerForCompletion(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{

@@ -8,7 +8,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
 func TestPatchSecrets(t *testing.T) {
@@ -26,19 +25,19 @@ func TestPatchSecrets(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosengine     *v1alpha1.ChaosEngine
+		chaosexperiment *v1alpha1.ChaosExperiment
 		secret          v1.Secret
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -55,13 +54,13 @@ func TestPatchSecrets(t *testing.T) {
 					},
 				},
 			},
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 					},
 				},
@@ -77,13 +76,13 @@ func TestPatchSecrets(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -100,13 +99,13 @@ func TestPatchSecrets(t *testing.T) {
 					},
 				},
 			},
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 					},
 				},
@@ -165,18 +164,18 @@ func TestSetSecrets(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
+		chaosexperiment *v1alpha1.ChaosExperiment
+		chaosengine     *v1alpha1.ChaosEngine
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -193,13 +192,13 @@ func TestSetSecrets(t *testing.T) {
 					},
 				},
 			},
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 					},
 				},
@@ -207,13 +206,13 @@ func TestSetSecrets(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosengine: &litmuschaosv1alpha1.ChaosEngine{
+			chaosengine: &v1alpha1.ChaosEngine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      engineDetails.Name,
 					Namespace: engineDetails.EngineNamespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosEngineSpec{
-					Experiments: []litmuschaosv1alpha1.ExperimentList{
+				Spec: v1alpha1.ChaosEngineSpec{
+					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: experiment.Name,
 							Spec: v1alpha1.ExperimentAttributes{
@@ -289,7 +288,7 @@ func TestValidateSecrets(t *testing.T) {
 				Namespace:          fakeNamespace,
 				JobName:            "fake-job-name",
 				StatusCheckTimeout: 10,
-				Secrets: []litmuschaosv1alpha1.Secret{
+				Secrets: []v1alpha1.Secret{
 					{
 						Name:      fakeSecretName,
 						MountPath: "fake mountpath",
@@ -312,7 +311,7 @@ func TestValidateSecrets(t *testing.T) {
 				Namespace:          fakeNamespace,
 				JobName:            "fake-job-name",
 				StatusCheckTimeout: 10,
-				Secrets: []litmuschaosv1alpha1.Secret{
+				Secrets: []v1alpha1.Secret{
 					{
 						Name: fakeSecretName,
 					},
@@ -334,7 +333,7 @@ func TestValidateSecrets(t *testing.T) {
 				Namespace:          fakeNamespace,
 				JobName:            "fake-job-name",
 				StatusCheckTimeout: 10,
-				Secrets: []litmuschaosv1alpha1.Secret{
+				Secrets: []v1alpha1.Secret{
 					{
 						MountPath: "fake mountpath",
 					},
@@ -373,19 +372,19 @@ func TestGetSecretsFromChaosExperiment(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosexperiment *v1alpha1.ChaosExperiment
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
-						Secrets: []litmuschaosv1alpha1.Secret{
+						Secrets: []v1alpha1.Secret{
 							{
 								Name:      fakeSecretName,
 								MountPath: "fake mountpath",
@@ -397,13 +396,13 @@ func TestGetSecretsFromChaosExperiment(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 					},
 				},

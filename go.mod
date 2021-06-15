@@ -4,18 +4,18 @@ go 1.13
 
 require (
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
-	github.com/litmuschaos/chaos-operator v0.0.0-20210427130225-719c08eb082a
+	github.com/litmuschaos/chaos-operator v0.0.0-20210610071657-a58dbd939e73
 	github.com/litmuschaos/elves v0.0.0-20210325101625-5620f93aed51
 	github.com/litmuschaos/litmus-go v0.0.0-20201015093552-b88e93ffc452
 	github.com/onsi/ginkgo v1.12.0
 	github.com/onsi/gomega v1.9.0
-	github.com/openebs/maya v1.12.1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
+	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
+	golang.org/x/sys v0.0.0-20210514084401-e8d321eab015 // indirect
 	k8s.io/api v0.17.3
 	k8s.io/apimachinery v0.17.3
 	k8s.io/client-go v12.0.0+incompatible
-	k8s.io/klog v1.0.0
 )
 
 // Pinned to kubernetes-1.16.2

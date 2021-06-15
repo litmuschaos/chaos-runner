@@ -6,18 +6,18 @@ IMG_NAME ?= chaos-runner
 PACKAGE_VERSION ?= ci
 IS_DOCKER_INSTALLED = $(shell which docker >> /dev/null 2>&1; echo $$?)
 HOME = $(shell echo $$HOME)
-# list only our namespaced directories
-PACKAGES = $(shell go list ./... | grep -v '/vendor/')
-
-.PHONY: all
-all: godeps format lint build dockerops test
 
 .PHONY: help
 help:
 	@echo ""
 	@echo "Usage:-"
-	@echo "\tmake all   -- [default] builds the chaos runner container"
+	@echo "\tmake godeps    -- sets up dependencies for image build"
+	@echo "\tmake build     -- builds the chaos runner binary"
+	@echo "\tmake dockerops -- builds & pushes the chaos runner image"
 	@echo ""
+
+.PHONY: all
+all: godeps build dockerops test
 
 .PHONY: godeps
 godeps:
@@ -25,7 +25,6 @@ godeps:
 	@echo "INFO:\tverifying dependencies for chaos runner build ..."
 	@go get -u -v golang.org/x/lint/golint
 	@go get -u -v golang.org/x/tools/cmd/goimports
-	#@go get -u -v github.com/golang/dep/cmd/dep
 
 _build_check_docker:
 	@if [ $(IS_DOCKER_INSTALLED) -eq 1 ]; \
@@ -38,24 +37,6 @@ _build_check_docker:
 .PHONY: deps
 deps: _build_check_docker godeps
 
-.PHONY: format
-format:
-	@echo "------------------"
-	@echo "--> Running go fmt"
-	@echo "------------------"
-	@go fmt $(PACKAGES)
-
-.PHONY: lint
-lint:
-	@echo "------------------"
-	@echo "--> Running golint"
-	@echo "------------------"
-	@golint $(PACKAGES)
-	@echo "------------------"
-	@echo "--> Running go vet"
-	@echo "------------------"
-	@go vet $(PACKAGES)
-
 .PHONY: build  
 build:
 	@echo "-----------------------------------"
@@ -63,8 +44,6 @@ build:
 	@echo "-----------------------------------"
 	@./build/go-multiarch-build.sh ./bin
 
-.PHONY: gotasks
-gotasks: format lint build
 
 .PHONY: test
 test:

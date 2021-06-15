@@ -54,7 +54,7 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 		}
 		err := clients.ValidatePresenceOfSecretResourceInCluster(v.Name, expDetails.Namespace)
 		if err != nil {
-			return errors.Errorf("unable to get Secret with Name: %v, in namespace: %v", v.Name, expDetails.Namespace)
+			return errors.Errorf("unable to get Secret with Name: %v, in namespace: %v, error: %v", v.Name, expDetails.Namespace, err)
 		}
 		log.Infof("Successfully Validated Secret: %v", v.Name)
 	}

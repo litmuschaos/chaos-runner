@@ -7,7 +7,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 )
 
 func TestPatchHostFileVolumes(t *testing.T) {
@@ -25,19 +24,19 @@ func TestPatchHostFileVolumes(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		chaosengine     *litmuschaosv1alpha1.ChaosEngine
-		chaosexperiment *litmuschaosv1alpha1.ChaosExperiment
+		chaosengine     *v1alpha1.ChaosEngine
+		chaosexperiment *v1alpha1.ChaosExperiment
 		configmap       v1.ConfigMap
 		isErr           bool
 	}{
 		"Test Positive-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 						HostFileVolumes: []v1alpha1.HostFile{
 							{
@@ -52,13 +51,13 @@ func TestPatchHostFileVolumes(t *testing.T) {
 			isErr: false,
 		},
 		"Test Negative-1": {
-			chaosexperiment: &litmuschaosv1alpha1.ChaosExperiment{
+			chaosexperiment: &v1alpha1.ChaosExperiment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      experiment.Name,
 					Namespace: experiment.Namespace,
 				},
-				Spec: litmuschaosv1alpha1.ChaosExperimentSpec{
-					Definition: litmuschaosv1alpha1.ExperimentDef{
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
 						Image: fakeExperimentImage,
 						HostFileVolumes: []v1alpha1.HostFile{
 							{
