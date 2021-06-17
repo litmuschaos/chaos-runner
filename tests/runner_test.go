@@ -18,6 +18,7 @@ limitations under the License.
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/exec"
 	"regexp"
@@ -243,39 +244,54 @@ var _ = Describe("BDD on chaos-runner", func() {
 	When("Check if the Job is spawned by chaos-runner", func() {
 		It("Should create a Pod delete Job", func() {
 
-			var jobName string
-			jobs, _ := clients.KubeClient.BatchV1().Jobs("litmus").List(metav1.ListOptions{})
+			err := retry.
+				Times(uint(180 / 2)).
+				Wait(time.Duration(2) * time.Second).
+				Try(func(attempt uint) error {
+					var jobName string
+					jobs, err := clients.KubeClient.BatchV1().Jobs("litmus").List(metav1.ListOptions{})
+					if err != nil {
+						return err
+					}
+					regExpr, err := regexp.Compile("pod-delete-.*")
+					if err != nil {
+						return err
+					}
+					for _, job := range jobs.Items {
+						matched := regExpr.MatchString(job.Name)
+						if matched {
+							jobName = job.Name
+							break
+						}
+					}
+					if jobName == "" {
+						return fmt.Errorf("unable to get the job, might be something wrong with chaos-runner")
+					}
+					return nil
+				})
 
-			for _, job := range jobs.Items {
-				matched, _ := regexp.MatchString("pod-delete-.*", job.Name)
-				if matched {
-					jobName = job.Name
-					break
-				}
-			}
-
-			Expect(jobName).To(
-				Not(BeEmpty()),
-				"unable to get the job, might be something wrong with chaos-runner",
+			Expect(err).To(
+				BeNil(),
+				"while listing experiment job in namespace litmus",
 			)
 		})
 	})
 
 })
 
-// This is a workaround to prevent a condition where operator expects presence of chaosresult to update target revert status
-// Also, this minikube is a transient cluster brought up in the pipeline VM, so we cna skip the cleanup
-/*
-
 //Deleting all unused resources
 var _ = AfterSuite(func() {
-	By("Deleting all CRDs")
-	crdDeletion := exec.Command("kubectl", "delete", "-f", "https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/chaos_crds.yaml").Run()
-	Expect(crdDeletion).To(BeNil())
-	By("Deleting RBAC Permissions")
-	rbacDeletion := exec.Command("kubectl", "delete", "-f", "https://raw.githubusercontent.com/litmuschaos/chaos-operator/master/deploy/rbac.yaml").Run()
-	Expect(rbacDeletion).To(BeNil())
-	log.Info("deleted CRD and RBAC")
-})
 
-*/
+	By("Deleting chaosengine CRD")
+	ceDeleteCRDs := exec.Command("kubectl", "delete", "crds", "chaosengines.litmuschaos.io").Run()
+	Expect(ceDeleteCRDs).To(BeNil())
+
+	By("Deleting other CRDs")
+	crdDeletion := exec.Command("kubectl", "delete", "crds", "chaosresults.litmuschaos.io", "chaosexperiments.litmuschaos.io").Run()
+	Expect(crdDeletion).To(BeNil())
+
+	By("Deleting namespace litmus")
+	rbacDeletion := exec.Command("kubectl", "delete", "ns", "litmus").Run()
+	Expect(rbacDeletion).To(BeNil())
+	log.Info("deleted CRD and Namespace")
+})
