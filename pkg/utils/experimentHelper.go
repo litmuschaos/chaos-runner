@@ -84,6 +84,7 @@ func (expDetails *ExperimentDetails) SetDefaultAttributeValuesFromChaosExperimen
 	expDetails.SetImage(experimentSpec).
 		SetImagePullPolicy(experimentSpec).
 		SetArgs(experimentSpec).
+		SetCommand(experimentSpec).
 		SetLabels(experimentSpec, engine).
 		SetSecurityContext(experimentSpec).
 		SetHostPID(experimentSpec)
@@ -117,6 +118,12 @@ func (expDetails *ExperimentDetails) SetImagePullPolicy(experimentSpec *litmusch
 // SetArgs sets the Experiment Image, in Experiment Structure
 func (expDetails *ExperimentDetails) SetArgs(experimentSpec *litmuschaosv1alpha1.ChaosExperiment) *ExperimentDetails {
 	expDetails.ExpArgs = experimentSpec.Spec.Definition.Args
+	return expDetails
+}
+
+// SetCommand to execute inside the experiment image.
+func (expDetails *ExperimentDetails) SetCommand(experimentSpec *litmuschaosv1alpha1.ChaosExperiment) *ExperimentDetails {
+	expDetails.ExpCommand = experimentSpec.Spec.Definition.Command
 	return expDetails
 }
 

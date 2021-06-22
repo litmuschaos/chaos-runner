@@ -39,6 +39,7 @@ type ExperimentDetails struct {
 	ExpImage           string
 	ExpImagePullPolicy v1.PullPolicy
 	ExpArgs            []string
+	ExpCommand         []string
 	JobName            string
 	Namespace          string
 	ConfigMaps         []v1alpha1.ConfigMap

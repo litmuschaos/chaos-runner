@@ -23,7 +23,7 @@ func buildContainerSpec(experiment *ExperimentDetails, envVars []corev1.EnvVar) 
 	containerSpec := container.NewBuilder().
 		WithName(experiment.JobName).
 		WithImage(experiment.ExpImage).
-		WithCommandNew([]string{"/bin/bash"}).
+		WithCommandNew(experiment.ExpCommand).
 		WithArgumentsNew(experiment.ExpArgs).
 		WithImagePullPolicy(experiment.ExpImagePullPolicy).
 		WithEnvsNew(envVars)
