@@ -1,9 +1,10 @@
 # Makefile for building Litmus and its tools
 # Reference Guide - https://www.gnu.org/software/make/manual/make.html
 
-REGISTRY ?= litmuschaos
-IMG_NAME ?= chaos-runner
-PACKAGE_VERSION ?= ci
+DOCKER_REGISTRY ?= docker.io
+DOCKER_REPO ?= litmuschaos
+DOCKER_IMAGE ?= chaos-runner
+DOCKER_TAG ?= ci
 IS_DOCKER_INSTALLED = $(shell which docker >> /dev/null 2>&1; echo $$?)
 HOME = $(shell echo $$HOME)
 
@@ -57,20 +58,20 @@ dockerops:
 	@echo "------------------"
 	@echo "--> Build Chaos-runner image..." 
 	@echo "------------------"
-	@docker buildx build --file build/Dockerfile  --progress plane --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .    
+	@docker buildx build --file build/Dockerfile  --progress plane --platform linux/arm64,linux/amd64 --tag $(DOCKER_REGISTRY)/$(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG) .    
 
 .PHONY: dockerops-amd64
 dockerops-amd64:
 	@echo "--------------------------------------------"
 	@echo "--> Build chaos-runner amd-64 docker image"
 	@echo "--------------------------------------------"
-	sudo docker build --file build/Dockerfile --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) . --build-arg TARGETARCH=amd64
+	sudo docker build --file build/Dockerfile --tag $(DOCKER_REGISTRY)/$(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG) . --build-arg TARGETARCH=amd64
 	@echo "--------------------------------------------"
 	@echo "--> Push chaos-runner amd-64 docker image"
 	@echo "--------------------------------------------"	
-	sudo docker push $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION)	
+	sudo docker push $(DOCKER_REGISTRY)/$(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG)	
 
 .PHONY: push
 push:
-	@docker buildx build --file build/Dockerfile  --progress plane --push --platform linux/arm64,linux/amd64 --tag $(REGISTRY)/$(IMG_NAME):$(PACKAGE_VERSION) .
+	@docker buildx build --file build/Dockerfile  --progress plane --push --platform linux/arm64,linux/amd64 --tag $(DOCKER_REGISTRY)/$(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG) .
 
