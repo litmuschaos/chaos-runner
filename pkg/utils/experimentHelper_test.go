@@ -173,6 +173,7 @@ func TestSetDefaultAttributeValuesFromChaosExperiment(t *testing.T) {
 		envMap:             map[string]v1.EnvVar{},
 		ExpLabels:          map[string]string{},
 		ExpArgs:            []string{},
+		ExpCommand:         []string{},
 		ConfigMaps:         []v1alpha1.ConfigMap{},
 		Secrets:            []v1alpha1.Secret{},
 		ExpImage:           "",
@@ -632,6 +633,61 @@ func TestSetArgs(t *testing.T) {
 			actualResult := mock.chaosexperiment.Spec.Definition.Args
 			if !reflect.DeepEqual(expectedResult, actualResult) {
 				t.Fatalf("Test %q failed to set the default env from experiment", name)
+			}
+		})
+	}
+}
+
+func TestSetCommand(t *testing.T) {
+	fakeExperimentCommand := "fake-exp-command"
+	experiment := ExperimentDetails{
+		Name:               "Fake-Exp-Name",
+		Namespace:          "Fake NameSpace",
+		JobName:            "fake-job-name",
+		StatusCheckTimeout: 10,
+		envMap:             map[string]v1.EnvVar{},
+		ExpLabels:          map[string]string{},
+		ExpArgs:            []string{},
+	}
+
+	tests := map[string]struct {
+		chaosexperiment *v1alpha1.ChaosExperiment
+	}{
+		"Test Positive-1": {
+			chaosexperiment: &v1alpha1.ChaosExperiment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      experiment.Name,
+					Namespace: experiment.Namespace,
+				},
+				Spec: v1alpha1.ChaosExperimentSpec{
+					Definition: v1alpha1.ExperimentDef{
+						Command: []string{
+							fakeExperimentCommand,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for name, mock := range tests {
+		t.Run(name, func(t *testing.T) {
+			client := CreateFakeClient(t)
+
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			if err != nil {
+				t.Fatalf("experiment not created for %v test, err: %v", name, err)
+			}
+			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(mock.chaosexperiment.Name, metav1.GetOptions{})
+			if err != nil {
+				t.Fatalf("fail to get the chaosexperiment for %v test, err: %v", name, err)
+			}
+
+			expDetails := experiment.SetCommand(experimentSpec)
+			expectedResult := expDetails.ExpCommand
+			actualResult := mock.chaosexperiment.Spec.Definition.Command
+			if !reflect.DeepEqual(expectedResult, actualResult) {
+				t.Fatalf("Test %q failed to set the command from experiment", name)
 			}
 		})
 	}
