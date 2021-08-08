@@ -50,7 +50,8 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		setEnv("ANNOTATION_KEY", engineDetails.AnnotationKey).
 		setEnv("ANNOTATION_CHECK", engineDetails.AnnotationCheck).
 		setEnv("LIB_IMAGE_PULL_POLICY", string(expDetails.ExpImagePullPolicy)).
-		setEnv("TERMINATION_GRACE_PERIOD_SECONDS", strconv.Itoa(int(expDetails.TerminationGracePeriodSeconds)))
+		setEnv("TERMINATION_GRACE_PERIOD_SECONDS", strconv.Itoa(int(expDetails.TerminationGracePeriodSeconds))).
+		setEnv("DEFAULT_CHECKS", expDetails.DefaultChecks)
 
 	// Get the Default ENV's from ChaosExperiment
 	log.Info("Getting the ENV Variables")

@@ -24,7 +24,8 @@ func (expDetails *ExperimentDetails) SetInstanceAttributeValuesFromChaosEngine(e
 		SetImagePullSecretsFromEngine(chaosEngine).
 		SetTolerationsFromEngine(chaosEngine).
 		SetExpImageFromEngine(chaosEngine).
-		SetTerminationGracePeriodSecondsFromEngine(chaosEngine)
+		SetTerminationGracePeriodSecondsFromEngine(chaosEngine).
+		SetDefaultChecks(chaosEngine)
 
 	return nil
 }
@@ -103,6 +104,12 @@ func (expDetails *ExperimentDetails) SetTolerationsFromEngine(engine *litmuschao
 			expDetails.Tolerations = expRefList[i].Spec.Components.Tolerations
 		}
 	}
+	return expDetails
+}
+
+// SetDefaultChecks sets th default checks provided in the chaosEngine
+func (expDetails *ExperimentDetails) SetDefaultChecks(engine *litmuschaosv1alpha1.ChaosEngine) *ExperimentDetails {
+	expDetails.DefaultChecks = engine.Spec.DefaultChecks
 	return expDetails
 }
 
