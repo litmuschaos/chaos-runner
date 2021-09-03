@@ -4,7 +4,7 @@
 DOCKER_REGISTRY ?= docker.io
 DOCKER_REPO ?= litmuschaos
 DOCKER_IMAGE ?= chaos-runner
-DOCKER_TAG ?= ci
+DOCKER_TAG ?= dev
 IS_DOCKER_INSTALLED = $(shell which docker >> /dev/null 2>&1; echo $$?)
 HOME = $(shell echo $$HOME)
 
@@ -65,7 +65,7 @@ dockerops-amd64:
 	@echo "--------------------------------------------"
 	@echo "--> Build chaos-runner amd-64 docker image"
 	@echo "--------------------------------------------"
-	sudo docker build --file build/Dockerfile --tag $(DOCKER_REGISTRY)/$(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG) . --build-arg TARGETARCH=amd64
+	sudo docker build --file build/Dockerfile --tag $(DOCKER_REGISTRY)/$(DOCKER_REPO)/$(DOCKER_IMAGE):$(DOCKER_TAG) . --build-arg TARGETPLATFORM=linux/amd64
 	@echo "--------------------------------------------"
 	@echo "--> Push chaos-runner amd-64 docker image"
 	@echo "--------------------------------------------"	
