@@ -24,7 +24,8 @@ func (expDetails *ExperimentDetails) SetInstanceAttributeValuesFromChaosEngine(e
 		SetImagePullSecretsFromEngine(chaosEngine).
 		SetTolerationsFromEngine(chaosEngine).
 		SetExpImageFromEngine(chaosEngine).
-		SetTerminationGracePeriodSecondsFromEngine(chaosEngine)
+		SetTerminationGracePeriodSecondsFromEngine(chaosEngine).
+		SetDefaultAppHealthCheck(chaosEngine)
 
 	return nil
 }
@@ -103,6 +104,12 @@ func (expDetails *ExperimentDetails) SetTolerationsFromEngine(engine *litmuschao
 			expDetails.Tolerations = expRefList[i].Spec.Components.Tolerations
 		}
 	}
+	return expDetails
+}
+
+// SetDefaultAppHealthCheck sets th default health checks provided inside the chaosEngine
+func (expDetails *ExperimentDetails) SetDefaultAppHealthCheck(engine *litmuschaosv1alpha1.ChaosEngine) *ExperimentDetails {
+	expDetails.DefaultAppHealthCheck = engine.Spec.DefaultAppHealthCheck
 	return expDetails
 }
 
