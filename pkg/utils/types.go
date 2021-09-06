@@ -87,23 +87,23 @@ var (
 )
 
 const (
-	// ExperimentDependencyCheckReason denotes the reason for the dependency check event
+	// ExperimentDependencyCheckReason contains the reason for the dependency check event
 	ExperimentDependencyCheckReason string = "ExperimentDependencyCheck"
-	// ExperimentJobCreateReason denotes the reason for the job creation event
+	// ExperimentJobCreateReason contains the reason for the job creation event
 	ExperimentJobCreateReason string = "ExperimentJobCreate"
-	// ExperimentJobCleanUpReason denotes the reason for the job cleanup event
+	// ExperimentJobCleanUpReason contains the reason for the job cleanup event
 	ExperimentJobCleanUpReason string = "ExperimentJobCleanUp"
-	// ExperimentSkippedReason denotes the reason for the experiment skip event
+	// ExperimentSkippedReason contains the reason for the experiment skip event
 	ExperimentSkippedReason string = "ExperimentSkipped"
-	//	ExperimentEnvParseErrorReason denotes the reason for the env-parse-error event
+	// ExperimentEnvParseErrorReason contains the reason for the env-parse-error event
 	ExperimentEnvParseErrorReason string = "EnvParseError"
-	// ExperimentNotFoundErrorReason denotes the reason for the experiment-not-found event
+	// ExperimentNotFoundErrorReason contains the reason for the experiment-not-found event
 	ExperimentNotFoundErrorReason string = "ExperimentNotFound"
-	// ExperimentJobCreationErrorReason denotes the reason for the job-creation-error event
+	// ExperimentJobCreationErrorReason contains the reason for the job-creation-error event
 	ExperimentJobCreationErrorReason string = "JobCreationError"
-	// ExperimentChaosContainerWatchErrorReason denotes the reason for the watch-job-error event
+	// ExperimentChaosContainerWatchErrorReason contains the reason for the watch-job-error event
 	ExperimentChaosContainerWatchErrorReason string = "ChaosContainerWatchNotPermitted"
-	// ChaosResourceNotFoundReason denotes the reason for the chaos-resources-not-found event
+	// ChaosResourceNotFoundReason contains the reason for the chaos-resources-not-found event
 	ChaosResourceNotFoundReason string = "ChaosResourceNotFound"
 )
 
