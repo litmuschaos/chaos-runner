@@ -142,7 +142,7 @@ func TestPatchConfigMaps(t *testing.T) {
 				actualResult := len(experiment.ConfigMaps)
 				expectedResult := 1
 				if actualResult != expectedResult {
-					t.Fatalf("Test %q failed: expected length of configmap is %v but the actual lenght is %v", name, expectedResult, actualResult)
+					t.Fatalf("Test %q failed: expected length of configmap is %v but the actual length is %v", name, expectedResult, actualResult)
 				}
 			}
 		})

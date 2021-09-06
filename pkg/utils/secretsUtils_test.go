@@ -142,7 +142,7 @@ func TestPatchSecrets(t *testing.T) {
 				actualResult := len(experiment.Secrets)
 				expectedResult := 1
 				if actualResult != expectedResult {
-					t.Fatalf("Test %q failed: expected length of secret is %v but the actual lenght is %v", name, expectedResult, actualResult)
+					t.Fatalf("Test %q failed: expected length of secret is %v but the actual length is %v", name, expectedResult, actualResult)
 				}
 			}
 		})
