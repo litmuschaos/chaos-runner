@@ -109,7 +109,7 @@ func (expDetails *ExperimentDetails) SetTolerationsFromEngine(engine *litmuschao
 
 // SetDefaultChecks sets th default checks provided in the chaosEngine
 func (expDetails *ExperimentDetails) SetDefaultChecks(engine *litmuschaosv1alpha1.ChaosEngine) *ExperimentDetails {
-	expDetails.DefaultChecks = engine.Spec.DefaultChecks
+	expDetails.DefaultChecks = engine.Spec.DefaultAppHealthCheck
 	return expDetails
 }
 
