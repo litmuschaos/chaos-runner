@@ -54,7 +54,7 @@ func main() {
 		if engineDetails.ClientUUID != "" {
 			analytics.TriggerAnalytics(experiment.Name, engineDetails.ClientUUID)
 		}
-		// check the existance of chaosexperiment inside the cluster
+		// check the existence of chaosexperiment inside the cluster
 		if err := experiment.HandleChaosExperimentExistence(engineDetails, clients); err != nil {
 			log.Errorf("unable to get ChaosExperiment name: %v, in namespace: %v, error: %v", experiment.Name, experiment.Namespace, err)
 			experiment.ExperimentSkipped(utils.ExperimentNotFoundErrorReason, engineDetails, clients)

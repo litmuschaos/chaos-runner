@@ -87,15 +87,24 @@ var (
 )
 
 const (
-	ExperimentDependencyCheckReason          string = "ExperimentDependencyCheck"
-	ExperimentJobCreateReason                string = "ExperimentJobCreate"
-	ExperimentJobCleanUpReason               string = "ExperimentJobCleanUp"
-	ExperimentSkippedReason                  string = "ExperimentSkipped"
-	ExperimentEnvParseErrorReason            string = "EnvParseError"
-	ExperimentNotFoundErrorReason            string = "ExperimentNotFound"
-	ExperimentJobCreationErrorReason         string = "JobCreationError"
+	// ExperimentDependencyCheckReason contains the reason for the dependency check event
+	ExperimentDependencyCheckReason string = "ExperimentDependencyCheck"
+	// ExperimentJobCreateReason contains the reason for the job creation event
+	ExperimentJobCreateReason string = "ExperimentJobCreate"
+	// ExperimentJobCleanUpReason contains the reason for the job cleanup event
+	ExperimentJobCleanUpReason string = "ExperimentJobCleanUp"
+	// ExperimentSkippedReason contains the reason for the experiment skip event
+	ExperimentSkippedReason string = "ExperimentSkipped"
+	// ExperimentEnvParseErrorReason contains the reason for the env-parse-error event
+	ExperimentEnvParseErrorReason string = "EnvParseError"
+	// ExperimentNotFoundErrorReason contains the reason for the experiment-not-found event
+	ExperimentNotFoundErrorReason string = "ExperimentNotFound"
+	// ExperimentJobCreationErrorReason contains the reason for the job-creation-error event
+	ExperimentJobCreationErrorReason string = "JobCreationError"
+	// ExperimentChaosContainerWatchErrorReason contains the reason for the watch-job-error event
 	ExperimentChaosContainerWatchErrorReason string = "ChaosContainerWatchNotPermitted"
-	ChaosResourceNotFoundReason              string = "ChaosResourceNotFound"
+	// ChaosResourceNotFoundReason contains the reason for the chaos-resources-not-found event
+	ChaosResourceNotFoundReason string = "ChaosResourceNotFound"
 )
 
 // GenerateClientSetFromKubeConfig will generation both ClientSets (k8s, and Litmus)
