@@ -59,7 +59,7 @@ type ExperimentDetails struct {
 	ImagePullSecrets              []v1.LocalObjectReference
 	StatusCheckTimeout            int
 	TerminationGracePeriodSeconds int64
-	DefaultChecks                 string
+	DefaultAppHealthCheck         string
 }
 
 //VolumeOpts is a strcuture for all volume related operations
