@@ -19,7 +19,7 @@ RUN CGO_ENABLED=0 go build -o /output/chaos-runner -v ./bin
 # Packaging stage
 # Image source: https://github.com/litmuschaos/test-tools/blob/master/custom/hardend-alpine/control-plane/Dockerfile
 # The base image is non-root (have litmus user) with default litmus directory.
-FROM litmuschaos/hardened-alpine
+FROM litmuschaos/infra-alpine
 
 LABEL maintainer="LitmusChaos"
 
