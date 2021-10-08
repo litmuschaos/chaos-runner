@@ -1,11 +1,16 @@
+# CHAOS RUNNER
+
+[![Slack Channel](https://img.shields.io/badge/Slack-Join-purple)](https://slack.litmuschaos.io)
+![GitHub Workflow](https://github.com/litmuschaos/chaos-runner/actions/workflows/push.yml/badge.svg?branch=master)
+[![Docker Pulls](https://img.shields.io/docker/pulls/litmuschaos/chaos-runner.svg)](https://hub.docker.com/r/litmuschaos/chaos-runner)
+[![GitHub issues](https://img.shields.io/github/issues/litmuschaos/chaos-runner)](https://github.com/litmuschaos/chaos-runner/issues)
+[![Twitter Follow](https://img.shields.io/twitter/follow/litmuschaos?style=social)](https://twitter.com/LitmusChaos)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5291/badge)](https://bestpractices.coreinfrastructure.org/projects/5291)
 [![Go Report Card](https://goreportcard.com/badge/github.com/litmuschaos/chaos-runner)](https://goreportcard.com/report/github.com/litmuschaos/chaos-runner)
 [![BCH compliance](https://bettercodehub.com/edge/badge/litmuschaos/chaos-runner?branch=master)](https://bettercodehub.com/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/litmuschaos/chaos-runner.svg)](https://hub.docker.com/r/litmuschaos/chaos-runner)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner?ref=badge_shield)
-[![codecov](https://codecov.io/gh/litmuschaos/chaos-runner/branch/master/graph/badge.svg)](https://codecov.io/gh/litmuschaos/chaos-runner)
-
-
-# CHAOS RUNNER
+[![YouTube Channel](https://img.shields.io/badge/YouTube-Subscribe-red)](https://www.youtube.com/channel/UCa57PMqmz_j0wnteRa9nCaw)
+<br><br>
 
 The chaos Runner is an operational bridge between the Chaos-Operator and the LitmusChaos experiment jobs. 
 
@@ -35,6 +40,16 @@ Objective behind chaos-runner creation:
 ## Further Improvements 
 
 - The Go Chaos Runner is in beta stage with further improvements coming soon!! 
+
+## How to get started?
+
+Refer the [LitmusChaos documentation](https://docs.litmuschaos.io) and [Experiment Documentation](https://litmuschaos.github.io/litmus/experiments/concepts/chaos-resources/contents/)
+
+## How do I contribute?
+
+You can contribute by raising issues, improving the documentation, contributing to the core framework and tooling, etc.
+
+Head over to the [Contribution guide](CONTRIBUTING.md)
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner?ref=badge_large)
