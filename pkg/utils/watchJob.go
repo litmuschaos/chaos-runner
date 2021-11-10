@@ -2,13 +2,17 @@ package utils
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/chaos-runner/pkg/log"
+	"github.com/litmuschaos/litmus-go/pkg/utils/retry"
 )
+
+var err error
 
 // checkStatusListForExp loops over all the status patched in chaosEngine, to get the one, which has to be updated
 // Can go with updated the last status(status[n-1])
@@ -24,12 +28,20 @@ func checkStatusListForExp(status []v1alpha1.ExperimentStatuses, ExperimentName 
 
 // GetChaosEngine returns chaosEngine Object
 func (engineDetails EngineDetails) GetChaosEngine(clients ClientSets) (*v1alpha1.ChaosEngine, error) {
-	expEngine, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(engineDetails.Name, metav1.GetOptions{})
-	if err != nil {
-
-		return nil, errors.Errorf("unable to get ChaosEngine name: %v, in namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
+	var engine *v1alpha1.ChaosEngine
+	if err := retry.
+		Times(uint(180)).
+		Wait(time.Duration(2)).
+		Try(func(attempt uint) error {
+			engine, err = clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(engineDetails.Name, metav1.GetOptions{})
+			if err != nil {
+				return errors.Errorf("unable to get ChaosEngine name: %v, in namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
+			}
+			return nil
+		}); err != nil {
+		return nil, err
 	}
-	return expEngine, nil
+	return engine, nil
 }
 
 // PatchChaosEngineStatus updates ChaosEngine with Experiment Status
