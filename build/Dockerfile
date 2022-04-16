@@ -14,7 +14,7 @@ RUN export GOOS=$(echo ${TARGETPLATFORM} | cut -d / -f1) && \
 
 RUN go env
 
-RUN CGO_ENABLED=0 go build -o /output/chaos-runner -v ./bin
+RUN CGO_ENABLED=0 go build -buildvcs=false -o /output/chaos-runner -v ./bin
 
 # Packaging stage
 # Image source: https://github.com/litmuschaos/test-tools/blob/master/custom/hardend-alpine/control-plane/Dockerfile
