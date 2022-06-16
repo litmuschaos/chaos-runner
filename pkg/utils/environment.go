@@ -18,7 +18,7 @@ func (engineDetails *EngineDetails) SetEngineDetails() *EngineDetails {
 	engineDetails.AppNs = os.Getenv("APP_NAMESPACE")
 	engineDetails.EngineNamespace = os.Getenv("CHAOS_NAMESPACE")
 	engineDetails.AppKind = os.Getenv("APP_KIND")
-	engineDetails.SvcAccount = os.Getenv("CHAOS_SVC_ACC")
+	engineDetails.SvcAccount = os.Getenv("CHAOS_SERVICE_ACCOUNT")
 	engineDetails.ClientUUID = os.Getenv("CLIENT_UUID")
 	engineDetails.AuxiliaryAppInfo = os.Getenv("AUXILIARY_APPINFO")
 	engineDetails.AnnotationKey = os.Getenv("ANNOTATION_KEY")
