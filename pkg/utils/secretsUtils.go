@@ -1,10 +1,11 @@
 package utils
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 )
 
@@ -26,7 +27,7 @@ func (expDetails *ExperimentDetails) PatchSecrets(clients ClientSets, engineDeta
 
 // ValidatePresenceOfSecretResourceInCluster validates the secret in Chaos Namespace
 func (clientSets ClientSets) ValidatePresenceOfSecretResourceInCluster(secretName, namespace string) error {
-	_, err := clientSets.KubeClient.CoreV1().Secrets(namespace).Get(secretName, metav1.GetOptions{})
+	_, err := clientSets.KubeClient.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	return err
 }
 
@@ -62,7 +63,7 @@ func (expDetails *ExperimentDetails) ValidateSecrets(clients ClientSets) error {
 }
 
 func (expDetails *ExperimentDetails) getSecretsFromChaosExperiment(clients ClientSets) ([]v1alpha1.Secret, error) {
-	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(context.Background(), expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Errorf("unable to get ChaosExperiment Resource, error: %v", err)
 	}

@@ -1,10 +1,11 @@
 package utils
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 )
 
@@ -57,7 +58,7 @@ func (expDetails *ExperimentDetails) ValidateHostFileVolumes() error {
 
 // getHostFileVolumesFromExperiment obtains the hostFileVolume details from experiment CR spec
 func getHostFileVolumesFromExperiment(clients ClientSets, expDetails *ExperimentDetails) ([]v1alpha1.HostFile, error) {
-	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(context.Background(), expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Errorf("unable to get ChaosExperiment Resource, error: %v", err)
 	}

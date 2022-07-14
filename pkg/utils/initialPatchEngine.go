@@ -1,9 +1,11 @@
 package utils
 
 import (
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"context"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ExperimentStatus is wrapper for v1alpha1.ExperimentStatuses
@@ -24,7 +26,7 @@ func InitialPatchEngine(engineDetails EngineDetails, clients ClientSets, experim
 		expStatus.InitialExperimentStatus(v.Name, engineDetails.Name)
 		expEngine.Status.Experiments = append(expEngine.Status.Experiments, v1alpha1.ExperimentStatuses(expStatus))
 	}
-	_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine)
+	_, updateErr := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(context.Background(), expEngine, metav1.UpdateOptions{})
 	if updateErr != nil {
 		return errors.Errorf("unable to update ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, updateErr)
 	}

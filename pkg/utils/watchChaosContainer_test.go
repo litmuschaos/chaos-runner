@@ -1,9 +1,10 @@
 package utils
 
 import (
+	"context"
 	"testing"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -125,12 +126,12 @@ func TestGetChaosPod(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.KubeClient.CoreV1().Pods(experiment.Namespace).Create(&mock.chaospod)
+			_, err := client.KubeClient.CoreV1().Pods(experiment.Namespace).Create(context.Background(), &mock.chaospod, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("fail to create chaos pod for %v test, err: %v", name, err)
 			}
 			if mock.isSecondTest {
-				_, err = client.KubeClient.CoreV1().Pods(experiment.Namespace).Create(&mock.chaospod2)
+				_, err = client.KubeClient.CoreV1().Pods(experiment.Namespace).Create(context.Background(), &mock.chaospod2, metav1.CreateOptions{})
 				if err != nil {
 					t.Fatalf("fail to create chaos pod 2 for %v test, err: %v", name, err)
 				}
@@ -248,7 +249,7 @@ func TestGetChaosContainerStatus(t *testing.T) {
 			} else {
 				ns = "wrong-ns"
 			}
-			_, err := client.KubeClient.CoreV1().Pods(ns).Create(&mock.chaospod)
+			_, err := client.KubeClient.CoreV1().Pods(ns).Create(context.Background(), &mock.chaospod, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("fail to create chaos pod for %v test, err: %v", name, err)
 			}
@@ -390,12 +391,12 @@ func TestWatchChaosContainerForCompletion(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(fakeNamespace).Create(mock.chaosengine)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(fakeNamespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
 
-			_, err = client.KubeClient.CoreV1().Pods(fakeNamespace).Create(&mock.chaospod)
+			_, err = client.KubeClient.CoreV1().Pods(fakeNamespace).Create(context.Background(), &mock.chaospod, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("fail to create chaos pod for %v test, err: %v", name, err)
 			}

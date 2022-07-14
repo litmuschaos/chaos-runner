@@ -1,13 +1,14 @@
 package utils
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 )
 
 func TestPatchSecrets(t *testing.T) {
@@ -118,15 +119,15 @@ func TestPatchSecrets(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.KubeClient.CoreV1().Secrets(experiment.Namespace).Create(&mock.secret)
+			_, err := client.KubeClient.CoreV1().Secrets(experiment.Namespace).Create(context.Background(), &mock.secret, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("secret not created for %v test, err: %v", name, err)
 			}
-			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
-			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
+			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
@@ -238,13 +239,13 @@ func TestSetSecrets(t *testing.T) {
 			client := CreateFakeClient(t)
 
 			if !mock.isErr {
-				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 				if err != nil {
 					t.Fatalf("experiment not created for %v test, err: %v", name, err)
 				}
 			}
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
@@ -347,7 +348,7 @@ func TestValidateSecrets(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.KubeClient.CoreV1().Secrets(fakeNamespace).Create(&mock.secret)
+			_, err := client.KubeClient.CoreV1().Secrets(fakeNamespace).Create(context.Background(), &mock.secret, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("secret not created for %v test, err: %v", name, err)
 			}
@@ -415,7 +416,7 @@ func TestGetSecretsFromChaosExperiment(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}

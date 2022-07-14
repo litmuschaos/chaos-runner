@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"reflect"
 	"strconv"
 
@@ -8,7 +9,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 )
 
 // SetInstanceAttributeValuesFromChaosEngine set the value from the chaosengine
@@ -116,7 +117,7 @@ func (expDetails *ExperimentDetails) SetDefaultAppHealthCheck(engine *litmuschao
 // SetOverrideEnvFromChaosEngine override the default envs with envs passed inside the chaosengine
 func (expDetails *ExperimentDetails) SetOverrideEnvFromChaosEngine(engineName string, clients ClientSets) error {
 
-	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(engineName, metav1.GetOptions{})
+	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(context.Background(), engineName, metav1.GetOptions{})
 	if err != nil {
 		return errors.Errorf("unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
 	}

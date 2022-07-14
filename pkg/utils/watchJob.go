@@ -1,13 +1,14 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 	"github.com/litmuschaos/litmus-go/pkg/utils/retry"
 )
@@ -33,7 +34,7 @@ func (engineDetails EngineDetails) GetChaosEngine(clients ClientSets) (*v1alpha1
 		Times(uint(180)).
 		Wait(time.Duration(2)).
 		Try(func(attempt uint) error {
-			engine, err = clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(engineDetails.Name, metav1.GetOptions{})
+			engine, err = clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(context.Background(), engineDetails.Name, metav1.GetOptions{})
 			if err != nil {
 				return errors.Errorf("unable to get ChaosEngine name: %v, in namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
 			}
@@ -56,7 +57,7 @@ func (expStatus *ExperimentStatus) PatchChaosEngineStatus(engineDetails EngineDe
 		return errors.Errorf("unable to find the status for Experiment: %v in ChaosEngine: %v", expStatus.Name, expEngine.Name)
 	}
 	expEngine.Status.Experiments[experimentIndex] = v1alpha1.ExperimentStatuses(*expStatus)
-	if _, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(expEngine); err != nil {
+	if _, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Update(context.Background(), expEngine, metav1.UpdateOptions{}); err != nil {
 		return err
 	}
 	return nil
@@ -76,7 +77,7 @@ func GetResultName(engineName, experimentName, instanceID string) string {
 func (expDetails *ExperimentDetails) GetChaosResult(engineDetails EngineDetails, clients ClientSets) (*v1alpha1.ChaosResult, error) {
 
 	resultName := GetResultName(engineDetails.Name, expDetails.Name, expDetails.InstanceID)
-	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.EngineNamespace).Get(resultName, metav1.GetOptions{})
+	expResult, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosResults(engineDetails.EngineNamespace).Get(context.Background(), resultName, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Errorf("unable to get ChaosResult name: %v in namespace: %v, error: %v", resultName, engineDetails.EngineNamespace, err)
 	}
@@ -117,7 +118,7 @@ func (engineDetails EngineDetails) DeleteJobAccordingToJobCleanUpPolicy(experime
 	case v1alpha1.CleanUpPolicyDelete:
 		log.Infof("deleting the job as jobCleanPolicy is set to %s", expEngine.Spec.JobCleanUpPolicy)
 		deletePolicy := metav1.DeletePropagationForeground
-		if deleteJobErr := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Delete(experiment.JobName, &metav1.DeleteOptions{
+		if deleteJobErr := clients.KubeClient.BatchV1().Jobs(experiment.Namespace).Delete(context.Background(), experiment.JobName, metav1.DeleteOptions{
 			PropagationPolicy: &deletePolicy,
 		}); deleteJobErr != nil {
 			return "", errors.Errorf("unable to delete ChaosExperiment Job name: %v, in namespace: %v, error: %v", experiment.JobName, experiment.Namespace, deleteJobErr)

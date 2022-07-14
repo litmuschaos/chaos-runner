@@ -1,10 +1,11 @@
 package utils
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -142,7 +143,7 @@ func TestSetDefaultEnvFromChaosExperiment(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
@@ -257,7 +258,7 @@ func TestSetDefaultAttributeValuesFromChaosExperiment(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
@@ -388,13 +389,13 @@ func TestSetValueFromChaosResources(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
 
 			if !mock.isErr {
-				_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
+				_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 				if err != nil {
 					t.Fatalf("engine not created for %v test, err: %v", name, err)
 				}
@@ -457,11 +458,11 @@ func TestSetLabels(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
-			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(mock.chaosexperiment.Name, metav1.GetOptions{})
+			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(context.Background(), mock.chaosexperiment.Name, metav1.GetOptions{})
 			if err != nil {
 				t.Fatalf("fail to get the chaosexperiment for %v test, err: %v", name, err)
 			}
@@ -510,11 +511,11 @@ func TestSetImage(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
-			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(mock.chaosexperiment.Name, metav1.GetOptions{})
+			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(context.Background(), mock.chaosexperiment.Name, metav1.GetOptions{})
 			if err != nil {
 				t.Fatalf("fail to get the chaosexperiment for %v test, err: %v", name, err)
 			}
@@ -564,11 +565,11 @@ func TestSetImagePullPolicy(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
-			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(mock.chaosexperiment.Name, metav1.GetOptions{})
+			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(context.Background(), mock.chaosexperiment.Name, metav1.GetOptions{})
 			if err != nil {
 				t.Fatalf("fail to get the chaosexperiment for %v test, err: %v", name, err)
 			}
@@ -619,11 +620,11 @@ func TestSetArgs(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
-			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(mock.chaosexperiment.Name, metav1.GetOptions{})
+			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(context.Background(), mock.chaosexperiment.Name, metav1.GetOptions{})
 			if err != nil {
 				t.Fatalf("fail to get the chaosexperiment for %v test, err: %v", name, err)
 			}
@@ -674,11 +675,11 @@ func TestSetCommand(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
-			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(mock.chaosexperiment.Name, metav1.GetOptions{})
+			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(context.Background(), mock.chaosexperiment.Name, metav1.GetOptions{})
 			if err != nil {
 				t.Fatalf("fail to get the chaosexperiment for %v test, err: %v", name, err)
 			}
@@ -731,11 +732,11 @@ func TestSetSecurityContext(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
-			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(mock.chaosexperiment.Name, metav1.GetOptions{})
+			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(context.Background(), mock.chaosexperiment.Name, metav1.GetOptions{})
 			if err != nil {
 				t.Fatalf("fail to get the chaosexperiment for %v test, err: %v", name, err)
 			}
@@ -784,11 +785,11 @@ func TestHostPID(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
-			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(mock.chaosexperiment.Name, metav1.GetOptions{})
+			experimentSpec, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Get(context.Background(), mock.chaosexperiment.Name, metav1.GetOptions{})
 			if err != nil {
 				t.Fatalf("fail to get the chaosexperiment for %v test, err: %v", name, err)
 			}
@@ -869,12 +870,12 @@ func TestHandleChaosExperimentExistence(t *testing.T) {
 			client := CreateFakeClient(t)
 
 			if !mock.isErr {
-				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 				if err != nil {
 					t.Fatalf("experiment not created for %v test, err: %v", name, err)
 				}
 			} else {
-				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
+				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 				if err != nil {
 					t.Fatalf("engine not created for %v test, err: %v", name, err)
 				}
@@ -888,7 +889,7 @@ func TestHandleChaosExperimentExistence(t *testing.T) {
 			}
 
 			if mock.isErr {
-				chaosEngine, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(engineDetails.Name, metav1.GetOptions{})
+				chaosEngine, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(engineDetails.EngineNamespace).Get(context.Background(), engineDetails.Name, metav1.GetOptions{})
 				if err != nil {
 					t.Fatalf("%v test failed engine not found, err: %v", name, err)
 				}
