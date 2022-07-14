@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"time"
 
 	"github.com/litmuschaos/chaos-runner/pkg/log"
@@ -36,7 +37,7 @@ func (engineDetails EngineDetails) CreateEvents(eventAttributes *EventAttributes
 		},
 	}
 
-	_, err := clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Create(events)
+	_, err := clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Create(context.Background(), events, metav1.CreateOptions{})
 	return err
 
 }
@@ -45,7 +46,7 @@ func (engineDetails EngineDetails) CreateEvents(eventAttributes *EventAttributes
 // else it will create a new event
 func (engineDetails EngineDetails) GenerateEvents(eventAttributes *EventAttributes, clients ClientSets) error {
 
-	event, err := clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Get(eventAttributes.Name, metav1.GetOptions{})
+	event, err := clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Get(context.Background(), eventAttributes.Name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			if err := engineDetails.CreateEvents(eventAttributes, clients); err != nil {
@@ -58,7 +59,7 @@ func (engineDetails EngineDetails) GenerateEvents(eventAttributes *EventAttribut
 		event.LastTimestamp = metav1.Time{Time: time.Now()}
 		event.Count = event.Count + 1
 		event.Message = eventAttributes.Message
-		_, err = clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Update(event)
+		_, err = clients.KubeClient.CoreV1().Events(engineDetails.EngineNamespace).Update(context.Background(), event, metav1.UpdateOptions{})
 		return err
 	}
 	return nil

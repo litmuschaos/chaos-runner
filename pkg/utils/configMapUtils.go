@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"context"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,7 +25,7 @@ func (expDetails *ExperimentDetails) PatchConfigMaps(clients ClientSets, engineD
 
 // ValidatePresenceOfConfigMapResourceInCluster validates the configMap, before checking or creating them.
 func (clientSets ClientSets) ValidatePresenceOfConfigMapResourceInCluster(configMapName, namespace string) error {
-	_, err := clientSets.KubeClient.CoreV1().ConfigMaps(namespace).Get(configMapName, metav1.GetOptions{})
+	_, err := clientSets.KubeClient.CoreV1().ConfigMaps(namespace).Get(context.Background(), configMapName, metav1.GetOptions{})
 	return err
 }
 
@@ -62,7 +63,7 @@ func (expDetails *ExperimentDetails) ValidateConfigMaps(clients ClientSets) erro
 }
 
 func (expDetails *ExperimentDetails) getConfigMapsFromChaosExperiment(clients ClientSets) ([]v1alpha1.ConfigMap, error) {
-	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	chaosExperimentObj, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(context.Background(), expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Errorf("unable to get ChaosExperiment Resource, error: %v", err)
 	}

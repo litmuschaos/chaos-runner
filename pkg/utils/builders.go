@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"context"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"reflect"
 
 	"github.com/pkg/errors"
@@ -109,7 +111,7 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 
 // launchJob spawn a kubernetes Job using the job Object received.
 func (expDetails *ExperimentDetails) launchJob(job *batchv1.Job, clients ClientSets) error {
-	_, err := clients.KubeClient.BatchV1().Jobs(expDetails.Namespace).Create(job)
+	_, err := clients.KubeClient.BatchV1().Jobs(expDetails.Namespace).Create(context.Background(), job, v1.CreateOptions{})
 	return err
 }
 

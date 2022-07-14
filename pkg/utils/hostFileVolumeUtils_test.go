@@ -1,12 +1,13 @@
 package utils
 
 import (
+	"context"
 	"testing"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 )
 
 func TestPatchHostFileVolumes(t *testing.T) {
@@ -77,7 +78,7 @@ func TestPatchHostFileVolumes(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", err, name)
 			}

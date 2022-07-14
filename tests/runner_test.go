@@ -17,6 +17,7 @@ limitations under the License.
 */
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -25,7 +26,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 	"github.com/litmuschaos/chaos-runner/pkg/utils"
 	"github.com/litmuschaos/chaos-runner/pkg/utils/k8s"
@@ -96,7 +97,7 @@ var _ = BeforeSuite(func() {
 		Times(uint(180 / 2)).
 		Wait(time.Duration(2) * time.Second).
 		Try(func(attempt uint) error {
-			podSpec, err := clients.KubeClient.CoreV1().Pods("litmus").List(metav1.ListOptions{LabelSelector: "name=chaos-operator"})
+			podSpec, err := clients.KubeClient.CoreV1().Pods("litmus").List(context.Background(), metav1.ListOptions{LabelSelector: "name=chaos-operator"})
 			if err != nil || len(podSpec.Items) == 0 {
 				return errors.Errorf("Unable to list chaos-operator, err: %v", err)
 			}
@@ -170,7 +171,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 				},
 			}
 			By("Creating nginx deployment")
-			_, err := clients.KubeClient.AppsV1().Deployments("litmus").Create(deployment)
+			_, err := clients.KubeClient.AppsV1().Deployments("litmus").Create(context.Background(), deployment, metav1.CreateOptions{})
 			Expect(err).To(
 				BeNil(),
 				"while creating nginx deployment in namespace litmus",
@@ -214,7 +215,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 			}
 
 			By("Creating ChaosEngine Resource")
-			_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines("litmus").Create(chaosEngine)
+			_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines("litmus").Create(context.Background(), chaosEngine, metav1.CreateOptions{})
 			Expect(err).To(
 				BeNil(),
 				"while building ChaosEngine engine-nginx in namespace litmus",
@@ -225,7 +226,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 				Times(uint(180 / 2)).
 				Wait(time.Duration(2) * time.Second).
 				Try(func(attempt uint) error {
-					pod, err := clients.KubeClient.CoreV1().Pods("litmus").Get("engine-nginx-runner", metav1.GetOptions{})
+					pod, err := clients.KubeClient.CoreV1().Pods("litmus").Get(context.Background(), "engine-nginx-runner", metav1.GetOptions{})
 					if err != nil {
 						return errors.Errorf("unable to get chaos-runner pod, err: %v", err)
 					}
@@ -250,7 +251,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 				Wait(time.Duration(2) * time.Second).
 				Try(func(attempt uint) error {
 					var jobName string
-					jobs, err := clients.KubeClient.BatchV1().Jobs("litmus").List(metav1.ListOptions{})
+					jobs, err := clients.KubeClient.BatchV1().Jobs("litmus").List(context.Background(), metav1.ListOptions{})
 					if err != nil {
 						return err
 					}

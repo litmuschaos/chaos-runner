@@ -1,13 +1,14 @@
 package utils
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 )
 
 func TestPatchConfigMaps(t *testing.T) {
@@ -118,15 +119,15 @@ func TestPatchConfigMaps(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.KubeClient.CoreV1().ConfigMaps(experiment.Namespace).Create(&mock.configmap)
+			_, err := client.KubeClient.CoreV1().ConfigMaps(experiment.Namespace).Create(context.Background(), &mock.configmap, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("configmap not created for %v test, err: %v", name, err)
 			}
-			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("experiment not created for %v test, err: %v", name, err)
 			}
-			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
+			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
@@ -231,7 +232,7 @@ func TestValidateConfigMaps(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.KubeClient.CoreV1().ConfigMaps(fakeNamespace).Create(&mock.configmap)
+			_, err := client.KubeClient.CoreV1().ConfigMaps(fakeNamespace).Create(context.Background(), &mock.configmap, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("configmap not created for %v test, err: %v", name, err)
 			}
@@ -279,7 +280,7 @@ func TestValidatePresenceOfConfigMapResourceInCluster(t *testing.T) {
 			client := CreateFakeClient(t)
 
 			if !mock.isErr {
-				_, err := client.KubeClient.CoreV1().ConfigMaps(experiment.Namespace).Create(&mock.configmap)
+				_, err := client.KubeClient.CoreV1().ConfigMaps(experiment.Namespace).Create(context.Background(), &mock.configmap, metav1.CreateOptions{})
 				if err != nil {
 					t.Fatalf("configmap not created for %v test, err: %v", name, err)
 				}
@@ -383,13 +384,13 @@ func TestSetConfigMaps(t *testing.T) {
 			client := CreateFakeClient(t)
 
 			if !mock.isErr {
-				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 				if err != nil {
 					t.Fatalf("experiment not created for %v test, err: %v", name, err)
 				}
 			}
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
@@ -447,7 +448,7 @@ func TestGetConfigMapsFromChaosExperiment(t *testing.T) {
 			client := CreateFakeClient(t)
 
 			if !mock.isErr {
-				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(mock.chaosexperiment)
+				_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(mock.chaosexperiment.Namespace).Create(context.Background(), mock.chaosexperiment, metav1.CreateOptions{})
 				if err != nil {
 					t.Fatalf("experiment not created for %v test, err: %v", name, err)
 				}

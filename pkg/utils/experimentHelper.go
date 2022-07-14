@@ -1,7 +1,8 @@
 package utils
 
 import (
-	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"context"
+	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +34,7 @@ func (engineDetails *EngineDetails) NewExperimentDetails(i int) ExperimentDetail
 
 // SetDefaultEnvFromChaosExperiment sets the Env's in Experiment Structure
 func (expDetails *ExperimentDetails) SetDefaultEnvFromChaosExperiment(clients ClientSets) error {
-	experimentEnv, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	experimentEnv, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(context.Background(), expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		return errors.Errorf("unable to get the %v ChaosExperiment in %v namespace, error: %v", expDetails.Name, expDetails.Namespace, err)
 	}
@@ -61,7 +62,7 @@ func (expDetails *ExperimentDetails) SetValueFromChaosResources(engineDetails *E
 // HandleChaosExperimentExistence will check the experiment in the app namespace
 func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetails EngineDetails, clients ClientSets) error {
 
-	_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	_, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(context.Background(), expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		if err := engineDetails.ExperimentNotFoundPatchEngine(expDetails, clients); err != nil {
 			return errors.Errorf("unable to patch Chaos Engine Name: %v, namespace: %v, error: %v", engineDetails.Name, engineDetails.EngineNamespace, err)
@@ -75,7 +76,7 @@ func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetail
 //SetDefaultAttributeValuesFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
 func (expDetails *ExperimentDetails) SetDefaultAttributeValuesFromChaosExperiment(clients ClientSets, engine *EngineDetails) error {
 
-	experimentSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(expDetails.Name, metav1.GetOptions{})
+	experimentSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(context.Background(), expDetails.Name, metav1.GetOptions{})
 	if err != nil {
 		return errors.Errorf("unable to get %v ChaosExperiment instance in namespace: %v", expDetails.Name, expDetails.Namespace)
 	}

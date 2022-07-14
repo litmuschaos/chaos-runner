@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/litmuschaos/chaos-operator/pkg/apis/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	litmusFakeClientset "github.com/litmuschaos/chaos-operator/pkg/client/clientset/versioned/fake"
 )
 
@@ -85,7 +86,7 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
@@ -98,7 +99,7 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 				t.Fatalf("Test %q failed: expected error not to be nil", name)
 			}
 
-			chaosEngine, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Get(engineDetails.Name, metav1.GetOptions{})
+			chaosEngine, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Get(context.Background(), engineDetails.Name, metav1.GetOptions{})
 			if err != nil {
 				t.Fatalf("fail to get chaos engine after status patch, err: %v", err)
 			}
@@ -250,15 +251,15 @@ func TestUpdateEngineWithResult(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
-			_, err = client.KubeClient.CoreV1().Pods(engineDetails.EngineNamespace).Create(&mock.chaospod)
+			_, err = client.KubeClient.CoreV1().Pods(engineDetails.EngineNamespace).Create(context.Background(), &mock.chaospod, metav1.CreateOptions{})
 			if err != nil {
 				fmt.Printf("fail to create chaos pod for %v test, err: %v", name, err)
 			}
-			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosResults(mock.chaosresult.Namespace).Create(mock.chaosresult)
+			_, err = client.LitmusClient.LitmuschaosV1alpha1().ChaosResults(mock.chaosresult.Namespace).Create(context.Background(), mock.chaosresult, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("chaosresult not created for %v test, err: %v", name, err)
 			}
@@ -269,7 +270,7 @@ func TestUpdateEngineWithResult(t *testing.T) {
 			if mock.isErr && err == nil {
 				t.Fatalf("Test %q failed: expected error not to be nil", name)
 			}
-			chaosEngine, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Get(engineDetails.Name, metav1.GetOptions{})
+			chaosEngine, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Get(context.Background(), engineDetails.Name, metav1.GetOptions{})
 			if err != nil {
 				t.Fatalf("fail to get chaosengine after status patch for %v test, err: %v", name, err)
 			}
@@ -386,11 +387,11 @@ func TestDeleteJobAccordingToJobCleanUpPolicy(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			client := CreateFakeClient(t)
 
-			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(mock.chaosengine)
+			_, err := client.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(mock.chaosengine.Namespace).Create(context.Background(), mock.chaosengine, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("engine not created for %v test, err: %v", name, err)
 			}
-			_, err = client.KubeClient.BatchV1().Jobs(engineDetails.EngineNamespace).Create(&mock.expjob)
+			_, err = client.KubeClient.BatchV1().Jobs(engineDetails.EngineNamespace).Create(context.Background(), &mock.expjob, metav1.CreateOptions{})
 			if err != nil {
 				t.Fatalf("fail to create exp job pod for %v test, err: %v", name, err)
 			}
@@ -399,7 +400,7 @@ func TestDeleteJobAccordingToJobCleanUpPolicy(t *testing.T) {
 				t.Fatalf("fail to create exp job for %v test, err: %v", name, err)
 			}
 
-			jobList, err := client.KubeClient.BatchV1().Jobs(engineDetails.EngineNamespace).List(metav1.ListOptions{LabelSelector: "job-name=" + experiment.JobName})
+			jobList, err := client.KubeClient.BatchV1().Jobs(engineDetails.EngineNamespace).List(context.Background(), metav1.ListOptions{LabelSelector: "job-name=" + experiment.JobName})
 			if !mock.isErr && err != nil && len(jobList.Items) != 0 {
 				t.Fatalf("[%v] test failed experiment job is not deleted when the job cleanup policy is %v , err: %v", name, err, cleanupPolicy)
 			}

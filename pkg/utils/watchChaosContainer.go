@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"time"
 
 	"github.com/litmuschaos/litmus-go/pkg/utils/retry"
@@ -19,7 +20,7 @@ func GetChaosPod(expDetails *ExperimentDetails, clients ClientSets) (*corev1.Pod
 		Times(uint(expDetails.StatusCheckTimeout / delay)).
 		Wait(time.Duration(delay) * time.Second).
 		Try(func(attempt uint) error {
-			chaosPodList, err = clients.KubeClient.CoreV1().Pods(expDetails.Namespace).List(metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
+			chaosPodList, err = clients.KubeClient.CoreV1().Pods(expDetails.Namespace).List(context.Background(), metav1.ListOptions{LabelSelector: "job-name=" + expDetails.JobName})
 			if err != nil || len(chaosPodList.Items) == 0 {
 				return errors.Errorf("unable to get the chaos pod, error: %v", err)
 			} else if len(chaosPodList.Items) > 1 {
