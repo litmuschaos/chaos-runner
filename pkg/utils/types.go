@@ -19,16 +19,12 @@ import (
 type EngineDetails struct {
 	Name             string
 	Experiments      []string
-	AppLabel         string
-	AppNs            string
+	Targets          string
 	SvcAccount       string
-	AppKind          string
 	ClientUUID       string
 	AuxiliaryAppInfo string
 	UID              string
 	EngineNamespace  string
-	AnnotationKey    string
-	AnnotationCheck  string
 }
 
 // ExperimentDetails is for collecting all the experiment-related details

@@ -190,7 +190,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 					Namespace: "litmus",
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
-					Appinfo: v1alpha1.ApplicationParams{
+					Appinfo: &v1alpha1.ApplicationParams{
 						Appns:    "litmus",
 						Applabel: "app=nginx",
 						AppKind:  "deployment",
