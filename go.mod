@@ -4,9 +4,9 @@ go 1.17
 
 require (
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
-	github.com/litmuschaos/chaos-operator v0.0.0-20220804112636-e3332c4460cf
+	github.com/litmuschaos/chaos-operator v0.0.0-20220929101337-868b2827f820
 	github.com/litmuschaos/elves v0.0.0-20210325101625-5620f93aed51
-	github.com/litmuschaos/litmus-go v0.0.0-20210914084212-c40973c39565
+	github.com/litmuschaos/litmus-go v0.0.0-20220927112726-25d81a302a70
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.15.0
 	github.com/pkg/errors v0.9.1
@@ -29,6 +29,7 @@ require (
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kr/pretty v0.2.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
