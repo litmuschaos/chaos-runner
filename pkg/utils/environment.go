@@ -51,7 +51,7 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		setEnv("ANNOTATION_CHECK", engineDetails.AnnotationCheck).
 		setEnv("LIB_IMAGE_PULL_POLICY", string(expDetails.ExpImagePullPolicy)).
 		setEnv("TERMINATION_GRACE_PERIOD_SECONDS", strconv.Itoa(int(expDetails.TerminationGracePeriodSeconds))).
-		setEnv("DEFAULT_APP_HEALTH_CHECK", expDetails.DefaultHealthCheck).
+		setEnv("DEFAULT_HEALTH_CHECK", expDetails.DefaultHealthCheck).
 		setEnv("CHAOS_SERVICE_ACCOUNT", expDetails.SvcAccount)
 
 	// Get the Default ENV's from ChaosExperiment
