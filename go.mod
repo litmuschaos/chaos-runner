@@ -4,9 +4,9 @@ go 1.17
 
 require (
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
-	github.com/litmuschaos/chaos-operator v0.0.0-20221114055503-3d12d34d2032
+	github.com/litmuschaos/chaos-operator v0.0.0-20221116055729-e069388bd0c6
 	github.com/litmuschaos/elves v0.0.0-20210325101625-5620f93aed51
-	github.com/litmuschaos/litmus-go v0.0.0-20220927112726-25d81a302a70
+	github.com/litmuschaos/litmus-go v0.0.0-20221116073419-e9a880ac55c9
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.15.0
 	github.com/pkg/errors v0.9.1
