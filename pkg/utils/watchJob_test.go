@@ -40,7 +40,7 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
-					Appinfo: &v1alpha1.ApplicationParams{
+					Appinfo: v1alpha1.ApplicationParams{
 						Appns:    engineDetails.EngineNamespace,
 						Applabel: fakeAppLabel,
 						AppKind:  fakeAppKind,
@@ -65,7 +65,7 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
-					Appinfo: &v1alpha1.ApplicationParams{
+					Appinfo: v1alpha1.ApplicationParams{
 						Appns:    engineDetails.EngineNamespace,
 						Applabel: fakeAppLabel,
 						AppKind:  fakeAppKind,
@@ -149,7 +149,7 @@ func TestUpdateEngineWithResult(t *testing.T) {
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
-					Appinfo: &v1alpha1.ApplicationParams{
+					Appinfo: v1alpha1.ApplicationParams{
 						Appns:    engineDetails.EngineNamespace,
 						Applabel: fakeAppLabel,
 						AppKind:  fakeAppKind,
@@ -201,7 +201,7 @@ func TestUpdateEngineWithResult(t *testing.T) {
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
-					Appinfo: &v1alpha1.ApplicationParams{
+					Appinfo: v1alpha1.ApplicationParams{
 						Appns:    engineDetails.EngineNamespace,
 						Applabel: fakeAppLabel,
 						AppKind:  fakeAppKind,
