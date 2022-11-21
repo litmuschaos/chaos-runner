@@ -19,7 +19,6 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 	fakeServiceAcc := "Fake Service Account"
 	fakeAppLabel := "Fake Label"
 	fakeAppKind := "Fake Kind"
-	fakeAnnotationCheck := "Fake Annotation Check"
 	expStatus := ExperimentStatus{
 		Name:   "Fake exp Name",
 		Status: v1alpha1.ExperimentStatusRunning,
@@ -41,10 +40,9 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
-					AnnotationCheck:     fakeAnnotationCheck,
 					Appinfo: v1alpha1.ApplicationParams{
-						Applabel: fakeAppLabel,
 						Appns:    engineDetails.EngineNamespace,
+						Applabel: fakeAppLabel,
 						AppKind:  fakeAppKind,
 					},
 				},
@@ -67,10 +65,9 @@ func TestPatchChaosEngineStatus(t *testing.T) {
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
-					AnnotationCheck:     fakeAnnotationCheck,
 					Appinfo: v1alpha1.ApplicationParams{
-						Applabel: fakeAppLabel,
 						Appns:    engineDetails.EngineNamespace,
+						Applabel: fakeAppLabel,
 						AppKind:  fakeAppKind,
 					},
 				},
@@ -123,7 +120,6 @@ func TestUpdateEngineWithResult(t *testing.T) {
 	fakeServiceAcc := "Fake Service Account"
 	fakeAppLabel := "Fake Label"
 	fakeAppKind := "Fake Kind"
-	fakeAnnotationCheck := "Fake Annotation Check"
 	expStatus := ExperimentStatus{
 		Name:   "Fake-Exp-Name",
 		Status: v1alpha1.ExperimentStatusRunning,
@@ -153,10 +149,9 @@ func TestUpdateEngineWithResult(t *testing.T) {
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
-					AnnotationCheck:     fakeAnnotationCheck,
 					Appinfo: v1alpha1.ApplicationParams{
-						Applabel: fakeAppLabel,
 						Appns:    engineDetails.EngineNamespace,
+						Applabel: fakeAppLabel,
 						AppKind:  fakeAppKind,
 					},
 					JobCleanUpPolicy: "retain",
@@ -206,10 +201,9 @@ func TestUpdateEngineWithResult(t *testing.T) {
 				},
 				Spec: v1alpha1.ChaosEngineSpec{
 					ChaosServiceAccount: fakeServiceAcc,
-					AnnotationCheck:     fakeAnnotationCheck,
 					Appinfo: v1alpha1.ApplicationParams{
-						Applabel: fakeAppLabel,
 						Appns:    engineDetails.EngineNamespace,
+						Applabel: fakeAppLabel,
 						AppKind:  fakeAppKind,
 					},
 					JobCleanUpPolicy: "retain",

@@ -35,9 +35,7 @@ func main() {
 	log.InfoWithValues("Experiments details are as follows", logrus.Fields{
 		"Experiments List":     engineDetails.Experiments,
 		"Engine Name":          engineDetails.Name,
-		"appLabels":            engineDetails.AppLabel,
-		"appNs":                engineDetails.AppNs,
-		"appKind":              engineDetails.AppKind,
+		"Targets":              engineDetails.Targets,
 		"Service Account Name": engineDetails.SvcAccount,
 		"Engine Namespace":     engineDetails.EngineNamespace,
 	})
