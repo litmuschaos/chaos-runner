@@ -134,11 +134,7 @@ func (expDetails *ExperimentDetails) SetOverrideEnvFromChaosEngine(engineName st
 				}
 			}
 
-			delay, timeout := 2, 180
-			if sc := exp.Spec.Components.StatusCheckTimeouts; !reflect.DeepEqual(sc, litmuschaosv1alpha1.StatusCheckTimeout{}) {
-				delay = sc.Delay
-				timeout = sc.Timeout
-			}
+			delay, timeout := getStatusCheckDelayAndTimeout(exp)
 
 			expDetails.envMap["STATUS_CHECK_DELAY"] = v1.EnvVar{
 				Name:  "STATUS_CHECK_DELAY",
@@ -159,4 +155,19 @@ func (expDetails *ExperimentDetails) SetOverrideEnvFromChaosEngine(engineName st
 	}
 
 	return nil
+}
+
+func getStatusCheckDelayAndTimeout(exp litmuschaosv1alpha1.ExperimentList) (int, int) {
+	delay, timeout := 2, 180
+
+	if sc := exp.Spec.Components.StatusCheckTimeouts; !reflect.DeepEqual(sc, litmuschaosv1alpha1.StatusCheckTimeout{}) {
+		if sc.Timeout != 0 {
+			timeout = sc.Timeout
+		}
+
+		if sc.Delay != 0 {
+			delay = sc.Delay
+		}
+	}
+	return delay, timeout
 }
