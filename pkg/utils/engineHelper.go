@@ -20,6 +20,7 @@ func (expDetails *ExperimentDetails) SetInstanceAttributeValuesFromChaosEngine(e
 	}
 	// fetch all the values from chaosengine and set into expDetails struct
 	expDetails.SetExpAnnotationFromEngine(chaosEngine).
+		SetEngineLabels(chaosEngine).
 		SetExpNodeSelectorFromEngine(chaosEngine).
 		SetResourceRequirementsFromEngine(chaosEngine).
 		SetImagePullSecretsFromEngine(chaosEngine).
@@ -155,6 +156,14 @@ func (expDetails *ExperimentDetails) SetOverrideEnvFromChaosEngine(engineName st
 	}
 
 	return nil
+}
+
+// SetEngineLabels sets the engine labels
+func (expDetails *ExperimentDetails) SetEngineLabels(engine *litmuschaosv1alpha1.ChaosEngine) *ExperimentDetails {
+	for k, v := range engine.Labels {
+		expDetails.ExpLabels[k] = v
+	}
+	return expDetails
 }
 
 func getStatusCheckDelayAndTimeout(exp litmuschaosv1alpha1.ExperimentList) (int, int) {
