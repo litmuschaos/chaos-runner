@@ -3,13 +3,11 @@ package utils
 import (
 	"context"
 	"fmt"
-	"reflect"
-	"strconv"
-	"strings"
-
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"reflect"
+	"strconv"
 
 	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 )
@@ -195,6 +193,8 @@ func (expDetails *ExperimentDetails) getSidecarDetails(engineSpec *litmuschaosv1
 			Image:           v.Image,
 			ImagePullPolicy: v.ImagePullPolicy,
 			Secrets:         v.Secrets,
+			ENV:             append(v.ENV, getDefaultEnvs(expDetails.JobName)...),
+			EnvFrom:         v.EnvFrom,
 		}
 
 		if sidecar.ImagePullPolicy == "" {
@@ -203,19 +203,11 @@ func (expDetails *ExperimentDetails) getSidecarDetails(engineSpec *litmuschaosv1
 
 		sidecars = append(sidecars, sidecar)
 	}
+	return sidecars
+}
 
-	var envs []v1.EnvVar
-	for _, exp := range engineSpec.Spec.Experiments {
-		if exp.Name == expDetails.Name {
-			for _, env := range exp.Spec.Components.ENV {
-				if strings.HasPrefix(env.Name, SideCarPrefix) {
-					envs = append(envs, env)
-				}
-			}
-		}
-	}
-
-	envs = append(envs, []v1.EnvVar{
+func getDefaultEnvs(cName string) []v1.EnvVar {
+	return []v1.EnvVar{
 		{
 			Name:      "POD_NAME",
 			ValueFrom: getEnvSource("v1", "metadata.name"),
@@ -226,14 +218,9 @@ func (expDetails *ExperimentDetails) getSidecarDetails(engineSpec *litmuschaosv1
 		},
 		{
 			Name:  "MAIN_CONTAINER",
-			Value: expDetails.JobName,
+			Value: cName,
 		},
-	}...)
-
-	for i := range sidecars {
-		sidecars[i].ENV = envs
 	}
-	return sidecars
 }
 
 // getEnvSource return the env source for the given apiVersion & fieldPath

@@ -64,6 +64,7 @@ type SideCar struct {
 	Image           string
 	ImagePullPolicy v1.PullPolicy
 	Secrets         []v1alpha1.Secret
+	EnvFrom         []v1.EnvFromSource
 }
 
 //VolumeOpts is a strcuture for all volume related operations

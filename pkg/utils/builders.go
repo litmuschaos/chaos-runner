@@ -78,6 +78,10 @@ func buildSideCarSpec(experiment *ExperimentDetails) ([]*container.Builder, erro
 			containerSpec.WithVolumeMountsNew(volumeOpts.VolumeMounts)
 		}
 
+		if len(sidecar.EnvFrom) != 0 {
+			containerSpec.WithEnvsFrom(sidecar.EnvFrom)
+		}
+
 		if _, err := containerSpec.Build(); err != nil {
 			return nil, err
 		}
