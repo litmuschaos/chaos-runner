@@ -2,14 +2,21 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
+)
+
+const (
+	SideCarEnabled = "sidecar/enabled"
+	SideCarPrefix  = "SIDECAR"
 )
 
 // SetInstanceAttributeValuesFromChaosEngine set the value from the chaosengine
@@ -156,6 +163,88 @@ func (expDetails *ExperimentDetails) SetOverrideEnvFromChaosEngine(engineName st
 	}
 
 	return nil
+}
+
+func (expDetails *ExperimentDetails) SetSideCarDetails(engineName string, clients ClientSets) error {
+
+	engineSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosEngines(expDetails.Namespace).Get(context.Background(), engineName, metav1.GetOptions{})
+	if err != nil {
+		return errors.Errorf("unable to get ChaosEngine Resource in namespace: %v", expDetails.Namespace)
+	}
+
+	if engineSpec.Annotations == nil {
+		return nil
+	}
+
+	if sidecarEnabled, ok := engineSpec.Annotations[SideCarEnabled]; !ok || (sidecarEnabled == "false") {
+		return nil
+	}
+
+	if len(engineSpec.Spec.Components.Sidecar) == 0 {
+		return fmt.Errorf("sidecar image is not set inside chaosengine")
+	}
+
+	expDetails.SideCars = expDetails.getSidecarDetails(engineSpec)
+	return nil
+}
+
+func (expDetails *ExperimentDetails) getSidecarDetails(engineSpec *litmuschaosv1alpha1.ChaosEngine) []SideCar {
+	var sidecars []SideCar
+	for _, v := range engineSpec.Spec.Components.Sidecar {
+		sidecar := SideCar{
+			Image:           v.Image,
+			ImagePullPolicy: v.ImagePullPolicy,
+			Secrets:         v.Secrets,
+		}
+
+		if sidecar.ImagePullPolicy == "" {
+			sidecar.ImagePullPolicy = v1.PullIfNotPresent
+		}
+
+		sidecars = append(sidecars, sidecar)
+	}
+
+	var envs []v1.EnvVar
+	for _, exp := range engineSpec.Spec.Experiments {
+		if exp.Name == expDetails.Name {
+			for _, env := range exp.Spec.Components.ENV {
+				if strings.HasPrefix(env.Name, SideCarPrefix) {
+					envs = append(envs, env)
+				}
+			}
+		}
+	}
+
+	envs = append(envs, []v1.EnvVar{
+		{
+			Name:      "POD_NAME",
+			ValueFrom: getEnvSource("v1", "metadata.name"),
+		},
+		{
+			Name:      "POD_NAMESPACE",
+			ValueFrom: getEnvSource("v1", "metadata.namespace"),
+		},
+		{
+			Name:  "MAIN_CONTAINER",
+			Value: expDetails.JobName,
+		},
+	}...)
+
+	for i := range sidecars {
+		sidecars[i].ENV = envs
+	}
+	return sidecars
+}
+
+// getEnvSource return the env source for the given apiVersion & fieldPath
+func getEnvSource(apiVersion string, fieldPath string) *v1.EnvVarSource {
+	downwardENV := v1.EnvVarSource{
+		FieldRef: &v1.ObjectFieldSelector{
+			APIVersion: apiVersion,
+			FieldPath:  fieldPath,
+		},
+	}
+	return &downwardENV
 }
 
 // SetEngineLabels sets the engine labels

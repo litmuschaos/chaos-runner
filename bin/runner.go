@@ -72,6 +72,13 @@ func main() {
 			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)
 			continue
 		}
+		// derive the sidecar details from chaosengine
+		if err := experiment.SetSideCarDetails(engineDetails.Name, clients); err != nil {
+			log.Errorf("unable to get sidecar details, error: %v", err)
+			experiment.ExperimentSkipped(utils.ExperimentSideCarPatchErrorReason, engineDetails, clients)
+			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)
+			continue
+		}
 
 		log.Infof("Preparing to run Chaos Experiment: %v", experiment.Name)
 

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/litmuschaos/litmus-go/pkg/utils/retry"
@@ -49,20 +50,21 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 	if err != nil {
 		return false, errors.Errorf("unable to get the chaos pod, error: %v", err)
 	}
-	if pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodSucceeded {
+	if pod.Status.Phase == corev1.PodSucceeded {
+		return true, nil
+	}
+
+	if pod.Status.Phase == corev1.PodRunning {
 		for _, container := range pod.Status.ContainerStatuses {
 
 			//NOTE: The name of container inside chaos-pod is same as the chaos job name
 			// we only have one container inside chaos pod to inject the chaos
 			// looking the chaos container is completed or not
-			if container.Name == experimentDetails.JobName && container.State.Terminated != nil {
-				if container.State.Terminated.Reason == "Completed" {
-					isCompleted = !container.Ready
-
-				}
+			if strings.Contains(container.Name, experimentDetails.JobName) && container.State.Terminated == nil {
+				return false, nil
 			}
 		}
-
+		return true, nil
 	} else if pod.Status.Phase == corev1.PodPending {
 		delay := 2
 		err := retry.
@@ -99,6 +101,10 @@ func (engineDetails EngineDetails) WatchChaosContainerForCompletion(experiment *
 		isChaosCompleted, err = GetChaosContainerStatus(experiment, clients)
 		if err != nil {
 			return err
+		}
+
+		if isChaosCompleted {
+			return nil
 		}
 
 		var expStatus ExperimentStatus
