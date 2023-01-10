@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"reflect"
 
@@ -31,15 +32,11 @@ func buildContainerSpec(experiment *ExperimentDetails, envVars []corev1.EnvVar) 
 		WithEnvsNew(envVars)
 
 	if !reflect.DeepEqual(experiment.SecurityContext.ContainerSecurityContext, corev1.SecurityContext{}) {
-
 		containerSpec.WithSecurityContext(experiment.SecurityContext.ContainerSecurityContext)
-
 	}
 
 	if !reflect.DeepEqual(experiment.ResourceRequirements, corev1.ResourceRequirements{}) {
-
 		containerSpec.WithResourceRequirements(experiment.ResourceRequirements)
-
 	}
 
 	if experiment.VolumeOpts.VolumeMounts != nil {
@@ -54,6 +51,45 @@ func buildContainerSpec(experiment *ExperimentDetails, envVars []corev1.EnvVar) 
 
 	return containerSpec, err
 
+}
+
+// buildSideCarSpec builds a Container with following properties
+func buildSideCarSpec(experiment *ExperimentDetails) ([]*container.Builder, error) {
+	var sidecarContainers []*container.Builder
+
+	for _, sidecar := range experiment.SideCars {
+		var volumeOpts VolumeOpts
+
+		if len(sidecar.Secrets) != 0 {
+			volumeOpts.NewVolumeMounts().BuildVolumeMountsForSecrets(sidecar.Secrets)
+		}
+
+		containerSpec := container.NewBuilder().
+			WithName(experiment.JobName + "-sidecar-" + RandomString()).
+			WithImage(sidecar.Image).
+			WithImagePullPolicy(sidecar.ImagePullPolicy).
+			WithEnvsNew(sidecar.ENV)
+
+		if !reflect.DeepEqual(experiment.ResourceRequirements, corev1.ResourceRequirements{}) {
+			containerSpec.WithResourceRequirements(experiment.ResourceRequirements)
+		}
+
+		if volumeOpts.VolumeMounts != nil {
+			containerSpec.WithVolumeMountsNew(volumeOpts.VolumeMounts)
+		}
+
+		if len(sidecar.EnvFrom) != 0 {
+			containerSpec.WithEnvsFrom(sidecar.EnvFrom)
+		}
+
+		if _, err := containerSpec.Build(); err != nil {
+			return nil, err
+		}
+
+		sidecarContainers = append(sidecarContainers, containerSpec)
+	}
+
+	return sidecarContainers, err
 }
 
 func getEnvFromMap(m map[string]corev1.EnvVar) []corev1.EnvVar {
@@ -86,8 +122,19 @@ func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) err
 	if err != nil {
 		return errors.Errorf("unable to build Container for Chaos Experiment, error: %v", err)
 	}
+
+	containers := []*container.Builder{containerForPod}
+
+	if len(experiment.SideCars) != 0 {
+		sidecars, err := buildSideCarSpec(experiment)
+		if err != nil {
+			return errors.Errorf("unable to build sidecar Container for Chaos Experiment, error: %v", err)
+		}
+		containers = append(containers, sidecars...)
+	}
+
 	// Will build a PodSpecTemplate
-	pod, err := buildPodTemplateSpec(experiment, containerForPod)
+	pod, err := buildPodTemplateSpec(experiment, containers...)
 	if err != nil {
 
 		return errors.Errorf("unable to build PodTemplateSpec for Chaos Experiment, error: %v", err)
@@ -115,8 +162,8 @@ func (expDetails *ExperimentDetails) launchJob(job *batchv1.Job, clients ClientS
 	return err
 }
 
-// BuildPodTemplateSpec return a PodTempplateSpec
-func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *container.Builder) (*podtemplatespec.Builder, error) {
+// BuildPodTemplateSpec return a PodTemplateSpec
+func buildPodTemplateSpec(experiment *ExperimentDetails, containers ...*container.Builder) (*podtemplatespec.Builder, error) {
 	podtemplate := podtemplatespec.NewBuilder().
 		WithName(experiment.JobName).
 		WithNamespace(experiment.Namespace).
@@ -125,7 +172,7 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		WithRestartPolicy(corev1.RestartPolicyNever).
 		WithVolumeBuilders(experiment.VolumeOpts.VolumeBuilders).
 		WithAnnotations(experiment.Annotations).
-		WithContainerBuildersNew(containerForPod)
+		WithContainerBuildersNew(containers...)
 
 	if experiment.TerminationGracePeriodSeconds != 0 {
 		podtemplate.WithTerminationGracePeriodSeconds(experiment.TerminationGracePeriodSeconds)
@@ -135,6 +182,15 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 
 		podtemplate.WithSecurityContext(experiment.SecurityContext.PodSecurityContext)
 
+	}
+
+	if len(experiment.SideCars) != 0 {
+		secrets := setSidecarSecrets(experiment)
+		if len(secrets) != 0 {
+			var volumeOpts VolumeOpts
+			volumeOpts.NewVolumeBuilder().BuildVolumeBuilderForSecrets(secrets)
+			podtemplate.WithVolumeBuilders(volumeOpts.VolumeBuilders)
+		}
 	}
 
 	if experiment.HostPID {
@@ -157,6 +213,20 @@ func buildPodTemplateSpec(experiment *ExperimentDetails, containerForPod *contai
 		return nil, err
 	}
 	return podtemplate, nil
+}
+
+func setSidecarSecrets(experiment *ExperimentDetails) []v1alpha1.Secret {
+	var secrets []v1alpha1.Secret
+	secretMap := make(map[string]bool)
+	for _, sidecar := range experiment.SideCars {
+		for _, secret := range sidecar.Secrets {
+			if _, ok := secretMap[secret.Name]; !ok {
+				secretMap[secret.Name] = true
+				secrets = append(secrets, secret)
+			}
+		}
+	}
+	return secrets
 }
 
 // BuildJobSpec returns a JobSpec

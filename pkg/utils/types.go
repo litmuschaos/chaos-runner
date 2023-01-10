@@ -56,6 +56,15 @@ type ExperimentDetails struct {
 	StatusCheckTimeout            int
 	TerminationGracePeriodSeconds int64
 	DefaultHealthCheck            string
+	SideCars                      []SideCar
+}
+
+type SideCar struct {
+	ENV             []v1.EnvVar
+	Image           string
+	ImagePullPolicy v1.PullPolicy
+	Secrets         []v1alpha1.Secret
+	EnvFrom         []v1.EnvFromSource
 }
 
 //VolumeOpts is a strcuture for all volume related operations
@@ -102,6 +111,8 @@ const (
 	ExperimentChaosContainerWatchErrorReason string = "ChaosContainerWatchNotPermitted"
 	// ChaosResourceNotFoundReason contains the reason for the chaos-resources-not-found event
 	ChaosResourceNotFoundReason string = "ChaosResourceNotFound"
+	// ExperimentSideCarPatchErrorReason contains the reason for the side-car-patch-error event
+	ExperimentSideCarPatchErrorReason string = "SideCarPatchError"
 )
 
 // GenerateClientSetFromKubeConfig will generation both ClientSets (k8s, and Litmus)
