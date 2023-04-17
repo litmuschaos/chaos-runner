@@ -3,11 +3,12 @@ package utils
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"strconv"
+
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"reflect"
-	"strconv"
 
 	litmuschaosv1alpha1 "github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
 )
@@ -116,7 +117,7 @@ func (expDetails *ExperimentDetails) SetTolerationsFromEngine(engine *litmuschao
 
 // SetDefaultHealthCheck sets th default health checks provided inside the chaosEngine
 func (expDetails *ExperimentDetails) SetDefaultHealthCheck(engine *litmuschaosv1alpha1.ChaosEngine) *ExperimentDetails {
-	expDetails.DefaultHealthCheck = engine.Spec.DefaultHealthCheck
+	expDetails.DefaultHealthCheck = strconv.FormatBool(engine.Spec.DefaultHealthCheck)
 	return expDetails
 }
 
