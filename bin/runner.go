@@ -5,6 +5,7 @@ import (
 	"github.com/litmuschaos/chaos-runner/pkg/utils"
 	"github.com/litmuschaos/chaos-runner/pkg/utils/analytics"
 	"github.com/sirupsen/logrus"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func init() {
@@ -20,6 +21,18 @@ func main() {
 
 	engineDetails := utils.EngineDetails{}
 	clients := utils.ClientSets{}
+	// Create a Prometheus client instance.
+       client := prometheus.NewRegistry()
+	// Create a Prometheus Counter metric.
+      counter := prometheus.NewCounter(
+    prometheus.CounterOpts{
+        Name: "chaos_runner_runs",
+        Help: "Number of times the chaos runner has run",
+    },
+)
+
+// Register the counter with the Prometheus client.
+client.Register(counter)
 	// Getting kubeConfig and Generate ClientSets
 	if err := clients.GenerateClientSetFromKubeConfig(); err != nil {
 		log.Errorf("unable to create ClientSets, error: %v", err)
