@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-//PatchConfigMaps patches configmaps in experimentDetails struct.
+// PatchConfigMaps patches configmaps in experimentDetails struct.
 func (expDetails *ExperimentDetails) PatchConfigMaps(clients ClientSets, engineDetails EngineDetails) error {
 	if err := expDetails.SetConfigMaps(clients, engineDetails); err != nil {
 		return err
