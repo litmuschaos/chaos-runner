@@ -32,7 +32,7 @@ func (engineDetails *EngineDetails) SetEngineUID(clients ClientSets) error {
 	return nil
 }
 
-//SetENV sets ENV values in experimentDetails struct.
+// SetENV sets ENV values in experimentDetails struct.
 func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) error {
 	// Setting envs from engine fields other than env
 	expDetails.setEnv("CHAOSENGINE", engineDetails.Name).

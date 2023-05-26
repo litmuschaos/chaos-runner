@@ -11,7 +11,7 @@ import (
 	clientTypes "k8s.io/apimachinery/pkg/types"
 )
 
-//CreateEvents create the events in the desired resource
+// CreateEvents create the events in the desired resource
 func (engineDetails EngineDetails) CreateEvents(eventAttributes *EventAttributes, clients ClientSets) error {
 
 	events := &apiv1.Event{
@@ -42,7 +42,7 @@ func (engineDetails EngineDetails) CreateEvents(eventAttributes *EventAttributes
 
 }
 
-//GenerateEvents update the events and increase the count by 1, if already present
+// GenerateEvents update the events and increase the count by 1, if already present
 // else it will create a new event
 func (engineDetails EngineDetails) GenerateEvents(eventAttributes *EventAttributes, clients ClientSets) error {
 

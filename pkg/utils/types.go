@@ -67,7 +67,7 @@ type SideCar struct {
 	EnvFrom         []v1.EnvFromSource
 }
 
-//VolumeOpts is a strcuture for all volume related operations
+// VolumeOpts is a strcuture for all volume related operations
 type VolumeOpts struct {
 	VolumeMounts   []v1.VolumeMount
 	VolumeBuilders []*volume.Builder
