@@ -15,7 +15,7 @@ import (
 //socket file mounts etc., and are often have fixed paths, i.e., similar to securityContext/hostPID
 //and other such mandatory attributes
 
-//PatchHostFileVolumes patches hostFileVolume in experimentDetails struct.
+// PatchHostFileVolumes patches hostFileVolume in experimentDetails struct.
 func (expDetails *ExperimentDetails) PatchHostFileVolumes(clients ClientSets, engineDetails EngineDetails) error {
 	err := expDetails.SetHostFileVolumes(clients, engineDetails)
 	if err != nil {

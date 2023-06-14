@@ -73,7 +73,7 @@ func (expDetails *ExperimentDetails) HandleChaosExperimentExistence(engineDetail
 	return nil
 }
 
-//SetDefaultAttributeValuesFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
+// SetDefaultAttributeValuesFromChaosExperiment sets value in experimentDetails struct from chaosExperiment
 func (expDetails *ExperimentDetails) SetDefaultAttributeValuesFromChaosExperiment(clients ClientSets, engine *EngineDetails) error {
 
 	experimentSpec, err := clients.LitmusClient.LitmuschaosV1alpha1().ChaosExperiments(expDetails.Namespace).Get(context.Background(), expDetails.Name, metav1.GetOptions{})

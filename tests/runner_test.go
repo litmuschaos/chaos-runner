@@ -122,7 +122,7 @@ var _ = BeforeSuite(func() {
 	log.Info("pod-delete-sa created")
 })
 
-//BDD Tests to check secondary resources
+// BDD Tests to check secondary resources
 var _ = Describe("BDD on chaos-runner", func() {
 
 	// BDD TEST CASE 1
@@ -281,7 +281,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 
 })
 
-//Deleting all unused resources
+// Deleting all unused resources
 var _ = AfterSuite(func() {
 
 	By("Deleting chaosengine CRD")
