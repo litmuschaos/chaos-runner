@@ -4,13 +4,13 @@ go 1.20
 
 require (
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
-	github.com/litmuschaos/chaos-operator v0.0.0-20230425063039-c97b2b90e1d5
+	github.com/litmuschaos/chaos-operator v0.0.0-20230602170015-d019f63af50f
 	github.com/litmuschaos/elves v0.0.0-20230109130230-d8c7345dd5ba
-	github.com/litmuschaos/litmus-go v0.0.0-20221116073419-e9a880ac55c9
+	github.com/litmuschaos/litmus-go v0.0.0-20230605073551-d73728198577
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.15.0
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.7.0
+	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	k8s.io/api v0.26.0
 	k8s.io/apimachinery v0.26.0
@@ -33,6 +33,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
+	github.com/palantir/stacktrace v0.0.0-20161112013806-78658fd2d177 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.3.1-0.20221206200815-1e63c2f08a10 // indirect
