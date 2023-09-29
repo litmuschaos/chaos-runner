@@ -113,7 +113,7 @@ var _ = BeforeSuite(func() {
 	log.Info("Chaos-Operator is in running state")
 
 	By("Installing Pod Delete Experiment")
-	err = exec.Command("kubectl", "apply", "-f", "https://hub.litmuschaos.io/api/chaos/master?file=charts/generic/pod-delete/experiment.yaml", "-n", "litmus").Run()
+	err = exec.Command("kubectl", "apply", "-f", "https://hub.litmuschaos.io/api/chaos/master?file=faults/kubernetes/pod-delete/fault.yaml", "-n", "litmus").Run()
 	Expect(err).To(BeNil(), "unable to create Pod-Delete Experiment")
 	log.Info("pod-delete ChaosExperiment created")
 
