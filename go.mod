@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
-	github.com/litmuschaos/chaos-operator v0.0.0-20230602170015-d019f63af50f
-	github.com/litmuschaos/elves v0.0.0-20230109130230-d8c7345dd5ba
+	github.com/litmuschaos/chaos-operator v0.0.0-20240104104915-2d8472873222
+	github.com/litmuschaos/elves v0.0.0-20230607095010-c7119636b529
 	github.com/litmuschaos/litmus-go v0.0.0-20230605073551-d73728198577
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.15.0
@@ -38,9 +38,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/term v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
