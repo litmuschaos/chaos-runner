@@ -3,6 +3,7 @@ module github.com/litmuschaos/chaos-runner
 go 1.20
 
 require (
+	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
 	github.com/litmuschaos/chaos-operator v0.0.0-20240301085554-ba4d2f704cfa
 	github.com/litmuschaos/elves v0.0.0-20230607095010-c7119636b529
