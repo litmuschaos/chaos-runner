@@ -7,6 +7,37 @@ import (
 	"testing"
 )
 
+func FuzzBuildContainerSpec(f *testing.F) {
+	f.Fuzz(func(t *testing.T, data []byte) {
+		fuzzConsumer := fuzz.NewConsumer(data)
+		targetStruct := &struct {
+			ExpDetails *ExperimentDetails
+			EnvVars    []corev1.EnvVar
+		}{}
+
+		err := fuzzConsumer.GenerateStruct(targetStruct)
+		if err != nil {
+			return
+		}
+		containerSpec, err := buildContainerSpec(targetStruct.ExpDetails, targetStruct.EnvVars)
+		if err != nil {
+			return
+		}
+
+		container, err := containerSpec.Build()
+		if err != nil {
+			return
+		}
+
+		require.Equal(t, targetStruct.ExpDetails.JobName, container.Name)
+		require.Equal(t, targetStruct.ExpDetails.ExpImage, container.Image)
+		require.Equal(t, targetStruct.ExpDetails.ExpCommand, container.Command)
+		require.Equal(t, targetStruct.ExpDetails.ExpArgs, container.Args)
+		require.Equal(t, targetStruct.ExpDetails.ExpImagePullPolicy, container.ImagePullPolicy)
+		require.Equal(t, targetStruct.EnvVars, container.Env)
+	})
+}
+
 func FuzzGetEnvFromMap(f *testing.F) {
 	f.Fuzz(func(t *testing.T, data []byte) {
 		fuzzConsumer := fuzz.NewConsumer(data)
