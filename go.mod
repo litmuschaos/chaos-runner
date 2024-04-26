@@ -84,4 +84,4 @@ replace (
 
 replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm
 
-replace golang.org/x/net => golang.org/x/net v0.7.0
+replace golang.org/x/net => golang.org/x/net v0.17.0
