@@ -7,7 +7,6 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/litmuschaos?style=social)](https://twitter.com/LitmusChaos)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5291/badge)](https://bestpractices.coreinfrastructure.org/projects/5291)
 [![Go Report Card](https://goreportcard.com/badge/github.com/litmuschaos/chaos-runner)](https://goreportcard.com/report/github.com/litmuschaos/chaos-runner)
-[![BCH compliance](https://bettercodehub.com/edge/badge/litmuschaos/chaos-runner?branch=master)](https://bettercodehub.com/)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Flitmuschaos%2Fchaos-runner?ref=badge_shield)
 [![YouTube Channel](https://img.shields.io/badge/YouTube-Subscribe-red)](https://www.youtube.com/channel/UCa57PMqmz_j0wnteRa9nCaw)
 <br><br>

@@ -28,7 +28,7 @@ func (engineDetails *EngineDetails) NewExperimentDetails(i int) ExperimentDetail
 	experimentDetails.SvcAccount = engineDetails.SvcAccount
 	experimentDetails.Namespace = engineDetails.EngineNamespace
 	// Setting the JobName in Experiment related struct
-	experimentDetails.JobName = experimentDetails.Name + "-" + RandomString()
+	experimentDetails.JobName = experimentDetails.Name + "-" + RandomString(6)
 	return experimentDetails
 }
 

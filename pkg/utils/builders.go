@@ -65,7 +65,7 @@ func buildSideCarSpec(experiment *ExperimentDetails) ([]*container.Builder, erro
 		}
 
 		containerSpec := container.NewBuilder().
-			WithName(experiment.JobName + "-sidecar-" + RandomString()).
+			WithName(experiment.JobName + "-sidecar-" + RandomString(6)).
 			WithImage(sidecar.Image).
 			WithImagePullPolicy(sidecar.ImagePullPolicy).
 			WithEnvsNew(sidecar.ENV)
