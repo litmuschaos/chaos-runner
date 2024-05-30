@@ -206,9 +206,7 @@ var _ = Describe("BDD on chaos-runner", func() {
 					Experiments: []v1alpha1.ExperimentList{
 						{
 							Name: "pod-delete",
-							Spec: v1alpha1.ExperimentAttributes{
-								Rank: uint32(1),
-							},
+							Spec: v1alpha1.ExperimentAttributes{},
 						},
 					},
 				},
