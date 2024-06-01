@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24
 	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
-	github.com/litmuschaos/chaos-operator v0.0.0-20240301085554-ba4d2f704cfa
+	github.com/litmuschaos/chaos-operator v0.0.0-20240601063404-e96a7ee7f1f7
 	github.com/litmuschaos/elves v0.0.0-20230607095010-c7119636b529
 	github.com/litmuschaos/litmus-go v0.0.0-20230605073551-d73728198577
 	github.com/onsi/ginkgo v1.16.5
