@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
+	"errors"
+
 	"github.com/litmuschaos/chaos-runner/pkg/log"
+	"github.com/litmuschaos/chaos-runner/pkg/telemetry"
 	"github.com/litmuschaos/chaos-runner/pkg/utils"
 	"github.com/litmuschaos/chaos-runner/pkg/utils/analytics"
 	"github.com/sirupsen/logrus"
@@ -17,9 +21,24 @@ func init() {
 }
 
 func main() {
+	ctx := context.Background()
+	// Set up Observability.
+	shutdown, err := telemetry.InitOTelSDK(ctx)
+	if err != nil {
+		return
+	}
+	// Handle shutdown properly so nothing leaks.
+	defer func() {
+		err = errors.Join(err, shutdown(ctx))
+	}()
+	ctx = telemetry.GetTraceParentContext()
 
 	engineDetails := utils.EngineDetails{}
-	clients := utils.ClientSets{}
+	clients := utils.ClientSets{Context: ctx}
+
+	span := telemetry.StartTracing(clients, "ExecuteChaosRunner")
+	defer span.End()
+
 	// Getting kubeConfig and Generate ClientSets
 	if err := clients.GenerateClientSetFromKubeConfig(); err != nil {
 		log.Errorf("unable to create ClientSets, error: %v", err)

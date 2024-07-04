@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"flag"
 
 	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
@@ -77,6 +78,7 @@ type VolumeOpts struct {
 type ClientSets struct {
 	KubeClient   kubernetes.Interface
 	LitmusClient clientV1alpha1.Interface
+	Context      context.Context
 }
 
 // EventAttributes is for collecting all the events-related details
