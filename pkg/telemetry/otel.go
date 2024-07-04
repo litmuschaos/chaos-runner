@@ -3,6 +3,7 @@ package telemetry
 import (
 	"context"
 	"errors"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel"
@@ -61,9 +62,7 @@ func newPropagator() propagation.TextMapPropagator {
 }
 
 func newTracerProvider(ctx context.Context) (*trace.TracerProvider, error) {
-	//var endpoint string
-	//flag.StringVar(&endpoint, OTELExporterOTLPEndpoint, "localhost:4317", "OTLP endpoint to connect to")
-	endpoint := "simplest-collector.default.svc.cluster.local:4317"
+	endpoint := os.Getenv(OTELExporterOTLPEndpoint)
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String(OTELServiceName),
