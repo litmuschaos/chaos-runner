@@ -6,22 +6,14 @@ import (
 	"os"
 
 	"github.com/litmuschaos/chaos-runner/pkg/log"
-	"github.com/litmuschaos/chaos-runner/pkg/utils"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/trace"
 )
 
 const (
 	TracerName  = "litmuschaos.io/chaos-runner"
 	TraceParent = "TRACE_PARENT"
 )
-
-func StartTracing(clients utils.ClientSets, spanName string) trace.Span {
-	ctx, span := otel.Tracer(TracerName).Start(clients.Context, spanName)
-	clients.Context = ctx
-	return span
-}
 
 func GetTraceParentContext() context.Context {
 	traceParent := os.Getenv(TraceParent)

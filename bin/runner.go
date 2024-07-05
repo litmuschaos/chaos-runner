@@ -9,6 +9,7 @@ import (
 	"github.com/litmuschaos/chaos-runner/pkg/utils"
 	"github.com/litmuschaos/chaos-runner/pkg/utils/analytics"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
 )
 
 func init() {
@@ -34,9 +35,9 @@ func main() {
 	ctx = telemetry.GetTraceParentContext()
 
 	engineDetails := utils.EngineDetails{}
-	clients := utils.ClientSets{Context: ctx}
+	clients := utils.ClientSets{}
 
-	span := telemetry.StartTracing(clients, "ExecuteChaosRunner")
+	ctx, span := otel.Tracer(telemetry.TracerName).Start(ctx, "ExecuteChaosRunner")
 	defer span.End()
 
 	// Getting kubeConfig and Generate ClientSets
@@ -85,7 +86,7 @@ func main() {
 			continue
 		}
 		// derive the envs from the chaos experiment and override their values from chaosengine if any
-		if err := experiment.SetENV(engineDetails, clients); err != nil {
+		if err := experiment.SetENV(ctx, engineDetails, clients); err != nil {
 			log.Errorf("unable to patch ENV, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentEnvParseErrorReason, engineDetails, clients)
 			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)
@@ -111,7 +112,7 @@ func main() {
 		experiment.ExperimentDependencyCheck(engineDetails, clients)
 
 		// Creation of PodTemplateSpec, and Final Job
-		if err := utils.BuildingAndLaunchJob(&experiment, clients); err != nil {
+		if err := utils.BuildingAndLaunchJob(ctx, &experiment, clients); err != nil {
 			log.Errorf("unable to construct chaos experiment job, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentDependencyCheckReason, engineDetails, clients)
 			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)

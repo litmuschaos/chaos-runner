@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"os"
 	"strconv"
 	"strings"
@@ -33,7 +34,7 @@ func (engineDetails *EngineDetails) SetEngineUID(clients ClientSets) error {
 }
 
 // SetENV sets ENV values in experimentDetails struct.
-func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) error {
+func (expDetails *ExperimentDetails) SetENV(ctx context.Context, engineDetails EngineDetails, clients ClientSets) error {
 
 	// Setting envs from engine fields other than env
 	expDetails.setEnv("CHAOSENGINE", engineDetails.Name).
@@ -47,7 +48,7 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		setEnv("DEFAULT_HEALTH_CHECK", expDetails.DefaultHealthCheck).
 		setEnv("CHAOS_SERVICE_ACCOUNT", expDetails.SvcAccount).
 		setEnv("OTEL_EXPORTER_OTLP_ENDPOINT", os.Getenv(telemetry.OTELExporterOTLPEndpoint)).
-		setEnv("TRACE_PARENT", telemetry.GetMarshalledSpanFromContext(clients.Context))
+		setEnv("TRACE_PARENT", telemetry.GetMarshalledSpanFromContext(ctx))
 
 	// Get the Default ENV's from ChaosExperiment
 	log.Info("Getting the ENV Variables")

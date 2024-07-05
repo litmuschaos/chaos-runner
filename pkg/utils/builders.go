@@ -11,6 +11,7 @@ import (
 	"github.com/litmuschaos/elves/kubernetes/jobspec"
 	"github.com/litmuschaos/elves/kubernetes/podtemplatespec"
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -113,8 +114,8 @@ func getEnvFromMap(m map[string]corev1.EnvVar) []corev1.EnvVar {
 }
 
 // BuildingAndLaunchJob builds Job, and then launch it.
-func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) error {
-	span := telemetry.StartTracing(clients, "CreateExperimentJob")
+func BuildingAndLaunchJob(ctx context.Context, experiment *ExperimentDetails, clients ClientSets) error {
+	ctx, span := otel.Tracer(telemetry.TracerName).Start(ctx, "CreateExperimentJob")
 	defer span.End()
 
 	experiment.VolumeOpts.VolumeOperations(experiment)
