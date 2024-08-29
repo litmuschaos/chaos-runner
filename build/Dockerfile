@@ -17,14 +17,15 @@ RUN go env
 RUN CGO_ENABLED=0 go build -buildvcs=false -o /output/chaos-runner -v ./bin
 
 # Packaging stage
-# Image source: https://github.com/litmuschaos/test-tools/blob/master/custom/hardend-alpine/control-plane/Dockerfile
-# The base image is non-root (have litmus user) with default litmus directory.
-FROM litmuschaos/infra-alpine
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.4
 
 LABEL maintainer="LitmusChaos"
 
 ENV RUNNER=/usr/local/bin/chaos-runner 
 
 COPY --from=builder /output/chaos-runner ${RUNNER}
+RUN chown 65534:0 ${RUNNER} && chmod 755 ${RUNNER}
+
+USER 65534
 
 ENTRYPOINT ["/usr/local/bin/chaos-runner"]
