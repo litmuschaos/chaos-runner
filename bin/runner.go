@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"os"
 
 	"github.com/litmuschaos/chaos-runner/pkg/log"
 	"github.com/litmuschaos/chaos-runner/pkg/telemetry"
@@ -24,15 +25,16 @@ func init() {
 func main() {
 	ctx := context.Background()
 	// Set up Observability.
-	shutdown, err := telemetry.InitOTelSDK(ctx)
-	if err != nil {
-		return
+	if otelExporterEndpoint := os.Getenv(telemetry.OTELExporterOTLPEndpoint); otelExporterEndpoint != "" {
+		shutdown, err := telemetry.InitOTelSDK(ctx, otelExporterEndpoint)
+		if err != nil {
+			return
+		}
+		defer func() {
+			err = errors.Join(err, shutdown(ctx))
+		}()
+		ctx = telemetry.GetTraceParentContext()
 	}
-	// Handle shutdown properly so nothing leaks.
-	defer func() {
-		err = errors.Join(err, shutdown(ctx))
-	}()
-	ctx = telemetry.GetTraceParentContext()
 
 	engineDetails := utils.EngineDetails{}
 	clients := utils.ClientSets{}

@@ -3,7 +3,6 @@ package telemetry
 import (
 	"context"
 	"errors"
-	"os"
 
 	log "github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel"
@@ -20,7 +19,7 @@ import (
 const OTELExporterOTLPEndpoint = "OTEL_EXPORTER_OTLP_ENDPOINT"
 const OTELServiceName = "chaos_runner"
 
-func InitOTelSDK(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func InitOTelSDK(ctx context.Context, endpoint string) (shutdown func(context.Context) error, err error) {
 	var shutdownFuncs []func(context.Context) error
 
 	shutdown = func(ctx context.Context) error {
@@ -36,7 +35,7 @@ func InitOTelSDK(ctx context.Context) (shutdown func(context.Context) error, err
 		err = errors.Join(inErr, shutdown(ctx))
 	}
 
-	tracerProvider, err := newTracerProvider(ctx)
+	tracerProvider, err := newTracerProvider(ctx, endpoint)
 	if err != nil {
 		handleErr(err)
 		return
@@ -61,8 +60,7 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
-func newTracerProvider(ctx context.Context) (*trace.TracerProvider, error) {
-	endpoint := os.Getenv(OTELExporterOTLPEndpoint)
+func newTracerProvider(ctx context.Context, endpoint string) (*trace.TracerProvider, error) {
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String(OTELServiceName),
