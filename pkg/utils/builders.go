@@ -115,7 +115,7 @@ func getEnvFromMap(m map[string]corev1.EnvVar) []corev1.EnvVar {
 
 // BuildingAndLaunchJob builds Job, and then launch it.
 func BuildingAndLaunchJob(ctx context.Context, experiment *ExperimentDetails, clients ClientSets) error {
-	ctx, span := otel.Tracer(telemetry.TracerName).Start(ctx, "CreateExperimentJob")
+	ctx, span := otel.Tracer(telemetry.TracerName).Start(ctx, "BuildingAndLaunchJob")
 	defer span.End()
 
 	experiment.VolumeOpts.VolumeOperations(experiment)
