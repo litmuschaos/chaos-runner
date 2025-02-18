@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/litmuschaos/chaos-runner/pkg/log"
@@ -91,7 +92,8 @@ func (expDetails ExperimentDetails) ExperimentDependencyCheck(engineDetails Engi
 // ExperimentJobCreate is an standard event spawned just after starting ChaosExperiment Job
 func (expDetails ExperimentDetails) ExperimentJobCreate(engineDetails EngineDetails, clients ClientSets) {
 	event := EventAttributes{}
-	msg := "Experiment Job " + expDetails.JobName + " for Chaos Experiment: " + expDetails.Name
+	msg := fmt.Sprintf("From Chaos Engine: %s Experiment Job: %s for Chaos Experiment: %s",
+		engineDetails.Name, expDetails.JobName, expDetails.Name)
 	event.SetEventAttributes(ExperimentJobCreateReason, "Normal", msg)
 	event.Name = event.Reason + expDetails.Name + string(engineDetails.UID)
 	if err := engineDetails.GenerateEvents(&event, clients); err != nil {
