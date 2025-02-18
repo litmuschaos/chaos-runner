@@ -17,11 +17,11 @@ RUN go env
 RUN CGO_ENABLED=0 go build -buildvcs=false -o /output/chaos-runner -v ./bin
 
 # Packaging stage
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.4
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 LABEL maintainer="LitmusChaos"
 
-ENV RUNNER=/usr/local/bin/chaos-runner 
+ENV RUNNER=/usr/local/bin/chaos-runner
 
 COPY --from=builder /output/chaos-runner ${RUNNER}
 RUN chown 65534:0 ${RUNNER} && chmod 755 ${RUNNER}
