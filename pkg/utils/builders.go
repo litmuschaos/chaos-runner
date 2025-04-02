@@ -2,18 +2,19 @@ package utils
 
 import (
 	"context"
-	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"reflect"
 
-	"github.com/pkg/errors"
-	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
-
+	"github.com/litmuschaos/chaos-operator/api/litmuschaos/v1alpha1"
+	"github.com/litmuschaos/chaos-runner/pkg/telemetry"
 	"github.com/litmuschaos/elves/kubernetes/container"
 	"github.com/litmuschaos/elves/kubernetes/job"
 	"github.com/litmuschaos/elves/kubernetes/jobspec"
 	"github.com/litmuschaos/elves/kubernetes/podtemplatespec"
+	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel"
+	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // PodTemplateSpec is struct for creating the *core1.PodTemplateSpec
@@ -113,7 +114,10 @@ func getEnvFromMap(m map[string]corev1.EnvVar) []corev1.EnvVar {
 }
 
 // BuildingAndLaunchJob builds Job, and then launch it.
-func BuildingAndLaunchJob(experiment *ExperimentDetails, clients ClientSets) error {
+func BuildingAndLaunchJob(ctx context.Context, experiment *ExperimentDetails, clients ClientSets) error {
+	ctx, span := otel.Tracer(telemetry.TracerName).Start(ctx, "BuildingAndLaunchJob")
+	defer span.End()
+
 	experiment.VolumeOpts.VolumeOperations(experiment)
 
 	envVars := getEnvFromMap(experiment.envMap)

@@ -1,10 +1,16 @@
 package main
 
 import (
+	"context"
+	"errors"
+	"os"
+
 	"github.com/litmuschaos/chaos-runner/pkg/log"
+	"github.com/litmuschaos/chaos-runner/pkg/telemetry"
 	"github.com/litmuschaos/chaos-runner/pkg/utils"
 	"github.com/litmuschaos/chaos-runner/pkg/utils/analytics"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
 )
 
 func init() {
@@ -17,9 +23,26 @@ func init() {
 }
 
 func main() {
+	ctx := context.Background()
+	// Set up Observability.
+	if otelExporterEndpoint := os.Getenv(telemetry.OTELExporterOTLPEndpoint); otelExporterEndpoint != "" {
+		shutdown, err := telemetry.InitOTelSDK(ctx, otelExporterEndpoint)
+		if err != nil {
+			log.Errorf("Failed to initialize OTel SDK: %v", err)
+			return
+		}
+		defer func() {
+			err = errors.Join(err, shutdown(ctx))
+		}()
+		ctx = telemetry.GetTraceParentContext()
+	}
 
 	engineDetails := utils.EngineDetails{}
 	clients := utils.ClientSets{}
+
+	ctx, span := otel.Tracer(telemetry.TracerName).Start(ctx, "ExecuteChaosRunner")
+	defer span.End()
+
 	// Getting kubeConfig and Generate ClientSets
 	if err := clients.GenerateClientSetFromKubeConfig(); err != nil {
 		log.Errorf("unable to create ClientSets, error: %v", err)
@@ -66,7 +89,7 @@ func main() {
 			continue
 		}
 		// derive the envs from the chaos experiment and override their values from chaosengine if any
-		if err := experiment.SetENV(engineDetails, clients); err != nil {
+		if err := experiment.SetENV(ctx, engineDetails, clients); err != nil {
 			log.Errorf("unable to patch ENV, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentEnvParseErrorReason, engineDetails, clients)
 			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)
@@ -92,7 +115,7 @@ func main() {
 		experiment.ExperimentDependencyCheck(engineDetails, clients)
 
 		// Creation of PodTemplateSpec, and Final Job
-		if err := utils.BuildingAndLaunchJob(&experiment, clients); err != nil {
+		if err := utils.BuildingAndLaunchJob(ctx, &experiment, clients); err != nil {
 			log.Errorf("unable to construct chaos experiment job, error: %v", err)
 			experiment.ExperimentSkipped(utils.ExperimentDependencyCheckReason, engineDetails, clients)
 			engineDetails.ExperimentSkippedPatchEngine(&experiment, clients)

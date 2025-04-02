@@ -1,13 +1,14 @@
 package utils
 
 import (
+	"context"
 	"os"
 	"strconv"
 	"strings"
 
-	v1 "k8s.io/api/core/v1"
-
 	"github.com/litmuschaos/chaos-runner/pkg/log"
+	"github.com/litmuschaos/chaos-runner/pkg/telemetry"
+	v1 "k8s.io/api/core/v1"
 )
 
 // SetEngineDetails adds the ENV's to EngineDetails
@@ -33,7 +34,8 @@ func (engineDetails *EngineDetails) SetEngineUID(clients ClientSets) error {
 }
 
 // SetENV sets ENV values in experimentDetails struct.
-func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients ClientSets) error {
+func (expDetails *ExperimentDetails) SetENV(ctx context.Context, engineDetails EngineDetails, clients ClientSets) error {
+
 	// Setting envs from engine fields other than env
 	expDetails.setEnv("CHAOSENGINE", engineDetails.Name).
 		setEnv("TARGETS", engineDetails.Targets).
@@ -44,7 +46,9 @@ func (expDetails *ExperimentDetails) SetENV(engineDetails EngineDetails, clients
 		setEnv("LIB_IMAGE_PULL_POLICY", string(expDetails.ExpImagePullPolicy)).
 		setEnv("TERMINATION_GRACE_PERIOD_SECONDS", strconv.Itoa(int(expDetails.TerminationGracePeriodSeconds))).
 		setEnv("DEFAULT_HEALTH_CHECK", expDetails.DefaultHealthCheck).
-		setEnv("CHAOS_SERVICE_ACCOUNT", expDetails.SvcAccount)
+		setEnv("CHAOS_SERVICE_ACCOUNT", expDetails.SvcAccount).
+		setEnv("OTEL_EXPORTER_OTLP_ENDPOINT", os.Getenv(telemetry.OTELExporterOTLPEndpoint)).
+		setEnv("TRACE_PARENT", telemetry.GetMarshalledSpanFromContext(ctx))
 
 	// Get the Default ENV's from ChaosExperiment
 	log.Info("Getting the ENV Variables")
