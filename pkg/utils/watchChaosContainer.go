@@ -90,34 +90,46 @@ func GetChaosContainerStatus(experimentDetails *ExperimentDetails, clients Clien
 	return isCompleted, nil
 }
 
-// WatchChaosContainerForCompletion watches the chaos container for completion
+// WatchChaosContainerForCompletion watches the chaos container for completion.
 func (engineDetails EngineDetails) WatchChaosContainerForCompletion(experiment *ExperimentDetails, clients ClientSets) error {
+	return engineDetails.WatchChaosContainerForCompletionContext(context.Background(), experiment, clients)
+}
 
-	//TODO: use watch rather than checking for status manually.
-	isChaosCompleted := false
-
-	var err error
-	for !isChaosCompleted {
-		isChaosCompleted, err = GetChaosContainerStatus(experiment, clients)
-		if err != nil {
+// WatchChaosContainerForCompletionContext watches the chaos container until
+// completion or cancellation.
+func (engineDetails EngineDetails) WatchChaosContainerForCompletionContext(ctx context.Context, experiment *ExperimentDetails, clients ClientSets) error {
+	for {
+		if err := ctx.Err(); err != nil {
 			return err
 		}
 
+		isChaosCompleted, err := GetChaosContainerStatus(experiment, clients)
+		if err != nil {
+			return err
+		}
 		if isChaosCompleted {
 			return nil
 		}
 
-		var expStatus ExperimentStatus
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
 		chaosPod, err := GetChaosPod(experiment, clients)
 		if err != nil {
 			return errors.Errorf("unable to get the chaos pod, error: %v", err)
 		}
 
+		var expStatus ExperimentStatus
 		expStatus.AwaitedExperimentStatus(experiment.Name, engineDetails.Name, chaosPod.Name)
 		if err := expStatus.PatchChaosEngineStatus(engineDetails, clients); err != nil {
 			return errors.Errorf("unable to patch ChaosEngine in namespace: %v, error: %v", engineDetails.EngineNamespace, err)
 		}
-		time.Sleep(2 * time.Second)
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(2 * time.Second):
+		}
 	}
-	return nil
 }
